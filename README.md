@@ -34,12 +34,14 @@ Roles talk to each other by name through the agent harness's cross-session messa
 
 ## Delivery
 
-1. Tech reviews a change and approves an exact package: branch, commit, tree, base and checks.
-2. Each game has one resident delivery-kit runner. It departs on a fixed schedule: Archie at :00 and Chibi at :10 each hour, America/Toronto.
-3. A departure runs the full gate in an isolated container, pushes `main`, watches CI for that exact commit, and deploys the gated build when CI passes.
-4. Failures are fixed forward with a new reviewed change. Failed trees are never retried unchanged, and nothing is reverted.
+Development is trunk-based. Work is never held on an approved branch, and deployment ships `main`.
 
-Until delivery-kit 1.0, approved branches go through a queue. From 1.0 delivery is trunk-based: Tech merges reviewed branches into local `main`, and each departure ships local `main`.
+1. Art and Gameplay hand Tech an exact branch and commit. Tech reviews it, merges it into the game's local `main` once its tests pass, and deletes the branch. Kits merge their own approved work the same way.
+2. Each game has one resident delivery-kit runner. It departs on a fixed schedule: Archie at :00 and Chibi at :10 each hour, America/Toronto.
+3. A departure runs the full gate on local `main` in an isolated container, pushes it, watches CI for that exact commit, and deploys the gated build when CI passes.
+4. Failures are fixed forward with a new change on `main`. Failed trees are never retried unchanged, and nothing is reverted.
+
+Until delivery-kit 1.0 the runner ships a queued `bus/main` branch that points at local `main`. It replays the commits onto the remote, so after each completed departure, Tech rebases local `main` onto `origin/main`. From 1.0 the runner pushes local `main` by fast-forward.
 
 ## Monitoring
 
