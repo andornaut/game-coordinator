@@ -38,10 +38,8 @@ Development is trunk-based. Work is never held on an approved branch, and deploy
 
 1. Art and Gameplay hand Tech an exact branch and commit. Tech reviews it, merges it into the game's local `main` once its tests pass, and deletes the branch. Kits merge their own approved work the same way.
 2. Each game has one resident delivery-kit runner. It departs on a fixed schedule: Archie at :00 and Chibi at :10 each hour, America/Toronto.
-3. A departure runs the full gate on local `main` in an isolated container, pushes it, watches CI for that exact commit, and deploys the gated build when CI passes.
+3. A departure runs the full gate on local `main` HEAD in an isolated container, pushes that exact commit by fast-forward, watches CI for it, and deploys the gated build when CI passes. There is no queue: whatever is on `main` at departure time ships.
 4. Failures are fixed forward with a new change on `main`. Failed trees are never retried unchanged, and nothing is reverted.
-
-Until delivery-kit 1.0 the runner ships a queued `bus/main` branch that points at local `main`. It replays the commits onto the remote, so after each completed departure, Tech rebases local `main` onto `origin/main`. From 1.0 the runner pushes local `main` by fast-forward.
 
 ## Monitoring
 
@@ -74,5 +72,5 @@ The agents run on one harness at a time, either Claude Code or Codex, and a hand
 | `package.json`, `package-lock.json` | yes | The pinned delivery-kit release |
 | `node_modules/` | no | The installed delivery-kit |
 | `.worktrees/` | no | Worktrees for changes to this repository |
-| `var/` | no | Registry, delivery route, per-role checkpoints and each game's bus state |
+| `var/` | no | Registry (`registry.json`), monitor route (`route.json`), channel config, per-role checkpoints and each game's runner state (`games/<game>/bus/`) |
 | `.claude/` | no | Harness-local files |
