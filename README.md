@@ -70,5 +70,9 @@ The agents run on one harness at a time, either Claude Code or Codex, and a hand
 | Path | Committed | Contents |
 | --- | --- | --- |
 | `README.md` | yes | This overview |
+| `config.json` | yes | delivery-kit configuration: games, kits, role names and the monitor wake schedule |
+| `package.json`, `package-lock.json` | yes | The pinned delivery-kit release |
+| `node_modules/` | no | The installed delivery-kit |
+| `.worktrees/` | no | Worktrees for changes to this repository |
 | `var/` | no | Registry, delivery route, per-role checkpoints and each game's bus state |
 | `.claude/` | no | Harness-local files |

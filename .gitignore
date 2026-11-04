@@ -1,2 +1,4 @@
 .claude/
+.worktrees/
+node_modules/
 var/
