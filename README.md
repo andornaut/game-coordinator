@@ -21,12 +21,12 @@ Each role is one agent conversation with a fixed scope.
 - **Art, Gameplay and Tech**, per game:
   - Art owns assets and art pipelines.
   - Gameplay owns rules, values, tuning and player strings.
-  - Tech owns implementation, integration and approval of exact release packages.
+  - Tech owns implementation, integration, approval of exact release packages and the game's runner.
 - **art-kit, game-kit and delivery-kit**, one coordinator each. Each owns its kit's source, tests, docs, CI and versioned releases. Kits release only after container checks and green CI on the exact commit.
 - **game-dev**, one shared coordinator and monitor:
   - triages and routes work between roles;
   - relays decisions to and from the user;
-  - admits approved packages;
+  - sets each game's desired delivery state;
   - reviews health on a schedule;
   - tracks every release through gate, CI and deployment.
 
@@ -40,6 +40,22 @@ Development is trunk-based. Work is never held on an approved branch, and deploy
 2. Each game has one resident delivery-kit runner. It departs on a fixed schedule: Archie at :00 and Chibi at :10 each hour, America/Toronto.
 3. A departure runs the full gate on local `main` HEAD in an isolated container, pushes that exact commit by fast-forward, watches CI for it, and deploys the gated build when CI passes. There is no queue: whatever is on `main` at departure time ships.
 4. Failures are fixed forward with a new change on `main`. Failed trees are never retried unchanged, and nothing is reverted.
+
+### Delivery control
+
+game-dev sets the desired state using the configured game `ID`, a `STATE` of `enabled` or `paused`, and a non-empty reason:
+
+```bash
+npx --no-install delivery-kit control --game ID --state STATE \
+  --reason 'TEXT' --requester game-dev
+npx --no-install delivery-kit status --game ID
+```
+
+`var/games/<g>/bus/delivery-control.json` persists desired state separately from the runner's observed state. Tech readiness and blockers remain separate from desired control; enabling delivery does not establish readiness. Status reports desired and observed control, runner identity, drain state and blockers.
+
+Pausing blocks new scheduled and requested departures. Already admitted gates, CI watches and deployments finish, and monitor wakes continue. Missing or invalid control fails closed until explicitly initialized or repaired.
+
+Before Tech adopts a runner version that requires persistent control, game-dev initializes each game's approved desired state with the upgraded CLI. Tech owns runner adoption and replaces the runner only when idle and drained. Check status before and after replacement, preserve existing desired state on later upgrades, and observe the next normal scheduled slot without a manual departure.
 
 ## Monitoring
 
