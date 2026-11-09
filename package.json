@@ -2,6 +2,6 @@
   "name": "game-dev",
   "private": true,
   "devDependencies": {
-    "@andornaut/delivery-kit": "https://github.com/andornaut/delivery-kit/releases/download/v2.0.2/delivery-kit-2.0.2.tgz"
+    "@andornaut/delivery-kit": "https://github.com/andornaut/delivery-kit/releases/download/v2.0.3/delivery-kit-2.0.3.tgz"
   }
 }
