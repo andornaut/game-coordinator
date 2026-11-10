@@ -95,9 +95,10 @@ The agents run on one harness at a time, either Claude Code or Codex, and a hand
 
 ### Source checks
 
-Run `make check` (or `npm run check`) for Markdown lint and ShellCheck in isolated containers.
-`make lint` runs the same checks; `make check-info` reports the supported categories as version-1 JSON.
-This repository has no runtime test suite or build target. Docker with BuildKit 0.31 or newer
-and Dockerfile frontend 1.25 is required. Dependencies install with lifecycle scripts disabled
-inside the image. Husky runs Git and lint-staged on the host; staged formatters run in containers.
-Unresolved container writers block Git updates until reconciled.
+Run `npm run check` or `npm run lint` for native Markdown lint and ShellCheck after installing
+npm dependencies and ShellCheck. Both commands use the same lint definition.
+`make check` and `make lint` run those checks in isolated containers. This repository has no runtime
+test suite or build target. The container path requires Docker with BuildKit 0.31 or newer
+and Dockerfile frontend 1.25; dependencies install with lifecycle scripts disabled inside the image.
+Husky runs ordinary lint-staged on the host with serial native Prettier tasks.
+The container launcher refuses checks while writable container execution is active or unconfirmed.

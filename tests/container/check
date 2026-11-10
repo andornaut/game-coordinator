@@ -8,7 +8,7 @@ case "${category}" in
         for category in ${CHECK_TASKS}; do /opt/check/run "${category}"; done
         ;;
     lint)
-        shellcheck -x -P SCRIPTDIR tests/container/run tests/container/check tests/container/staged tests/container/staged-git
+        shellcheck -x -P SCRIPTDIR tests/container/run tests/container/check
         markdownlint-cli2 "$@"
         ;;
     exec)

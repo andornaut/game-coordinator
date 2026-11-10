@@ -1,1 +1,1 @@
-./tests/container/staged orchestrate
+npx lint-staged --concurrent false
