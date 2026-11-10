@@ -4,13 +4,13 @@ Coordination home for two games and three shared kits. Each game and each kit is
 
 ## Projects
 
-| Project | Repository | Purpose |
-| --- | --- | --- |
-| Archie | [archies-dog-walks](https://github.com/andornaut/archies-dog-walks) | Game |
-| Chibi | [chibis-way-home](https://github.com/andornaut/chibis-way-home) | Game |
-| art-kit | [art-kit](https://github.com/andornaut/art-kit) | Raster, frame, font and Aseprite export primitives |
-| game-kit | [game-kit](https://github.com/andornaut/game-kit) | Shared TypeScript runtime, input, layout and Phaser adapters |
-| delivery-kit | [delivery-kit](https://github.com/andornaut/delivery-kit) | Scheduled gate, push, CI watch, deploy and monitoring |
+| Project      | Repository                                                          | Purpose                                                      |
+| ------------ | ------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Archie       | [archies-dog-walks](https://github.com/andornaut/archies-dog-walks) | Game                                                         |
+| Chibi        | [chibis-way-home](https://github.com/andornaut/chibis-way-home)     | Game                                                         |
+| art-kit      | [art-kit](https://github.com/andornaut/art-kit)                     | Raster, frame, font and Aseprite export primitives           |
+| game-kit     | [game-kit](https://github.com/andornaut/game-kit)                   | Shared TypeScript runtime, input, layout and Phaser adapters |
+| delivery-kit | [delivery-kit](https://github.com/andornaut/delivery-kit)           | Scheduled gate, push, CI watch, deploy and monitoring        |
 
 Games consume kits as dev dependencies pinned to GitHub release tarballs.
 
@@ -60,6 +60,7 @@ Before Tech adopts a runner version that requires persistent control, game-dev i
 ## Monitoring
 
 delivery-kit wakes `game-dev` at :20 and :50 each hour, and sends every bus event (departure, gate failure, push, CI, deploy) as it happens. Both arrive over a channel into the `game-dev` conversation. `game-dev` records handling with explicit acknowledgements. At each review it does three things:
+
 - surfaces any role's unanswered question to the user;
 - asks the owning role to close a job that has made no progress across two reviews;
 - routes failures to the owning Tech role.
@@ -81,12 +82,12 @@ The agents run on one harness at a time, either Claude Code or Codex, and a hand
 
 ## This repository
 
-| Path | Committed | Contents |
-| --- | --- | --- |
-| `README.md` | yes | This overview |
-| `config.json` | yes | delivery-kit configuration: games, kits, role names and the monitor wake schedule |
-| `package.json`, `package-lock.json` | yes | The pinned delivery-kit release |
-| `node_modules/` | no | The installed delivery-kit |
-| `.worktrees/` | no | Worktrees for changes to this repository |
-| `var/` | no | Registry (`registry.json`), monitor route (`route.json`), channel config, per-role checkpoints and each game's runner state (`games/<game>/bus/`) |
-| `.claude/` | no | Harness-local files |
+| Path                                | Committed | Contents                                                                                                                                          |
+| ----------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `README.md`                         | yes       | This overview                                                                                                                                     |
+| `config.json`                       | yes       | delivery-kit configuration: games, kits, role names and the monitor wake schedule                                                                 |
+| `package.json`, `package-lock.json` | yes       | The pinned delivery-kit release                                                                                                                   |
+| `node_modules/`                     | no        | The installed delivery-kit                                                                                                                        |
+| `.worktrees/`                       | no        | Worktrees for changes to this repository                                                                                                          |
+| `var/`                              | no        | Registry (`registry.json`), monitor route (`route.json`), channel config, per-role checkpoints and each game's runner state (`games/<game>/bus/`) |
+| `.claude/`                          | no        | Harness-local files                                                                                                                               |
