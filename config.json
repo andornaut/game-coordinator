@@ -12,12 +12,23 @@
       "name": "Chibi",
       "path": "../chibis-way-home",
       "roles": ["art", "gameplay", "tech"]
+    },
+    "ada-the-navigator": {
+      "name": "Ada the Navigator",
+      "path": "../ada-the-navigator",
+      "roles": ["art", "gameplay", "tech"]
     }
   },
   "kits": {
-    "art-kit": { "path": "../art-kit" },
-    "delivery-kit": { "path": "../delivery-kit" },
-    "game-kit": { "path": "../game-kit" }
+    "art-kit": {
+      "path": "../art-kit"
+    },
+    "delivery-kit": {
+      "path": "../delivery-kit"
+    },
+    "game-kit": {
+      "path": "../game-kit"
+    }
   },
   "sharedRoles": ["game-dev", "art-kit", "delivery-kit", "game-kit"]
 }
