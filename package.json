@@ -2,12 +2,16 @@
   "name": "game-dev",
   "private": true,
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "check": "make check",
+    "check-info": "make check-info",
+    "lint": "make lint"
   },
   "devDependencies": {
     "@andornaut/delivery-kit": "https://github.com/andornaut/delivery-kit/releases/download/v2.1.1/delivery-kit-2.1.1.tgz",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
-    "prettier": "^3.9.10"
+    "prettier": "^3.9.10",
+    "markdownlint-cli2": "0.24.0"
   }
 }

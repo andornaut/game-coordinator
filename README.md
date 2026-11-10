@@ -92,3 +92,11 @@ The agents run on one harness at a time, either Claude Code or Codex, and a hand
 | `.worktrees/`                       | no        | Worktrees for changes to this repository                                                                                                          |
 | `var/`                              | no        | Registry (`registry.json`), monitor route (`route.json`), channel config, per-role checkpoints and each game's runner state (`games/<game>/bus/`) |
 | `.claude/`                          | no        | Harness-local files                                                                                                                               |
+
+### Source checks
+
+Run `make check` (or `npm run check`) for Markdown lint and ShellCheck in isolated containers.
+`make lint` runs the same checks; `make check-info` reports the supported categories as version-1 JSON.
+This repository has no runtime test suite or build target. Docker with BuildKit 0.31 or newer
+and Dockerfile frontend 1.25 is required. Dependencies install with lifecycle scripts disabled
+inside the image; the existing Husky preparation and staged formatting hooks remain separate.
