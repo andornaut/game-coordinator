@@ -1,16 +1,17 @@
 # game-dev
 
-Coordination home for two games and three shared kits. Each game and each kit is worked on by long-running AI coding agent sessions, one per role. This repository holds the coordination layout and documents how the pieces fit together. Machine-local state lives in an ignored directory.
+Coordination home for three games and three shared kits. Each game and each kit is worked on by long-running AI coding agent sessions, one per role. This repository holds the coordination layout and documents how the pieces fit together. Machine-local state lives in an ignored directory.
 
 ## Projects
 
-| Project      | Repository                                                          | Purpose                                                      |
-| ------------ | ------------------------------------------------------------------- | ------------------------------------------------------------ |
-| Archie       | [archies-dog-walks](https://github.com/andornaut/archies-dog-walks) | Game                                                         |
-| Chibi        | [chibis-way-home](https://github.com/andornaut/chibis-way-home)     | Game                                                         |
-| art-kit      | [art-kit](https://github.com/andornaut/art-kit)                     | Raster, frame, font and Aseprite export primitives           |
-| game-kit     | [game-kit](https://github.com/andornaut/game-kit)                   | Shared TypeScript runtime, input, layout and Phaser adapters |
-| delivery-kit | [delivery-kit](https://github.com/andornaut/delivery-kit)           | Scheduled gate, push, CI watch, deploy and monitoring        |
+| Project           | Repository                                                          | Purpose                                                      |
+| ----------------- | ------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Archie            | [archies-dog-walks](https://github.com/andornaut/archies-dog-walks) | Game                                                         |
+| Chibi             | [chibis-way-home](https://github.com/andornaut/chibis-way-home)     | Game                                                         |
+| Ada the Navigator | [ada-the-navigator](https://github.com/andornaut/ada-the-navigator) | Game                                                         |
+| art-kit           | [art-kit](https://github.com/andornaut/art-kit)                     | Raster, frame, font and Aseprite export primitives           |
+| game-kit          | [game-kit](https://github.com/andornaut/game-kit)                   | Shared TypeScript runtime, input, layout and Phaser adapters |
+| delivery-kit      | [delivery-kit](https://github.com/andornaut/delivery-kit)           | Scheduled gate, push, CI watch, deploy and monitoring        |
 
 Games consume kits as dev dependencies pinned to GitHub release tarballs.
 
