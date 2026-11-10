@@ -38,7 +38,7 @@ Roles talk to each other by name through the agent harness's cross-session messa
 Development is trunk-based. Work is never held on an approved branch, and deployment ships `main`.
 
 1. Art and Gameplay hand Tech an exact branch and commit. Tech reviews it, merges it into the game's local `main` once its tests pass, and deletes the branch. Kits merge their own approved work the same way.
-2. Each game has one resident delivery-kit runner. It departs on a fixed schedule: Archie at :00 and Chibi at :10 each hour, America/Toronto.
+2. Each game uses at most one resident delivery-kit runner. Hourly departures are alphabetical in America/Toronto: Ada the Navigator at :00, Archie at :10 and Chibi at :20. Scheduled delivery policy enables only Ada the Navigator; Archie and Chibi remain paused. Actual Tech readiness and configuration adoption must be verified before activation.
 3. A departure runs the full gate on local `main` HEAD in an isolated container, pushes that exact commit by fast-forward, watches CI for it, and deploys the gated build when CI passes. There is no queue: whatever is on `main` at departure time ships.
 4. Failures are fixed forward with a new change on `main`. Failed trees are never retried unchanged, and nothing is reverted.
 
