@@ -31,6 +31,8 @@ jobs:
           set -euo pipefail
           source tests/container/stock
           stock_begin "$PWD"
+          [[ ${revision} == "${GITHUB_SHA:?}" ]]
+          [[ ${source_dirty} == false ]]
           stock_image shellcheck_image koalaman/shellcheck:v0.11.0
           stock_readonly "${shellcheck_image}" /bin/shellcheck -x -P SCRIPTDIR \
             tests/container/stock tests/container/check-stock tests/container/markdown
