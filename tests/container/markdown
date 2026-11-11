@@ -1,15 +1,5 @@
 #!/bin/sh
 set -eu
-if [ "$#" -ne 1 ]; then exit 2; fi
-case "$1" in
-    prepare)
-        mkdir -p /scratch/node
-        cp package.json package-lock.json /scratch/node/
-        npm ci --prefix /scratch/node --ignore-scripts --no-audit --no-fund --maxsockets=1 >&2
-        exec tar --create --file - --directory / scratch/node
-        ;;
-    lint)
-        exec /scratch/node/node_modules/.bin/markdownlint-cli2
-        ;;
-    *) exit 2 ;;
-esac
+if [ "$#" -ne 0 ]; then exit 2; fi
+npm ci --ignore-scripts --no-audit --no-fund --maxsockets=1 >&2
+exec ./node_modules/.bin/markdownlint-cli2

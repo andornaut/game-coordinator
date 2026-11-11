@@ -98,7 +98,7 @@ The agents run on one harness at a time, either Claude Code or Codex, and a hand
 Run `npm run check` or `npm run lint` for native Markdown lint and ShellCheck after installing
 npm dependencies and ShellCheck. Both commands use the same lint definition.
 `make check` and `make lint` run those checks in isolated stock Node and ShellCheck containers.
-Dependencies install into scratch with lifecycle scripts disabled; no project image is built.
+Dependencies install in the temporary working copy with lifecycle scripts disabled; no project image is built.
 CI uses the same stock images and native tools. This repository has no runtime test suite or build target.
 Husky runs ordinary lint-staged on the host with serial native Prettier tasks.
 The stock runner refuses checks while writable container execution is active or unconfirmed.
