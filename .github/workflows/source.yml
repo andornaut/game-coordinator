@@ -25,11 +25,21 @@ jobs:
         with:
           version: v29.9.3
 
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@v4.4.1
-        with:
-          version: v0.38.2
-          driver: docker
-
       - name: Run source checks
-        run: make check
+        shell: bash
+        run: |
+          set -euo pipefail
+          source tests/container/stock
+          stock_begin "$PWD"
+          stock_image shellcheck_image koalaman/shellcheck:v0.11.0
+          stock_readonly "${shellcheck_image}" /bin/shellcheck -x -P SCRIPTDIR \
+            tests/container/stock tests/container/check-stock tests/container/markdown
+          stock_image node_image node:24.22.2
+          stock_prepare "${node_image}" node -- sh -ec '
+            mkdir -p /scratch/node
+            cp package.json package-lock.json /scratch/node/
+            npm ci --prefix /scratch/node --ignore-scripts --no-audit --no-fund --maxsockets=1 >&2
+            tar --create --file - --directory / scratch/node
+          '
+          stock_run "${node_image}" node -- /scratch/node/node_modules/.bin/markdownlint-cli2
+          stock_finish

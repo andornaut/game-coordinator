@@ -1,4 +1,0 @@
-package.json
-package-lock.json
-tests/container/Dockerfile
-tests/container/check
