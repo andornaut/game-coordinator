@@ -101,4 +101,3 @@ npm dependencies and ShellCheck. Both commands use the same lint definition.
 Dependencies install in the temporary working copy with lifecycle scripts disabled; no project image is built.
 CI uses the same stock images and native tools. This repository has no runtime test suite or build target.
 Husky runs ordinary lint-staged on the host with serial native Prettier tasks.
-The stock runner refuses checks while writable container execution is active or unconfirmed.

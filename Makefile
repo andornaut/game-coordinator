@@ -9,4 +9,4 @@ export CHECK_TIMEOUT_SECONDS CHECK_MEMORY CHECK_SCRATCH_SIZE CHECK_WORK_SIZE CHE
 .PHONY: check lint
 
 check lint:
-	@./tests/container/check-stock $@
+	@./tests/container/check-stock
