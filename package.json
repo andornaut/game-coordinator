@@ -7,7 +7,7 @@
     "lint": "shellcheck -x -P SCRIPTDIR tests/container/stock tests/container/check-stock tests/container/markdown && markdownlint-cli2"
   },
   "devDependencies": {
-    "@andornaut/delivery-kit": "https://github.com/andornaut/delivery-kit/releases/download/v3.0.0/delivery-kit-3.0.0.tgz",
+    "@andornaut/delivery-kit": "https://github.com/andornaut/delivery-kit/releases/download/v3.0.1/delivery-kit-3.0.1.tgz",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
     "markdownlint-cli2": "0.24.0",
