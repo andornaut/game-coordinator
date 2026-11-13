@@ -60,6 +60,8 @@ Pausing blocks new scheduled and requested departures. Already admitted gates, C
 
 Before Tech adopts a runner version that requires persistent control, dev-manager initializes each game's approved desired state with the upgraded CLI. Tech owns runner adoption and replaces the runner only when idle and drained. Check status before and after replacement, preserve existing desired state on later upgrades, and observe the next normal scheduled slot without a manual departure.
 
+Delivery-kit 4 requires explicit `resources.memoryMiB` from 6 through 8192 in every registered game's delivery configuration. Version 3 rejects this field. Coordinate configuration and package adoption while affected residents and the shared route host are idle and drained; validate the complete layout with `check-config` before startup. Preserve controls, routes, singleton ownership and schedules.
+
 ## Monitoring
 
 delivery-kit sends `dev-manager` a scheduled review at :20 and :50 each hour, and sends every bus event (departure, gate failure, push, CI, deploy) as it happens. Both arrive over a channel into the `dev-manager` conversation. `dev-manager` records handling with explicit acknowledgements. At each review it does three things:
@@ -72,7 +74,7 @@ delivery-kit sends `dev-manager` a scheduled review at :20 and :50 each hour, an
 
 Each role keeps its exact conversation IDs and one shared edit worktree. Native cwd stays at the game root, or game-dev for kits and dev-manager. Shared windows belong in `codex-game` or `claude-game`; each game's `art`, `gameplay` and `tech` windows belong in its own harness-prefixed session. Windows are alphabetical. Moving windows preserves processes and does not activate a role.
 
-Delivery-kit 3.x resolves each role through its optional harness override, otherwise the registry default. Handoffs select explicit games and any included kit/dev-manager roles; unselected owners remain unchanged.
+Delivery-kit resolves each role through its optional harness override, otherwise the registry default. Handoffs select explicit games and any included kit/dev-manager roles; unselected owners remain unchanged.
 
 ### Inspect and resume
 
