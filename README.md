@@ -37,9 +37,7 @@ Roles talk to each other by name through the agent harness's cross-session messa
 
 ## Delivery
 
-Development is trunk-based. Work is never held on an approved branch, and deployment ships `main`.
-
-Working games that pass required gates ship on schedule; fix regressions forward and track unfinished acceptance separately in the [approval ledger](docs/approval-ledger.md).
+The [development and delivery policy](docs/game-policies.md#development-and-delivery) defines integration and release eligibility; the [approval ledger](docs/approval-ledger.md) tracks acceptance.
 
 1. Art and Gameplay hand Tech an exact branch and commit. Tech reviews it, merges it into the game's local `main` once its tests pass, and deletes the branch. Kits merge their own approved work the same way.
 2. Each game uses at most one resident delivery-kit runner. Hourly departures are alphabetical in America/Toronto: Ada the Navigator at :00, Archie at :10 and Chibi at :20. Each game's delivery control enables or pauses its departures.

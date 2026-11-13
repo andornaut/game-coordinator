@@ -4,9 +4,7 @@ The ignored `var/handoffs/game-coordinator/approval-ledger.json` tracks approved
 
 ## Delivery policy
 
-Working games that pass required gates ship on the normal cadence, including builds with known visual/design regressions, unfinished approved refinements or missing final acceptance. Fix forward without rollback or polish-based delivery pauses. The ledger is not an additional admission gate.
-
-Game-breaking failures, required red gates and explicit user delivery pauses remain blockers. Unknown new-feature authority restricts that feature's work and adoption, not unrelated releases. Preserve scoped user questions and independent source holds.
+Follow the canonical [development and delivery policy](game-policies.md#development-and-delivery). The ledger records acceptance evidence; it adds no admission gate and never changes delivery controls.
 
 ## Records
 

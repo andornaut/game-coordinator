@@ -35,7 +35,22 @@ Prefer simple, explicit designs and consistent behavior across games. Treat like
 
 - Disable UI text selection, including mobile long-press selection of counters. Preserve normal editable inputs and game interactions.
 - Center Close when it is a modal's only visible footer action; hidden actions do not count. With multiple visible actions, place secondary actions left and the primary action right. Preserve labels, navigation, controls and story guards.
-- Check online for updates on every return to the home screen and present available updates. Preserve each game's presentation and update-activation lifecycle.
+
+### Settings
+
+Use consistent settings structure, labels, state text and help across games. Labels name the setting; state text uses On/Off or Shown/Hidden as appropriate. Help is stable, declarative text describing the actual effect, rather than changing instructions for the next click. Include only settings the game supports; consistency does not authorize inventing toggles.
+
+### Updates
+
+Check online for updates on every return to the home screen and present available updates. Preserve each game's offer presentation and lifecycle.
+
+For normal updates, serve the active build's assets from cache first; fetch only missing files matching that build. Check for versions separately and stage a complete new build apart from the active build. Activate normal updates only on Update now or a fresh document launch/restart before gameplay and save initialization, never automatically during play, a title return or a visibility resume. Reject incomplete staging and mixed-build assets, pages or manifests.
+
+An explicitly approved newer-save recovery path may activate automatically when saved progress, statistics or achievements require a newer game. Block gameplay start, incompatible save loading and all save writes throughout recovery. Switch only to a complete, hash-verified compatible build; the new document must recheck compatibility. Missing, unsafe or incomplete candidates and timeouts retain the fence and untouched saves, with connection/retry recovery. Activation alone is not compatibility proof.
+
+### Ideas
+
+Each game keeps an Ideas document for proposals outside its current version. The document location is game-specific. Ideas do not establish approval or implemented behavior; keep current specifications separate.
 
 ## Saves and cheats
 
