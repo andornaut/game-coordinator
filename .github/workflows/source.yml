@@ -11,7 +11,7 @@ permissions:
 jobs:
   markdown:
     runs-on: ubuntu-latest
-    # Markdown checks have a fifteen-minute cap: a job still running then
+    # Source checks have a fifteen-minute cap: a job still running then
     # has hung rather than failed.
     timeout-minutes: 15
     steps:
@@ -35,8 +35,5 @@ jobs:
           stock_readonly "${shellcheck_image}" /bin/shellcheck -x -P SCRIPTDIR \
             tests/container/stock tests/container/check-stock tests/container/markdown
           stock_image node_image node:24.22.2
-          STOCK_NETWORK=bridge stock_run "${node_image}" -- sh -ec '
-            npm ci --ignore-scripts --no-audit --no-fund --maxsockets=1 >&2
-            ./node_modules/.bin/markdownlint-cli2
-          '
+          STOCK_NETWORK=bridge stock_run "${node_image}" -- sh tests/container/markdown
           stock_finish

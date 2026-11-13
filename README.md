@@ -72,6 +72,20 @@ Each role keeps its exact conversation IDs and one shared edit worktree. Native 
 
 Delivery-kit 3.x resolves each role through its optional harness override, otherwise the registry default. Handoffs select explicit games and any included kit/dev-manager roles; unselected owners remain unchanged.
 
+### Inspect and resume
+
+Run from game-dev, or pass `--root` with its authoritative checkout. Select each role explicitly:
+
+```bash
+node scripts/sessions.mjs plan --role dev-manager --role art-kit
+```
+
+- `plan` reports sorted exact-ID slots and local blockers; `check` also exits nonzero for blockers.
+- `resume` preserves live panes and resumes only eligible missing/dead slots. Another harness needs `--harness TARGET --held`, asserting caller-verified source HOLD.
+- Repeat `--runner-pid PID` to inspect resident socket configuration. `--handoff-marker TEXT` preserves the original marker separately from the bounded role marker.
+
+Local inspection does not prove native project identity, pending-question state, quota or an effective Remote Control connection. The helper never selects ownership, activates work, stops frontends or changes a runner/daemon.
+
 1. Verify native identities, source HOLDs, checkpoints, owned jobs and pending questions. Commit unfinished work to named branches and preserve all independent holds. Keep current checkpoints concise; archive superseded state unchanged in sibling history before removing obsolete receipts.
 2. Reuse matching live target panes. Resume missing or verified dead targets by exact ID, without an appended prompt. Verify effective Remote Control separately from launch flags and actual receipt. Select visible authorized trust choices explicitly; a default No or exit choice must not receive blind Enter.
 3. Obtain each target's exact marker/role/ID acceptance before selecting its harness. Reconcile matching existing acceptance on retries instead of repeating activation. Delivery acceptance alone is not handling.
@@ -83,7 +97,7 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 ## Conventions
 
 - Test suites and harnesses run in isolated containers, with only the project checkout and scratch writable. Preserve per-job CPU, memory and worker caps.
-- Tooling is TypeScript, run through a CLI or imported as a node module. Shell is limited to thin build wrappers, and there is no Python.
+- Tooling runs through a CLI or an imported Node module. Shell is limited to thin build wrappers, and there is no Python.
 - Each repository keeps role worktrees in an ignored `.worktrees/` directory. Merged branches and their worktrees are deleted when they land.
 
 ## This repository
@@ -100,9 +114,8 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 
 ### Source checks
 
-Run `npm run check` or `npm run lint` for native Markdown lint and ShellCheck after installing
-npm dependencies and ShellCheck. Both commands use the same lint definition.
-`make check` and `make lint` run those checks in isolated stock Node and ShellCheck containers.
-Dependencies install in the temporary working copy with lifecycle scripts disabled; no project image is built.
-CI uses the same stock images and native tools.
+Run `make check` or `make lint` for ShellCheck, Markdown lint and session lifecycle tests in isolated
+stock containers. Dependencies install in the temporary working copy with lifecycle scripts disabled;
+no project image is built. CI uses the same stock images and native tools.
+`npm run lint` is lint-only; `npm run check` also runs lifecycle tests and requires the same test isolation.
 Husky runs ordinary lint-staged on the host with serial native Prettier tasks.

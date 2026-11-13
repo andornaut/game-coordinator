@@ -2,4 +2,5 @@
 set -eu
 if [ "$#" -ne 0 ]; then exit 2; fi
 npm ci --ignore-scripts --no-audit --no-fund --maxsockets=1 >&2
-exec ./node_modules/.bin/markdownlint-cli2
+./node_modules/.bin/markdownlint-cli2
+npm test
