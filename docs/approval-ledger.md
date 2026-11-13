@@ -1,6 +1,6 @@
 # Approval ledger
 
-The ignored `var/handoffs/game-dev/approval-ledger.json` tracks approved behavior through delivery. Dev-manager is its sole writer. Every registered game and kit role reports evidence and gaps to dev-manager; a completed audit can still leave approvals open.
+The ignored `var/handoffs/game-coordinator/approval-ledger.json` tracks approved behavior through delivery. game-coordinator is its sole writer. Every registered game and kit role reports evidence and gaps to game-coordinator; a completed audit can still leave approvals open.
 
 ## Delivery policy
 
@@ -30,14 +30,14 @@ Missing native approval IDs stay explicitly unknown. Existing owner-attested aut
 
 These stages track acceptance closure, not permission to deploy. Record actual `deployedSha` and delivery receipts even when incomplete criteria leave an entry at an earlier stage.
 
-| Stage         | Meaning                                                                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `approved`    | Actual approval is recorded with its scope and available provenance.                                                                        |
-| `implemented` | The owner supplies the reviewed implementation pin and focused checks. Worker READY is a handoff.                                           |
-| `merged`      | The implementation and required dependencies are present in the recorded local-main snapshot.                                               |
-| `verified`    | Tech verifies every acceptance clause on the integrated artifact; required full main gates pass for the exact revision.                     |
-| `published`   | A kit-only publication target has successful exact-source CI and an immutable release/artifact receipt. Consumer adoption remains separate. |
-| `deployed`    | Dev-manager reconciles actual successful game/consumer deployment of the verified behavior for the exact target/SHA and closes all clauses. |
+| Stage         | Meaning                                                                                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `approved`    | Actual approval is recorded with its scope and available provenance.                                                                             |
+| `implemented` | The owner supplies the reviewed implementation pin and focused checks. Worker READY is a handoff.                                                |
+| `merged`      | The implementation and required dependencies are present in the recorded local-main snapshot.                                                    |
+| `verified`    | Tech verifies every acceptance clause on the integrated artifact; required full main gates pass for the exact revision.                          |
+| `published`   | A kit-only publication target has successful exact-source CI and an immutable release/artifact receipt. Consumer adoption remains separate.      |
+| `deployed`    | game-coordinator reconciles actual successful game/consumer deployment of the verified behavior for the exact target/SHA and closes all clauses. |
 
 Acceptance with missing coverage stays open even after successful deployment; continue remediation without pausing otherwise eligible delivery. Preserve prior evidence when a regression reopens an item. Superseding one clause does not cancel independent requirements.
 
@@ -57,5 +57,5 @@ Art review adds no delivery hold; the fix-forward policy remains in force.
 2. Remediate approved gaps within existing role scope. Preserve WIP, unanswered questions and independent holds, including capture-tool, Phase 5 and simulation boundaries. Ask the owner to surface any genuinely new user decision; never answer or clear another role's question.
 3. Workers run focused relevant checks. The integrating owner reviews and merges promptly, then runs one combined full gate on exact main. Repeat only for changed source, an actual failure or unresolved evidence; do not inflate tests to restate this ledger. Mandatory delivery-runner gates remain required.
 4. Tech checks real interactions and state changes, including affected edge cases. Activate controls and observe their required effects. Source presence, screenshots and worker reports alone do not establish interaction coverage. Noninteractive clauses use the relevant artifact/configuration proof.
-5. Dev-manager matches each verified clause to the actual target, pushed SHA, successful required CI and deployment receipt. A later commit must demonstrably include the verified behavior and dependencies. Reused proof must identify unchanged covered code/assets and the retained artifact; ancestry alone is insufficient.
+5. game-coordinator matches each verified clause to the actual target, pushed SHA, successful required CI and deployment receipt. A later commit must demonstrably include the verified behavior and dependencies. Reused proof must identify unchanged covered code/assets and the retained artifact; ancestry alone is insufficient.
 6. Record incomplete or unavailable evidence in `unresolved`; keep acceptance open with an owner and next boundary, without adding a delivery hold. Ledger updates never alter delivery controls, schedules, ownership, independent holds or another role's pending question.
