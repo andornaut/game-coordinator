@@ -66,18 +66,23 @@ delivery-kit sends `dev-manager` a scheduled review at :20 and :50 each hour, an
 - asks the owning role to close a job that has made no progress across two reviews;
 - routes failures to the owning Tech role.
 
-## Handoffs between harnesses
+## Sessions and handoffs
 
-The agents run on one harness at a time, either Claude Code or Codex, and a handoff moves every role together. It is designed as a switch rather than a migration:
+Each role keeps its exact conversation IDs and one shared edit worktree. Native cwd stays at the game root, or game-dev for kits and dev-manager. Shared windows belong in `codex-game` or `claude-game`; each game's `art`, `gameplay` and `tech` windows belong in its own harness-prefixed session. Windows are alphabetical. Moving windows preserves processes and does not activate a role.
 
-- **Registry:** it maps each role name to its conversation on each harness, plus one active-harness field. Delivery and messages address roles by name and resolve the conversation at send time.
-- **Worktrees:** each role keeps one worktree, shared by both harnesses.
-- **Checkpoints:** each role keeps a living checkpoint with its state, work in progress, next action and pending questions, refreshed at every safe boundary.
-- **Steps:** a handoff holds every role, flips the active harness, resumes the paired conversations from their checkpoints, verifies delivery and stops the old frontends.
+Delivery-kit 3.x resolves each role through its optional harness override, otherwise the registry default. Handoffs select explicit games and any included kit/dev-manager roles; unselected owners remain unchanged.
+
+1. Verify native identities, source HOLDs, checkpoints, owned jobs and pending questions. Commit unfinished work to named branches and preserve all independent holds. Keep current checkpoints concise; archive superseded state unchanged in sibling history before removing obsolete receipts.
+2. Reuse matching live target panes. Resume missing or verified dead targets by exact ID, without an appended prompt. Verify effective Remote Control separately from launch flags and actual receipt. Select visible authorized trust choices explicitly; a default No or exit choice must not receive blind Enter.
+3. Obtain each target's exact marker/role/ID acceptance before selecting its harness. Reconcile matching existing acceptance on retries instead of repeating activation. Delivery acceptance alone is not handling.
+4. Apply scoped `delivery-kit harness select` with a fresh expected revision, reconcile compatibility records under locks, then validate configuration and scoped readiness. Keep delivery controls, route and cadence unchanged unless separately authorized. The route host's resident must have the effective target adapter/socket; a fresh CLI probe is not resident proof.
+5. Exit held source frontends through their supported idle exit, verify owned MCP cleanup, then record role completion. If dev-manager moves, keep scheduled review coverage pending until actual receipt at the next genuine review. Preserve runners, their gate containers and unrelated services.
+
+If quota prevents activation, leave explicitly prepared targets idle and keep routing unchanged. A handoff never starts tests, builds or releases merely to move ownership.
 
 ## Conventions
 
-- Containers run as a dedicated uid that owns nothing on the host, with every host mount read-only. Results are copied out by the host user, so no container leaves files a user can't remove.
+- Test suites and harnesses run in isolated containers, with only the project checkout and scratch writable. Preserve per-job CPU, memory and worker caps.
 - Tooling is TypeScript, run through a CLI or imported as a node module. Shell is limited to thin build wrappers, and there is no Python.
 - Each repository keeps role worktrees in an ignored `.worktrees/` directory. Merged branches and their worktrees are deleted when they land.
 
@@ -99,5 +104,5 @@ Run `npm run check` or `npm run lint` for native Markdown lint and ShellCheck af
 npm dependencies and ShellCheck. Both commands use the same lint definition.
 `make check` and `make lint` run those checks in isolated stock Node and ShellCheck containers.
 Dependencies install in the temporary working copy with lifecycle scripts disabled; no project image is built.
-CI uses the same stock images and native tools. This repository has no runtime test suite or build target.
+CI uses the same stock images and native tools.
 Husky runs ordinary lint-staged on the host with serial native Prettier tasks.
