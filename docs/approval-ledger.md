@@ -43,6 +43,14 @@ Acceptance with missing coverage stays open even after successful deployment; co
 
 Kit publication, consumer pin adoption and each game's deployment are separate targets. Kit-only entries end at `published`, retain the published source in `mainSha` and its release/artifact receipt in `interactionProof`, and leave `deployedSha` null. They cannot close consumer behavior without that consumer's interaction and deployment evidence.
 
+## Art review
+
+All Art owners and workers inspect each actual mockup and production artifact before presenting it or claiming done/READY. Compare against cumulative latest instructions, applicable approved references and the specification; preserve approved details unless explicitly superseded.
+
+Check affected states, views and sizes, including visible pixel geometry and occlusion; DOM bounds alone are insufficient. Record the artifact/source pin and disclose deviations and unverified limits. Present incomplete or nonconforming work as WIP with its differences stated.
+
+Art review adds no delivery hold; the fix-forward policy remains in force.
+
 ## Reconciliation
 
 1. Each role audits all its approved scope against current source, integrated behavior and actual delivery. Report every gap, its existing owner, exact pins/receipts and next action. A no-gap report needs evidence; idle sessions, empty queues and stale checkpoints are not coverage.
