@@ -2,6 +2,8 @@
 
 Coordination home for three games and three shared kits. Each game and each kit is worked on by long-running AI coding agent sessions, one per role. This repository holds the coordination layout and documents how the pieces fit together. Machine-local state lives in an ignored directory.
 
+[Cross-game policies](docs/game-policies.md) define shared product and development rules and how the game-coordinator communicates changes.
+
 ## Projects
 
 | Project           | Repository                                                          | Purpose                                                      |
