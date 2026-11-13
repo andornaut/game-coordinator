@@ -46,7 +46,7 @@ Check online for updates on every return to the home screen and present availabl
 
 For normal updates, serve the active build's assets from cache first; fetch only missing files matching that build. Check for versions separately and stage a complete new build apart from the active build. Activate normal updates only on Update now or a fresh document launch/restart before gameplay and save initialization, never automatically during play, a title return or a visibility resume. Reject incomplete staging and mixed-build assets, pages or manifests.
 
-An explicitly approved newer-save recovery path may activate automatically when saved progress, statistics or achievements require a newer game. Block gameplay start, incompatible save loading and all save writes throughout recovery. Switch only to a complete, hash-verified compatible build; the new document must recheck compatibility. Missing, unsafe or incomplete candidates and timeouts retain the fence and untouched saves, with connection/retry recovery. Activation alone is not compatibility proof.
+An explicitly approved newer-save recovery path may activate automatically when saved progress, statistics or achievements require a newer game. Block gameplay start, incompatible save loading and all save writes throughout recovery. Switch only to a complete, hash-verified build; resume only after the new document proves compatibility. Missing, unsafe or incomplete candidates, timeouts and continued incompatibility retain the fence and untouched saves, with connection/retry recovery. Activation alone is not compatibility proof.
 
 ### Ideas
 
