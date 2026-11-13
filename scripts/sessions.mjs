@@ -23,6 +23,7 @@ import {
   launchArgs,
   plan,
   quote,
+  windowName,
   verification,
 } from "./session-plan.mjs";
 
@@ -62,12 +63,13 @@ export function resumeLock(path, action) {
   }
 }
 
-export function managerChannel(root, slot, write = false) {
-  if (slot.harness !== "claude" || slot.role !== "dev-manager") return slot;
+export function coordinatorChannel(root, slot, write = false) {
+  if (slot.harness !== "claude" || slot.role !== "game-coordinator")
+    return slot;
   const cli = resolve(root, "node_modules/@andornaut/delivery-kit/dist/cli.js");
   if (!existsSync(cli))
     throw new Error(
-      "Claude dev-manager requires the installed delivery-kit channel CLI",
+      "Claude game-coordinator requires the installed delivery-kit channel CLI",
     );
   const path = resolve(root, `var/session-frontends/${slot.id}.mcp.json`);
   const content = `${JSON.stringify(
@@ -98,7 +100,7 @@ export function managerChannel(root, slot, write = false) {
       readFileSync(path, "utf8") !== content
     ) {
       throw new Error(
-        "Claude dev-manager channel configuration is not an exact owned match",
+        "Claude game-coordinator channel configuration is not an exact owned match",
       );
     }
   } else if (write) {
@@ -134,7 +136,7 @@ export function sortWindows(registry, slot, tmux = run) {
     const [id, index, name, role, harness] = line.split("\t");
     const known =
       Object.hasOwn(registry.roles, role ?? "") &&
-      role.split("/").at(-1) === name &&
+      windowName(harness, role) === name &&
       harness === slot.harness;
     const item = groups.get(id) ?? {
       id,
@@ -394,7 +396,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
       issues.push(`${slot.role}: registered root or worktree missing`);
   for (const slot of slots.filter((s) => s.state !== "live")) {
     try {
-      managerChannel(root, slot);
+      coordinatorChannel(root, slot);
     } catch (error) {
       issues.push(error.message);
     }
@@ -415,7 +417,8 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
         if (readRegistry(layout).revision !== registry.revision)
           throw new Error("Registry changed; re-plan");
         let fresh = snapshot().find((s) => s.role === slot.role);
-        if (fresh.state !== "live") fresh = managerChannel(root, fresh, true);
+        if (fresh.state !== "live")
+          fresh = coordinatorChannel(root, fresh, true);
         const result = resumeSlot(
           fresh,
           socketPath,

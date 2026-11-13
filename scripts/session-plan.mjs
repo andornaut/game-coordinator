@@ -5,6 +5,12 @@ import { resolveHarness, resolveRole } from "@andornaut/delivery-kit/registry";
 export const verification =
   "Native project, pending questions, quota, HOLD and Remote Control connection require supported native verification by the caller.";
 
+export function windowName(harness, role) {
+  return role === "game-coordinator"
+    ? `${harness}-game-coordinator`
+    : role.split("/").at(-1);
+}
+
 export function marker(revision, role, harness, id) {
   return `sessions-r${revision}-${createHash("sha256")
     .update(JSON.stringify([role, harness, id]))
@@ -112,7 +118,7 @@ export function plan(root, registry, options, panes, processes) {
     const session = role.includes("/")
       ? `${harness}-${role.split("/")[0]}`
       : `${harness}-game`;
-    const name = role.split("/").at(-1);
+    const name = windowName(harness, role);
     const relevant = panes.filter(
       (p) =>
         (p.role === role && p.harness === harness) ||

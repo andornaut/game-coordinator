@@ -21,7 +21,7 @@ import {
   controlSocket,
   inspectPanes,
   main,
-  managerChannel,
+  coordinatorChannel,
   processes,
   resumeLock,
   resumeSlot,
@@ -37,7 +37,7 @@ const registry = {
   harness: "codex",
   host: { root: ".", nativeProjectId: "fixture-project" },
   roles: {
-    "dev-manager": {
+    "game-coordinator": {
       worktree: ".",
       conversations: { codex: id, claude: target },
     },
@@ -48,7 +48,7 @@ const registry = {
     },
   },
 };
-const options = { roles: ["dev-manager"], config };
+const options = { roles: ["game-coordinator"], config };
 const frontend = {
   pid: 42,
   ppid: 41,
@@ -60,9 +60,9 @@ const frontend = {
 const pane = {
   pane: "%1",
   session: "codex-game",
-  name: "dev-manager",
+  name: "codex-game-coordinator",
   dead: false,
-  role: "dev-manager",
+  role: "game-coordinator",
   harness: "codex",
   id,
   frontends: [frontend],
@@ -78,14 +78,14 @@ test("selection is explicit, sorted and uses each effective harness", () => {
   const slots = plan(
     "/repo",
     registry,
-    { roles: ["game/art", "dev-manager", "game/art"], config },
+    { roles: ["game/art", "game-coordinator", "game/art"], config },
     [],
     [],
   );
   assert.deepEqual(
     slots.map((s) => [s.role, s.harness, s.session, s.cwd]),
     [
-      ["dev-manager", "codex", "codex-game", "/repo"],
+      ["game-coordinator", "codex", "codex-game", "/repo"],
       ["game/art", "claude", "claude-game", "/game"],
     ],
   );
@@ -138,6 +138,61 @@ test("canonical native roots differ from role worktrees for games and kits", () 
   ]);
 });
 
+test("coordinator windows use harness prefixes while shared sessions and kit windows stay unchanged", () => {
+  for (const harness of ["codex", "claude"]) {
+    const value = structuredClone(registry);
+    value.harness = harness;
+    value.roles["art-kit"] = {
+      worktree: "../art-kit/.worktrees/coordinator",
+      conversations: { codex: target, claude: id },
+    };
+    const slots = plan(
+      "/game-coordinator",
+      value,
+      { roles: ["game-coordinator", "art-kit"], config },
+      [],
+      [],
+    );
+    assert.deepEqual(
+      slots.map((s) => [s.role, s.session, s.name, s.cwd]),
+      [
+        ["art-kit", `${harness}-game`, "art-kit", "/game-coordinator"],
+        [
+          "game-coordinator",
+          `${harness}-game`,
+          `${harness}-game-coordinator`,
+          "/game-coordinator",
+        ],
+      ],
+    );
+    assert.equal(slots[1].id, harness === "codex" ? id : target);
+    const current = slots[1];
+    const existing = { ...frontend, harness, id: current.id, cwd: current.cwd };
+    const live = plan(
+      "/game-coordinator",
+      value,
+      { roles: [current.role], config },
+      [
+        {
+          ...pane,
+          session: current.session,
+          name: current.name,
+          harness,
+          id: current.id,
+          frontends: [existing],
+        },
+      ],
+      [existing],
+    )[0];
+    assert.equal(live.state, "live");
+    assert.equal(
+      resumeSlot(live, "/socket", null, () => assert.fail("live pane mutation"))
+        .action,
+      "preserved",
+    );
+  }
+});
+
 test("CLI parser passes layout config and resolves --root independently of caller cwd", async (t) => {
   const dir = mkdtempSync(join(tmpdir(), "sessions-cli-"));
   t.after(() => rmSync(dir, { recursive: true }));
@@ -152,7 +207,7 @@ test("CLI parser passes layout config and resolves --root independently of calle
       wakeMinutes: [],
       games: { game: { name: "Game", path: "../game", roles: ["art"] } },
       kits: {},
-      sharedRoles: ["dev-manager"],
+      sharedRoles: ["game-coordinator"],
     }),
   );
   writeFileSync(
@@ -204,11 +259,14 @@ test("socket override is explicit, absolute and fails closed when invalid", () =
     );
 });
 
-test("Claude manager channel is exact-target, owned, isolated from ordinary role launches", (t) => {
+test("Claude coordinator channel is exact-target, owned, isolated from ordinary role launches", (t) => {
   const root = mkdtempSync(join(tmpdir(), "sessions-channel-"));
   t.after(() => rmSync(root, { recursive: true }));
   const current = { ...slot(), harness: "claude", id: target };
-  assert.throws(() => managerChannel(root, current), /installed delivery-kit/);
+  assert.throws(
+    () => coordinatorChannel(root, current),
+    /installed delivery-kit/,
+  );
   mkdirSync(join(root, "node_modules/@andornaut/delivery-kit/dist"), {
     recursive: true,
   });
@@ -216,19 +274,22 @@ test("Claude manager channel is exact-target, owned, isolated from ordinary role
     join(root, "node_modules/@andornaut/delivery-kit/dist/cli.js"),
     "",
   );
-  const configured = managerChannel(root, current, true);
+  const configured = coordinatorChannel(root, current, true);
   const args = launchArgs(configured, "/socket");
   assert.equal(args.includes("--mcp-config"), true);
   assert.equal(args.includes("--strict-mcp-config"), false);
   assert.equal(args.includes("--dangerously-load-development-channels"), true);
   assert.equal(
-    managerChannel(root, current).channelConfig,
+    coordinatorChannel(root, current).channelConfig,
     configured.channelConfig,
   );
   writeFileSync(configured.channelConfig, "{}");
-  assert.throws(() => managerChannel(root, current, true), /exact owned match/);
+  assert.throws(
+    () => coordinatorChannel(root, current, true),
+    /exact owned match/,
+  );
   assert.equal(
-    managerChannel(root, { ...current, role: "game/art" }).channelConfig,
+    coordinatorChannel(root, { ...current, role: "game/art" }).channelConfig,
     undefined,
   );
 });
@@ -277,7 +338,7 @@ test("alphabetical insertion swaps only known windows and leaves unknown windows
   sortWindows(value, slot(), (args) => {
     calls.push(args);
     return args[0] === "list-panes"
-      ? "@1\t1\tdev-manager\tdev-manager\tcodex\n@2\t2\tscratch\t\t\n@3\t3\tart-kit\tart-kit\tcodex"
+      ? "@1\t1\tcodex-game-coordinator\tgame-coordinator\tcodex\n@2\t2\tscratch\t\t\n@3\t3\tart-kit\tart-kit\tcodex"
       : "";
   });
   assert.deepEqual(calls.slice(1), [["swap-window", "-s", "@3", "-t", "@1"]]);
@@ -339,7 +400,7 @@ test("different harness preparation requires explicit held assertion and an exis
     target,
   );
   const missing = structuredClone(registry);
-  delete missing.roles["dev-manager"].conversations.codex;
+  delete missing.roles["game-coordinator"].conversations.codex;
   assert.throws(() => plan("/repo", missing, options, [], []), /no registered/);
 });
 
@@ -440,9 +501,9 @@ test("resume argv contains exact ID and no new-session flag or appended prompt",
     "--resume",
     id,
     "--name",
-    "dev-manager",
+    "game-coordinator",
     "--remote-control",
-    "dev-manager",
+    "game-coordinator",
     "--dangerously-skip-permissions",
     "--add-dir",
     "/repo",
@@ -464,7 +525,7 @@ test("Bash wrapper descendants are inspected without pane_start_command or termi
   const panes = inspectPanes(all, (args) => {
     assert.equal(args.includes("capture-pane"), false);
     assert.equal(args.join(" ").includes("pane_start_command"), false);
-    return "%1\tcodex-game\tdev-manager\t0\t40\t\t\t";
+    return "%1\tcodex-game\tcodex-game-coordinator\t0\t40\t\t\t";
   });
   assert.deepEqual(panes[0].frontends, [frontend]);
   assert.equal(
@@ -577,10 +638,9 @@ test("missing shared slot joins canonical session and repeated live observation 
         : "";
   });
   assert.equal(result.action, "resume-requested");
-  assert.equal(
-    calls.find((args) => args[0] === "new-window").includes("codex-game:"),
-    true,
-  );
+  const created = calls.find((args) => args[0] === "new-window");
+  assert.equal(created.includes("codex-game:"), true);
+  assert.equal(created[created.indexOf("-n") + 1], "codex-game-coordinator");
   const before = calls.length;
   resumeSlot({ ...result, state: "live" }, "/socket", null, (args) =>
     calls.push(args),
