@@ -36,6 +36,10 @@ Prefer simple, explicit designs and consistent behavior across games. Treat like
 - Disable UI text selection, including mobile long-press selection of counters. Preserve normal editable inputs and game interactions.
 - Center Close when it is a modal's only visible footer action; hidden actions do not count. With multiple visible actions, place secondary actions left and the primary action right. Preserve labels, navigation, controls and story guards.
 
+### Pause and Menu navigation
+
+Remove standalone Settings icons. Put Settings inside the Pause/Menu modal alongside navigation. Keep the entry control's position and navigation function consistent across screens: Pause during gameplay and a hamburger Menu outside gameplay. Center screen and modal titles and keep controls from occluding them.
+
 ### Settings
 
 Use consistent settings structure, labels, state text and help across games. Labels name the setting; state text uses On/Off or Shown/Hidden as appropriate. Help is stable, declarative text describing the actual effect, rather than changing instructions for the next click. Include only settings the game supports; consistency does not authorize inventing toggles.
