@@ -29,6 +29,14 @@ Acceptance remains open until its clauses are proved, even after deployment. Wor
 
 Run tests and harnesses in isolated containers with only the project checkout and scratch writable. Fingerprint dirty paths and file contents before and after checks; discard changed-tree results. Run long checks in the background, preserve evidence and release completed owned resources.
 
+## Testing
+
+Across all games and shared kits, target a 40% reduction in actual executed test cases across existing suites. Prioritize realistic user scenarios and plausible critical edge cases. Prefer shared tables and helpers over repeated test bodies, but parameterization alone is not case reduction.
+
+Record baseline and after case counts and runtime separately, using comparable suite scope and execution settings. Report the achieved reduction and explicitly document accepted coverage losses in low-risk, low-churn areas.
+
+Do not delete failing tests to get green, weaken timeouts, run mass mutation campaigns or add a new test matrix to meet the target. Test pruning does not authorize application changes or cross-game source imports. Use existing owners and assigned workers; focused worker checks and owner combined gates remain required. Preserve independent holds, publication controls and runtime state.
+
 ## Product consistency
 
 Prefer simple, explicit designs and consistent behavior across games. Treat like cases alike; keep a difference only for a concrete current requirement. Review ergonomics against actual use, including controls, readability, layout and navigation. Preserve approved details and disclose unverified behavior rather than claiming completion.
