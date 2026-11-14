@@ -38,7 +38,7 @@ Prefer simple, explicit designs and consistent behavior across games. Treat like
 
 ### Pause and Menu navigation
 
-Remove standalone Settings icons. Put Settings inside the Pause/Menu modal alongside navigation. Keep the entry control's position and navigation function consistent across screens: Pause during gameplay and a hamburger Menu outside gameplay. Center screen and modal titles and keep controls from occluding them.
+Remove standalone Settings icons. Put Settings inside the Pause/Menu modal alongside navigation. Keep the entry control's position and navigation function consistent across screens: Pause only during active pausable gameplay; use a hamburger Menu everywhere else, including Start, Maps and nonpausable story screens. Center screen and modal titles and keep controls from occluding them.
 
 ### Settings
 
