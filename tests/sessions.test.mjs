@@ -4,6 +4,8 @@ import {
   mkdtempSync,
   mkdirSync,
   writeFileSync,
+  readFileSync,
+  statSync,
   rmSync,
   symlinkSync,
 } from "node:fs";
@@ -21,7 +23,7 @@ import {
   controlSocket,
   inspectPanes,
   main,
-  coordinatorChannel,
+  roleChannel,
   processes,
   resumeLock,
   resumeSlot,
@@ -259,12 +261,12 @@ test("socket override is explicit, absolute and fails closed when invalid", () =
     );
 });
 
-test("Claude coordinator channel is exact-target, owned, isolated from ordinary role launches", (t) => {
+test("Claude role channel requires installed CLI and preserves immutable owned config", (t) => {
   const root = mkdtempSync(join(tmpdir(), "sessions-channel-"));
   t.after(() => rmSync(root, { recursive: true }));
   const current = { ...slot(), harness: "claude", id: target };
   assert.throws(
-    () => coordinatorChannel(root, current),
+    () => roleChannel(root, false, current),
     /installed delivery-kit/,
   );
   mkdirSync(join(root, "node_modules/@andornaut/delivery-kit/dist"), {
@@ -274,24 +276,119 @@ test("Claude coordinator channel is exact-target, owned, isolated from ordinary 
     join(root, "node_modules/@andornaut/delivery-kit/dist/cli.js"),
     "",
   );
-  const configured = coordinatorChannel(root, current, true);
+  const configured = roleChannel(root, true, current);
   const args = launchArgs(configured, "/socket");
   assert.equal(args.includes("--mcp-config"), true);
   assert.equal(args.includes("--strict-mcp-config"), false);
   assert.equal(args.includes("--dangerously-load-development-channels"), true);
   assert.equal(
-    coordinatorChannel(root, current).channelConfig,
+    roleChannel(root, false, current).channelConfig,
     configured.channelConfig,
   );
   writeFileSync(configured.channelConfig, "{}");
+  assert.throws(() => roleChannel(root, true, current), /exact owned match/);
+});
+
+for (const [role, conversation] of [
+  ["game-coordinator", id],
+  ["art-kit", target],
+  ["game/art", "abcdefab-1234-1234-1234-123456789abd"],
+]) {
+  test(`Claude channel binds exact identity for ${role} without changing startup authority`, (t) => {
+    const root = mkdtempSync(join(tmpdir(), "sessions-role-channel-"));
+    t.after(() => rmSync(root, { recursive: true }));
+    const cli = join(root, "node_modules/@andornaut/delivery-kit/dist/cli.js");
+    mkdirSync(join(root, "node_modules/@andornaut/delivery-kit/dist"), {
+      recursive: true,
+    });
+    writeFileSync(cli, "");
+    const current = { ...slot(), role, harness: "claude", id: conversation };
+    const configured = roleChannel(root, true, current);
+    assert.deepEqual(configured, {
+      ...current,
+      channelConfig: join(
+        root,
+        `var/session-frontends/${conversation}.mcp.json`,
+      ),
+    });
+    const expected = {
+      mcpServers: {
+        "delivery-kit-monitor": {
+          command: process.execPath,
+          args: [
+            cli,
+            "--root",
+            root,
+            "claude",
+            "channel",
+            "--conversation",
+            conversation,
+          ],
+        },
+      },
+    };
+    assert.equal(
+      readFileSync(configured.channelConfig, "utf8"),
+      JSON.stringify(expected, null, 2) + "\n",
+    );
+    assert.equal(statSync(configured.channelConfig).mode & 0o777, 0o600);
+    assert.equal(
+      roleChannel(root, false, current).channelConfig,
+      configured.channelConfig,
+    );
+    const args = launchArgs(configured, "/socket");
+    assert.equal(args[args.indexOf("--resume") + 1], conversation);
+    assert.equal(
+      args[args.indexOf("--mcp-config") + 1],
+      configured.channelConfig,
+    );
+    assert.equal(
+      args.includes("--dangerously-load-development-channels"),
+      true,
+    );
+    assert.equal(args.includes("--strict-mcp-config"), false);
+    assert.equal(args.includes("--remote-control"), true);
+    assert.equal(
+      readFileSync(configured.channelConfig, "utf8").includes("/socket"),
+      false,
+    );
+  });
+}
+
+test("Codex roles do not require or create Claude channel configuration", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "sessions-codex-channel-"));
+  t.after(() => rmSync(root, { recursive: true }));
+  for (const role of ["game-coordinator", "art-kit", "game/art"]) {
+    const current = { ...slot(), role };
+    assert.equal(roleChannel(root, true, current), current);
+  }
+});
+
+test("Claude channel refuses a symlink config without changing its target", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "sessions-channel-link-"));
+  t.after(() => rmSync(root, { recursive: true }));
+  mkdirSync(join(root, "node_modules/@andornaut/delivery-kit/dist"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(root, "node_modules/@andornaut/delivery-kit/dist/cli.js"),
+    "",
+  );
+  mkdirSync(join(root, "var/session-frontends"), { recursive: true });
+  const original = join(root, "original.json");
+  writeFileSync(original, "private fixture");
+  symlinkSync(original, join(root, `var/session-frontends/${target}.mcp.json`));
   assert.throws(
-    () => coordinatorChannel(root, current, true),
+    () =>
+      roleChannel(root, true, {
+        ...slot(),
+        role: "game/art",
+        harness: "claude",
+        id: target,
+      }),
     /exact owned match/,
   );
-  assert.equal(
-    coordinatorChannel(root, { ...current, role: "game/art" }).channelConfig,
-    undefined,
-  );
+  assert.equal(readFileSync(original, "utf8"), "private fixture");
 });
 
 test("resume lock excludes concurrent helpers and releases on descriptor close", (t) => {

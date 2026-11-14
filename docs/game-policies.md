@@ -19,6 +19,22 @@ Implement requested or approved scope only. A question is not authorization. The
 
 Route dependencies to the role that can clear them. Never answer, cancel or clear another owner's question. Preserve WIP, exact pins, recipient guards and independent holds. Unavailable question state is not clearance.
 
+## Communication
+
+Use one delivery-kit role-addressed messaging contract for Claude and Codex, including all game, coordinator and kit roles. Harness adapters implement the same interface and report unavailable or unsupported native capabilities explicitly. All roles use the coordinator-installed CLI; game-local delivery-runner package pins remain separate.
+
+Deliver exact payloads directly through supported tools. The coordinator owns communication health, reconciliation and escalation; it is not a mandatory relay for every message. Frontend bridge and authentication repair remain separate integration-owner responsibilities; never bypass a refusal, type payloads into tmux as a fallback or overwrite user drafts.
+
+Durably record each original's stable ID, exact payload, recipient role and intent before dispatch. Resolve the current registry route at send time, including the recipient's effective harness. Use normal queues for ordinary independent work and supported native live delivery only for confirmed unblockers. Guard both queued and live native dispatch against pending questions and HOLDs. If recipient clearance is unknown, retain the original in the durable local inbox without native dispatch or wake; a native queue can wake an idle owner.
+
+- Queued means the original is durably retained for delivery.
+- Accepted means the transport accepted delivery, not that the recipient handled it.
+- Handled requires actual recipient reconciliation of the exact original.
+
+Preserve unavailable and ambiguous outcomes with an owner, reason and next boundary. Reconcile accepted or ambiguous delivery before retrying; never blindly resend or acknowledge an unreconciled original. Preserve recipient questions, independent holds and parent-owned native worker guards. Communication does not authorize activation, interruption, restart or routing changes.
+
+Use the existing :20/:50 reviews to reconcile the whole backlog, retry only after reconciliation and escalate items unhandled or repeatedly deferred across two slots. Follow the [review procedure](../README.md#monitoring); add no daemon or timer.
+
 ## Development and delivery
 
 Integrate approved, reviewed work into local main promptly after focused relevant checks. Workers run focused checks; the integration owner runs combined full gates on the exact integrated revision before publication or deployment. Avoid repeated full feature-branch gates. Ship rules and design changes with the behavior they describe. Reporting an immutable prior release does not freeze subsequent approved source integration; each new candidate needs its own exact-revision gates.

@@ -33,7 +33,7 @@ Each role is one agent conversation with a fixed scope.
   - reviews health on a schedule;
   - tracks every release through gate, CI and deployment.
 
-Roles talk to each other by name through the agent harness's cross-session messaging. Coordinators delegate substantive work to short-lived worker agents, each in its own Git worktree and branch.
+The shared [communication contract](docs/game-policies.md#communication) defines role-addressed delivery for Claude and Codex, including kits. Coordinators delegate substantive work to short-lived worker agents, each in its own Git worktree and branch.
 
 ## Delivery
 
@@ -62,16 +62,41 @@ Before Tech adopts a runner version that requires persistent control, game-coord
 
 Delivery-kit 4 requires explicit `resources.memoryMiB` from 6 through 8192 in every registered game's delivery configuration. Version 3 rejects this field. Coordinate configuration and package adoption while affected residents and the shared route host are idle and drained; validate the complete layout with `check-config` before startup. Preserve controls, routes, singleton ownership and schedules.
 
+## Role messaging
+
+All roles use the coordinator-installed CLI with its absolute root, including from a game or kit worktree. Delivery-kit 4.2.0 provides the commands below; native capability and per-recipient adoption require separate qualification. Follow the [communication and recipient guards](docs/game-policies.md#communication).
+
+Use the shared CLI and root prefix shown below, followed by these arguments:
+
+| Operation | Arguments                                                                                    | Result                                                                                                                                       |
+| --------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Record    | `message send --from ROLE --recipient ROLE --id UUID --body-file FILE`                       | Persist locally, without native wake or delivery. Optional `--intent INTENT` (`queue` or `unblock`) and `--parent ROLE`.                     |
+| Inspect   | `message status --id UUID` or `message status --recipient ROLE`                              | Inspect durable state; `--include-body` includes the payload.                                                                                |
+| Dispatch  | `message dispatch --id UUID`                                                                 | Explicit guarded native delivery; acceptance is not handling.                                                                                |
+| Reconcile | `message reconcile --id UUID --expected-revision N --disposition DISPOSITION --evidence REF` | Record `handled`, `superseded` or `retained`. Retention also requires `--reason TEXT --next-boundary TEXT`; `--owner-role ROLE` is optional. |
+| Diagnose  | `harness doctor --role ROLE`                                                                 | Inspect the selected role's harness capabilities.                                                                                            |
+
+For example, record an approved payload without dispatching it:
+
+```bash
+COORDINATOR_ROOT=/absolute/path/to/game-coordinator
+node "$COORDINATOR_ROOT/node_modules/@andornaut/delivery-kit/dist/cli.js" \
+  --root "$COORDINATOR_ROOT" message send --from art-kit \
+  --recipient game-coordinator --id UUID --body-file /absolute/path/to/message.txt
+```
+
 ## Monitoring
 
 delivery-kit sends game-coordinator reviews at :20 and :50 each hour and bus events as they happen. Both arrive over the existing channel. At every review, game-coordinator works with owners to drain the whole message backlog, including independent work:
 
-1. Inventory every registered role, including game Art, Gameplay and Tech, shared coordinators and kits, plus their verified workers' queues and ready handoffs. Read actual queued payloads and current owner evidence. Report unavailable queue or question visibility; never infer an empty backlog from an idle session.
+1. Inventory both the durable message inbox and native queues for every registered role, including game Art, Gameplay and Tech, shared coordinators and kits, plus their verified workers' queues and ready handoffs. Read actual queued payloads and current owner evidence. Report unavailable queue or question visibility; never infer an empty backlog from an idle session.
 2. Reconcile every exact original as handled, superseded or retained. Handled and superseded require actual recipient reconciliation; transport acceptance proves delivery only. Retained items name an owner, reason and next review boundary. Do not skip ordinary independent work after prioritizing user replies and dependency unblockers.
 3. Deliver confirmed unblockers through supported native live steering and ordinary independent work through normal queues. Reconcile accepted or ambiguous deliveries before retrying. Acknowledge or remove only exact unchanged originals after confirmed reconciliation, preserving evidence for retained deliveries awaiting handling.
 4. Surface pending user decisions through their owning session's structured prompt. Preserve unanswered questions, source holds and independent work. Never answer or cancel another owner's question, interrupt or restart its turn, or treat silence as a decision. Route release failures and cross-role dependencies to the role that can resolve them.
 5. Escalate any item unhandled or repeatedly deferred across two scheduled slots with its exact ID, owner, blocker and next action. Ask owners to close finished or stalled jobs after preserving diagnostics; retain protected live resources and unresolved ownership.
 6. Finish each pass with exact counts of originals inspected, handled, superseded and retained, plus unavailable scopes. Identify each remaining item's owner, reason and next boundary; record new arrivals at safe boundaries so they are included or explicitly retained for the next pass. Claim a fully drained backlog only when no originals remain and visibility is complete.
+
+Durable collection is not native wake or delivery. Message handling receipts and scheduled release reporters are distinct; there is no public reporter acknowledgment command.
 
 Use the existing :20/:50 reviews; add no timers or teams. Preserve handoff and activation guards when communicating with held owners.
 

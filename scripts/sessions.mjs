@@ -12,12 +12,12 @@ import {
   realpathSync,
   writeFileSync,
 } from "node:fs";
-import { homedir } from "node:os";
-import { isAbsolute, resolve } from "node:path";
+import { resolve } from "node:path";
 import { createConnection } from "node:net";
 import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
 import { loadLayout, readRegistry } from "@andornaut/delivery-kit/registry";
+import { resolveCodexControlSocket } from "@andornaut/delivery-kit/transport";
 import {
   identity,
   launchArgs,
@@ -28,15 +28,7 @@ import {
 } from "./session-plan.mjs";
 
 export function controlSocket(env = process.env) {
-  if (Object.hasOwn(env, "CODEX_CONTROL_SOCKET")) {
-    if (!isAbsolute(env.CODEX_CONTROL_SOCKET))
-      throw new Error("CODEX_CONTROL_SOCKET must be an absolute path");
-    return env.CODEX_CONTROL_SOCKET;
-  }
-  return resolve(
-    homedir(),
-    ".codex/app-server-control/app-server-control.sock",
-  );
+  return resolveCodexControlSocket({ env }).path;
 }
 const run = (args) =>
   execFileSync("tmux", args, {
@@ -63,13 +55,12 @@ export function resumeLock(path, action) {
   }
 }
 
-export function coordinatorChannel(root, slot, write = false) {
-  if (slot.harness !== "claude" || slot.role !== "game-coordinator")
-    return slot;
+export function roleChannel(root, write, slot) {
+  if (slot.harness !== "claude") return slot;
   const cli = resolve(root, "node_modules/@andornaut/delivery-kit/dist/cli.js");
   if (!existsSync(cli))
     throw new Error(
-      "Claude game-coordinator requires the installed delivery-kit channel CLI",
+      "Claude role requires the installed delivery-kit channel CLI",
     );
   const path = resolve(root, `var/session-frontends/${slot.id}.mcp.json`);
   const content = `${JSON.stringify(
@@ -100,7 +91,7 @@ export function coordinatorChannel(root, slot, write = false) {
       readFileSync(path, "utf8") !== content
     ) {
       throw new Error(
-        "Claude game-coordinator channel configuration is not an exact owned match",
+        "Claude role channel configuration is not an exact owned match",
       );
     }
   } else if (write) {
@@ -396,7 +387,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
       issues.push(`${slot.role}: registered root or worktree missing`);
   for (const slot of slots.filter((s) => s.state !== "live")) {
     try {
-      coordinatorChannel(root, slot);
+      roleChannel(root, false, slot);
     } catch (error) {
       issues.push(error.message);
     }
@@ -417,8 +408,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
         if (readRegistry(layout).revision !== registry.revision)
           throw new Error("Registry changed; re-plan");
         let fresh = snapshot().find((s) => s.role === slot.role);
-        if (fresh.state !== "live")
-          fresh = coordinatorChannel(root, fresh, true);
+        if (fresh.state !== "live") fresh = roleChannel(root, true, fresh);
         const result = resumeSlot(
           fresh,
           socketPath,
