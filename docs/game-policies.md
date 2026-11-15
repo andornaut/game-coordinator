@@ -45,6 +45,10 @@ Acceptance remains open until its clauses are proved, even after deployment. Wor
 
 Run tests and harnesses in isolated containers with only the project checkout and scratch writable. Fingerprint dirty paths and file contents before and after checks; discard changed-tree results. Run long checks in the background, preserve evidence and release completed owned resources.
 
+### Resource admission
+
+Use only the one-minute load average for admission: ordinary containers start below 20; scheduled delivery starts below 30, rechecking every minute for up to 15 minutes after the slot before skipping it. Keep at most four CPUs and four test workers per container, plus applicable memory caps. These execution caps add no admission conditions.
+
 ## Testing
 
 Across all games and shared kits, target a 40% reduction in actual executed test cases across existing suites. Prioritize realistic user scenarios and plausible critical edge cases. Prefer shared tables and helpers over repeated test bodies, but parameterization alone is not case reduction.
