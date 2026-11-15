@@ -104,7 +104,8 @@ node scripts/sessions.mjs brief --role game-coordinator
 ```
 
 - `plan` reports sorted exact-ID slots, catalog/tool checks and local blockers; `check` also exits nonzero for blockers. Optional role tools are reported separately from launch requirements.
-- `brief` writes the generated orientation artifact without delivery. Include it once in a new role's initial HOLD request after verified registry enrollment, or in an existing handoff activation packet.
+- By default, `brief` writes the generated orientation artifact without delivery. Include it once in a new role's initial HOLD request after verified registry enrollment, or in an existing handoff activation packet.
+- `brief --dispatch --role ROLE` completes previously unsent startup orientation after exact native identity verification for the live effective owner. It uses guarded messaging; `--held` remains artifact-only. Do not use it for initial HOLD or handoff activation packets.
 - `resume` preserves live panes and resumes only eligible missing/dead slots. A fresh resume queues one idempotent orientation through guarded messaging after local identity readback; acceptance is not handling or activation. `--held` suppresses standalone orientation for held preparation, including newly enrolled roles; include the artifact once in the HOLD or activation packet. Another harness also needs `--harness TARGET`, asserting caller-verified source HOLD.
 - Repeat `--runner-pid PID` to inspect resident socket configuration. `--handoff-marker TEXT` preserves the original marker separately from the bounded role marker.
 
