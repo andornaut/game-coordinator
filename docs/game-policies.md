@@ -63,11 +63,13 @@ Prefer simple, explicit designs and consistent behavior across games. Treat like
 
 - Disable UI text selection, including mobile long-press selection of counters. Preserve normal editable inputs and game interactions.
 - Center Close when it is a modal's only visible footer action; hidden actions do not count. With multiple visible actions, place secondary actions left and the primary action right. Preserve labels, navigation, controls and story guards.
-- In vertical menus, place the primary action last, at the bottom: Resume or Close as applicable. Place Back to title above the primary action whenever it is present.
+- In vertical menus, place the primary action last, at the bottom: Resume or Close as applicable.
 
 ### Pause and Menu navigation
 
 Remove standalone Settings icons. Put Settings inside the Pause/Menu modal alongside navigation. Keep the entry control's position and navigation function consistent across screens: Pause only during active pausable gameplay; use a hamburger Menu everywhere else, including Start, Maps and nonpausable story screens. Center screen and modal titles and keep controls from occluding them.
+
+Every Pause/Menu outside Start/title includes Back to title immediately above its bottom primary Resume or Close, including Ada's Earth narrative Menu. Omit Back to title only on Start/title; ordinary dialogs and choice cards keep their existing actions. Game callers own this navigation policy; preserve actual pausability, save/progress, settlement and exit-confirmation guards.
 
 ### Settings
 
