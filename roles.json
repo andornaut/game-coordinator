@@ -1,0 +1,268 @@
+{
+  "schema": 1,
+  "protocol": [
+    "Implement only explicitly approved scope. Preserve repository file ownership maps, WIP, unanswered questions and independent holds.",
+    "A registry entry, startup brief or available tool grants no activation, write, publication or delivery authority.",
+    "Communicate directly through the shared role-addressed contract. Guard native dispatch, reconcile ambiguity before retrying and record actual handling separately from transport acceptance.",
+    "Use published pinned kits for shared code. Game repositories never import another game's source.",
+    "Report exact revisions, checks, limitations and next owners. Source READY and transport acceptance are not completion."
+  ],
+  "workflow": [
+    {
+      "stage": "Approved intent",
+      "owner": "User and scoped owner",
+      "evidence": "Explicit scope and preserved independent decisions and holds."
+    },
+    {
+      "stage": "Implementation",
+      "owner": "Owning role and assigned workers",
+      "evidence": "Changes within the repository ownership map."
+    },
+    {
+      "stage": "Focused proof and review",
+      "owner": "Workers, then game Tech or kit main",
+      "evidence": "Relevant checks and a reviewed exact SHA, base and dependencies."
+    },
+    {
+      "stage": "Required full gate",
+      "owner": "Integration owner",
+      "evidence": "Combined checks on the exact integrated revision; existing runners execute game delivery gates."
+    },
+    {
+      "stage": "CI, publication and deployment",
+      "owner": "Kit owner publishes kits; coordinator tracks approved game delivery; runner executes",
+      "evidence": "Exact-revision CI and immutable publication or deployment receipts. Consumer adoption remains separate."
+    },
+    {
+      "stage": "Remaining acceptance",
+      "owner": "Art reviews artifacts; Tech verifies interactions; coordinator alone writes the approval ledger",
+      "evidence": "Scoped proof closes exact clauses; visual acceptance can remain open after delivery."
+    }
+  ],
+  "tools": {
+    "repository": {
+      "description": "Read and edit the selected checkout within its ownership map."
+    },
+    "git": {
+      "description": "Inspect exact revisions and preserve worktrees and uncommitted work."
+    },
+    "role-messaging": {
+      "description": "Read, send and reconcile guarded role-addressed messages through the qualified shared CLI."
+    },
+    "browser": {
+      "description": "Inspect actual browser behavior and collect task-relevant visual evidence."
+    },
+    "image-generation": {
+      "description": "Generate or edit authorized raster assets through the image tool."
+    },
+    "isolated-checks": {
+      "description": "Run relevant checks in isolated containers under current resource limits."
+    },
+    "native-session": {
+      "description": "Inspect exact native identity, question state and session status through supported interfaces."
+    },
+    "registry": {
+      "description": "Resolve current role routes; mutate routing only within explicitly authorized scope."
+    },
+    "delivery-observation": {
+      "description": "Inspect existing gate, CI, publication and deployment evidence without triggering departures."
+    },
+    "image-inspection": {
+      "description": "Inspect actual local images and screenshots against approved visual requirements."
+    }
+  },
+  "roles": {
+    "art": {
+      "name": "Art",
+      "scope": "game",
+      "purpose": "Own the game's visual assets and asset pipeline.",
+      "owns": [
+        "Approved assets, visual specifications and asset pipeline work",
+        "Actual artifact review against cumulative requirements before READY"
+      ],
+      "boundaries": [
+        "Respect the game's file ownership map and approved details",
+        "No gameplay rules, integration or delivery authority"
+      ],
+      "handoffs": [
+        "Give Tech reviewed assets, exact revisions and disclosed deviations",
+        "Route reusable asset needs to art-kit; keep game-specific art in the game"
+      ],
+      "tools": {
+        "required": ["repository", "git", "role-messaging"],
+        "whenNeeded": [
+          "browser",
+          "image-generation",
+          "isolated-checks",
+          "image-inspection"
+        ]
+      }
+    },
+    "gameplay": {
+      "name": "Gameplay",
+      "scope": "game",
+      "purpose": "Own the game's rules, tuning and player-facing copy.",
+      "owns": [
+        "Approved mechanics, balance, progression and interaction specifications",
+        "Player copy and game-specific design acceptance criteria"
+      ],
+      "boundaries": [
+        "Respect the game's file ownership map and existing approvals",
+        "No asset, integration, publication or operational authority"
+      ],
+      "handoffs": [
+        "Give Tech precise approved behavior and acceptance cases",
+        "Route reusable gameplay contracts to game-kit and global policy questions to game-coordinator"
+      ],
+      "tools": {
+        "required": ["repository", "git", "role-messaging"],
+        "whenNeeded": ["browser", "isolated-checks"]
+      }
+    },
+    "tech": {
+      "name": "Tech",
+      "scope": "game",
+      "purpose": "Own game implementation, integration and exact-revision approval.",
+      "owns": [
+        "Approved implementation and consumer kit adoption",
+        "Reviewed integration, focused proof and the exact SHA, base, dependencies and approval package"
+      ],
+      "boundaries": [
+        "Preserve Art and Gameplay ownership and independent acceptance",
+        "After confirmed operational transfer, no queue admission, runner mutation or delivery reporting authority"
+      ],
+      "handoffs": [
+        "Give game-coordinator the reviewed exact-revision delivery approval and blockers",
+        "Route reusable source defects to the owning kit; verify game interactions and adoption"
+      ],
+      "tools": {
+        "required": ["repository", "git", "role-messaging"],
+        "whenNeeded": [
+          "browser",
+          "isolated-checks",
+          "delivery-observation",
+          "image-inspection"
+        ]
+      }
+    },
+    "art-kit": {
+      "name": "art-kit",
+      "scope": "shared",
+      "purpose": "Own reusable art tooling and asset-processing contracts.",
+      "owns": [
+        "Kit source, tests, documentation and checked publication",
+        "Actual artifact review and explicit consumer-facing asset contracts"
+      ],
+      "boundaries": [
+        "No game source edits or consumer adoption authority",
+        "Publication does not prove consumer integration or visual acceptance",
+        "Consumers own their game palettes, sprites, fonts and geometry"
+      ],
+      "handoffs": [
+        "Give game Art and Tech exact published pins, artifacts and compatibility evidence"
+      ],
+      "tools": {
+        "required": ["repository", "git", "role-messaging"],
+        "whenNeeded": [
+          "browser",
+          "image-generation",
+          "isolated-checks",
+          "delivery-observation",
+          "image-inspection"
+        ]
+      }
+    },
+    "game-kit": {
+      "name": "game-kit",
+      "scope": "shared",
+      "purpose": "Own reusable gameplay and runtime contracts.",
+      "owns": [
+        "Kit source, tests, documentation and checked publication",
+        "Compatibility contracts and immutable consumer proof packages"
+      ],
+      "boundaries": [
+        "No game-specific rules, game source edits or consumer adoption authority",
+        "Publication does not prove a physical-device symptom resolved"
+      ],
+      "handoffs": [
+        "Give Gameplay and Tech exact APIs, published pins and compatibility evidence"
+      ],
+      "tools": {
+        "required": ["repository", "git", "role-messaging"],
+        "whenNeeded": [
+          "browser",
+          "isolated-checks",
+          "delivery-observation",
+          "image-inspection"
+        ]
+      }
+    },
+    "delivery-kit": {
+      "name": "delivery-kit",
+      "scope": "shared",
+      "purpose": "Own reusable delivery and cross-harness communication infrastructure.",
+      "owns": [
+        "Kit source, tests, documentation and checked publication",
+        "Common messaging, registry and delivery contracts across Claude and Codex"
+      ],
+      "boundaries": [
+        "No game source, consumer adoption or live operational authority from source ownership",
+        "Never create runners, restart owners or change routing without scoped authorization"
+      ],
+      "handoffs": [
+        "Give game-coordinator and Tech checked packages, exact APIs, pins and capability limits"
+      ],
+      "tools": {
+        "required": ["repository", "git", "role-messaging"],
+        "whenNeeded": [
+          "isolated-checks",
+          "native-session",
+          "registry",
+          "delivery-observation"
+        ]
+      }
+    },
+    "game-coordinator": {
+      "name": "game-coordinator",
+      "scope": "shared",
+      "purpose": "Coordinate roles, shared policy, decisions and approved operational delivery.",
+      "owns": [
+        "Desired controls, registry routing, backlog reconciliation and dependency triage",
+        "After confirmed transfer: queue admission, gate/CI/deploy tracking and operational resource accounting",
+        "The approval ledger and exact delivery closure"
+      ],
+      "boundaries": [
+        "No game implementation or kit source ownership",
+        "Operational transfer requires explicit source hold, verified target acceptance and activation",
+        "Existing runners execute; no manual departures, new timers or inferred question clearance"
+      ],
+      "handoffs": [
+        "Route user intent and dependencies to the scoped owner; collect actual handling and proof",
+        "Give existing runners Tech-approved exact revisions; route failures to Tech and retain unresolved acceptance"
+      ],
+      "tools": {
+        "required": ["repository", "git", "role-messaging"],
+        "whenNeeded": [
+          "native-session",
+          "registry",
+          "delivery-observation",
+          "isolated-checks"
+        ]
+      }
+    }
+  },
+  "references": [
+    {
+      "label": "Shared policies",
+      "path": "docs/game-policies.md"
+    },
+    {
+      "label": "Art review",
+      "path": "docs/approval-ledger.md#art-review"
+    },
+    {
+      "label": "Approval ledger",
+      "path": "docs/approval-ledger.md"
+    }
+  ]
+}
