@@ -4,7 +4,7 @@ These policies apply to every current and future game. Game-specific rules and e
 
 ## Ownership and communication
 
-The game-coordinator owns cross-game policy coordination, documentation and communication. Keep shared principles here and game-specific specifications with their game. The [approval ledger contract](approval-ledger.md) defines acceptance evidence and delivery closure.
+The game-coordinator owns cross-game policy coordination, documentation and communication. Keep shared principles here and game-specific specifications with their game. Repository documentation is the source of truth for each project's current specifications. The [approval ledger contract](approval-ledger.md) defines acceptance evidence and delivery closure.
 
 When defining or changing a policy:
 
