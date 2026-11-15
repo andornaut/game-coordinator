@@ -51,7 +51,7 @@ Use only the one-minute load average for admission: ordinary containers start be
 
 ## Testing
 
-Across all games and shared kits, target a 40% reduction in actual executed test cases across existing suites. Prioritize realistic user scenarios and plausible critical edge cases. Prefer shared tables and helpers over repeated test bodies, but parameterization alone is not case reduction.
+Target a 40% reduction in actual executed test cases across existing game suites and 20% across each of the three shared kits' existing suites. Prioritize realistic user scenarios and plausible critical edge cases. Prefer shared tables and helpers over repeated test bodies, but parameterization alone is not case reduction.
 
 Record baseline and after case counts and runtime separately, using comparable suite scope and execution settings. Report the achieved reduction and explicitly document accepted coverage losses in low-risk, low-churn areas.
 
