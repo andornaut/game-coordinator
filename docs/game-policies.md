@@ -69,6 +69,12 @@ Remove standalone Settings icons. Put Settings inside the Pause/Menu modal along
 
 Use consistent settings structure, labels, state text and help across games. Labels name the setting; state text uses On/Off or Shown/Hidden as appropriate. Help is stable, declarative text describing the actual effect, rather than changing instructions for the next click. Include only settings the game supports; consistency does not authorize inventing toggles.
 
+### Loading failures
+
+Required assets must load before game entry. On failure, show **Loading failed**, the message **Some game files could not load. Try again.**, and **Retry**. Keep the error readable if the normal font fails.
+
+Retry is explicit, with at most one load attempt in flight. Use the single top loading bar for new loads and retries; success continues and another failure returns to the same error. Preserve saves and existing optional-asset placeholders.
+
 ### Updates
 
 Check online for updates on every return to the home screen and present available updates. Preserve each game's offer presentation and lifecycle.
