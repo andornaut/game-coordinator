@@ -1,6 +1,9 @@
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
-import { resolveHarness, resolveRole } from "@andornaut/delivery-kit/registry";
+import {
+  resolveHarness,
+  resolveRole,
+} from "@andornaut/delivery-kit/build/registry";
 
 export const verification =
   "Native project, pending questions, quota, HOLD and Remote Control connection require supported native verification by the caller.";

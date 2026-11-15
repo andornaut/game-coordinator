@@ -819,7 +819,7 @@ test("tool discovery separates required launch failures from optional native cap
       },
     },
     {
-      messaging: () => ({ status: "available", version: "4.2.2" }),
+      messaging: () => ({ status: "available", version: "4.4.0" }),
       probe: (binary, args) => {
         calls.push([binary, args]);
         return binary === "docker"
@@ -1094,15 +1094,17 @@ test("messaging availability requires compatible public message CLI metadata", (
   const metadata = {
     name: "@andornaut/delivery-kit",
     exports: {
-      "./registry": "./dist/registry.js",
-      "./transport": "./dist/transport.js",
+      "./build/registry": "./dist/registry.js",
+      "./build/transport": "./dist/transport.js",
     },
   };
   for (const [version, status] of [
     ["4.1.0", "missing"],
     ["4.2.1", "missing"],
-    ["4.2.2", "available"],
-    ["4.3.0", "available"],
+    ["4.2.2", "missing"],
+    ["4.3.0", "missing"],
+    ["4.4.0", "available"],
+    ["4.5.0", "available"],
     ["5.0.0", "missing"],
   ]) {
     writeFileSync(
@@ -1111,6 +1113,22 @@ test("messaging availability requires compatible public message CLI metadata", (
     );
     assert.equal(installedMessaging(root).status, status, version);
   }
+  writeFileSync(
+    join(directory, "package.json"),
+    JSON.stringify({
+      ...metadata,
+      version: "4.4.0",
+      exports: {
+        "./registry": "./dist/registry.js",
+        "./transport": "./dist/transport.js",
+      },
+    }),
+  );
+  assert.equal(
+    installedMessaging(root).status,
+    "missing",
+    "Legacy aliases alone do not establish canonical SDK readiness",
+  );
 });
 
 test("delayed frontend visibility requires explicit guarded orientation completion", async (t) => {

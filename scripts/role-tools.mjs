@@ -46,16 +46,13 @@ export function installedMessaging(root) {
       readFileSync(join(directory, "package.json"), "utf8"),
     );
     const version = /^4\.(\d+)\.(\d+)$/.exec(pkg.version ?? "");
-    const compatible =
-      version &&
-      (Number(version[1]) > 2 ||
-        (Number(version[1]) === 2 && Number(version[2]) >= 2));
+    const compatible = version && Number(version[1]) >= 4;
     if (
       !compatible ||
       pkg.name !== "@andornaut/delivery-kit" ||
       typeof pkg.version !== "string" ||
-      !pkg.exports?.["./registry"] ||
-      !pkg.exports?.["./transport"] ||
+      !pkg.exports?.["./build/registry"] ||
+      !pkg.exports?.["./build/transport"] ||
       !statSync(cli).isFile()
     )
       throw new Error("Unsupported installed CLI metadata");
@@ -65,7 +62,7 @@ export function installedMessaging(root) {
       status: "missing",
       cli,
       reason:
-        "Coordinator delivery-kit 4.2.2+ CLI/public exports missing or incompatible",
+        "Coordinator delivery-kit 4.4.0+ CLI/canonical build exports missing or incompatible",
     };
   }
 }

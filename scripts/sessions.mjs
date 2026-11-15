@@ -17,8 +17,11 @@ import { resolve } from "node:path";
 import { createConnection } from "node:net";
 import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
-import { loadLayout, readRegistry } from "@andornaut/delivery-kit/registry";
-import { resolveCodexControlSocket } from "@andornaut/delivery-kit/transport";
+import {
+  loadLayout,
+  readRegistry,
+} from "@andornaut/delivery-kit/build/registry";
+import { resolveCodexControlSocket } from "@andornaut/delivery-kit/build/transport";
 import {
   catalogHash,
   loadCatalog,
