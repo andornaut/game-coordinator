@@ -1112,3 +1112,141 @@ test("messaging availability requires compatible public message CLI metadata", (
     assert.equal(installedMessaging(root).status, status, version);
   }
 });
+
+test("delayed frontend visibility requires explicit guarded orientation completion", async (t) => {
+  const { root } = startupFixture(t);
+  let visible = false;
+  let output;
+  const messages = [];
+  const realCli = new URL(
+    "../node_modules/@andornaut/delivery-kit/dist/cli.js",
+    import.meta.url,
+  ).pathname;
+  const ports = {
+    tools: availableTools,
+    processes: () => (visible ? [{ ...frontend, cwd: root }] : []),
+    panes: () =>
+      visible ? [{ ...pane, frontends: [{ ...frontend, cwd: root }] }] : [],
+    socketAvailable: async () => true,
+    tmux: (args) => (args[0] === "new-session" ? "%1" : ""),
+    message: (args) => {
+      messages.push(args);
+      // Exercise real public local-queue deduplication; native acceptance uses the transport seam.
+      return args.includes("send")
+        ? JSON.parse(
+            execFileSync(process.execPath, [realCli, ...args.slice(1)], {
+              encoding: "utf8",
+            }),
+          )
+        : { state: "native-accepted" };
+    },
+    output: (text) => {
+      output = JSON.parse(text);
+    },
+  };
+  const selection = ["--root", root, "--role", "game-coordinator"];
+  await main(ports, ["resume", ...selection]);
+  assert.equal(output.slots[0].orientation.state, "not-sent");
+  assert.deepEqual(messages, []);
+  visible = true;
+  ports.tmux = () => assert.fail("live completion mutated tmux");
+  await main(ports, ["resume", ...selection]);
+  assert.deepEqual(messages, []);
+  await main(ports, ["brief", "--dispatch", ...selection]);
+  const first = output.slots[0].orientation;
+  assert.equal(first.state, "native-accepted");
+  assert.equal(first.handling, "unverified");
+  await main(ports, ["brief", "--dispatch", ...selection]);
+  assert.equal(output.slots[0].orientation.id, first.id);
+  const records = JSON.parse(
+    execFileSync(
+      process.execPath,
+      [
+        realCli,
+        "--root",
+        root,
+        "message",
+        "status",
+        "--recipient",
+        "game-coordinator",
+      ],
+      { encoding: "utf8" },
+    ),
+  );
+  assert.equal(records.length, 1);
+  assert.equal(records[0].id, first.id);
+  assert.equal(records[0].intent, "queue");
+  assert.equal(records[0].attempts, 0);
+});
+
+for (const mode of [
+  "held",
+  "blocked",
+  "missing",
+  "local-only",
+  "socket",
+  "changed-registry",
+  "changed-catalog",
+]) {
+  test(`explicit brief dispatch preserves unavailable or protected owner: ${mode}`, async (t) => {
+    const { root } = startupFixture(t);
+    let snapshots = 0;
+    const ports = {
+      tools: availableTools,
+      processes: () => {
+        if (++snapshots === 2 && mode === "changed-registry") {
+          const path = join(root, "var/registry.json");
+          const value = JSON.parse(readFileSync(path, "utf8"));
+          writeFileSync(
+            path,
+            JSON.stringify({ ...value, revision: value.revision + 1 }),
+          );
+        }
+        if (snapshots === 2 && mode === "changed-catalog") {
+          const path = join(root, "roles.json");
+          const value = JSON.parse(readFileSync(path, "utf8"));
+          value.protocol.push("Keep fixture identity unchanged.");
+          writeFileSync(path, JSON.stringify(value));
+        }
+        return mode === "missing" ? [] : [{ ...frontend, cwd: root }];
+      },
+      panes: (all) =>
+        mode === "missing"
+          ? []
+          : [
+              {
+                ...pane,
+                frontends: [
+                  {
+                    ...all[0],
+                    id: mode === "blocked" ? target : id,
+                    remoteRequested: mode !== "local-only",
+                  },
+                ],
+              },
+            ],
+      socketAvailable: async () => mode !== "socket",
+      tmux: () => assert.fail("brief dispatch touched tmux"),
+      message: () => assert.fail("ineligible owner messaged"),
+      output: (text) => {
+        const result = JSON.parse(text).slots[0].orientation;
+        assert.equal(result.state, "not-sent");
+        assert.match(result.id, /^[0-9a-f-]{36}$/);
+      },
+    };
+    await main(ports, [
+      "brief",
+      "--dispatch",
+      "--root",
+      root,
+      "--role",
+      "game-coordinator",
+      ...(mode === "held" ? ["--held"] : []),
+    ]);
+  });
+}
+
+test("dispatch flag cannot add messaging to other session verbs", async () => {
+  for (const command of ["plan", "check", "resume"])
+    await assert.rejects(main({}, [command, "--dispatch"]), /only with brief/);
+});

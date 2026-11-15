@@ -514,6 +514,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
       root: { type: "string", default: process.cwd() },
       harness: { type: "string" },
       held: { type: "boolean", default: false },
+      dispatch: { type: "boolean", default: false },
       "runner-pid": { type: "string", multiple: true },
       "handoff-marker": { type: "string" },
     },
@@ -524,8 +525,10 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
     !["plan", "check", "brief", "resume"].includes(command)
   )
     throw new Error(
-      "Usage: sessions.mjs plan|check|brief|resume --role ROLE [--role ROLE] [--root PATH] [--harness codex|claude --held] [--runner-pid PID] [--handoff-marker TEXT]",
+      "Usage: sessions.mjs plan|check|brief|resume --role ROLE [--role ROLE] [--root PATH] [--harness codex|claude --held] [--runner-pid PID] [--handoff-marker TEXT] [brief --dispatch]",
     );
+  if (values.dispatch && command !== "brief")
+    throw new Error("--dispatch is supported only with brief");
   const root = realpathSync(values.root);
   const socketPath = controlSocket();
   const layout = loadLayout(root);
@@ -609,6 +612,36 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
     issues.push(
       "Resident runner socket configuration unavailable or mismatched",
     );
+  if (command === "brief" && values.dispatch) {
+    slots = slots.map((slot) => {
+      const fresh = snapshot().find(
+        (candidate) => candidate.role === slot.role,
+      );
+      const eligible =
+        !values.held &&
+        available &&
+        issues.length === 0 &&
+        fresh.state === "live" &&
+        fresh.remoteRequested &&
+        fresh.harness === fresh.effectiveHarness &&
+        fresh.id === slot.id &&
+        readRegistry(layout).revision === registry.revision &&
+        catalogHash(loadCatalog(root)) === catalogHash(catalog);
+      return {
+        ...slot,
+        observedState: fresh.state,
+        orientation: eligible
+          ? queueOrientation(root, fresh, slot.brief, ports.message)
+          : {
+              id: orientationId(slot, slot.brief),
+              state: "not-sent",
+              reason: values.held
+                ? "HOLD preparation is artifact-only"
+                : "Fresh exact live effective owner, matching remote configuration, socket and unchanged registry/catalog required",
+            },
+      };
+    });
+  }
   if (command === "resume") {
     if (issues.length) throw new Error(issues.join("; "));
     resumeLock(resolve(root, "var/session-resume.lock"), () => {
