@@ -819,7 +819,7 @@ test("tool discovery separates required launch failures from optional native cap
       },
     },
     {
-      messaging: () => ({ status: "available", version: "4.4.0" }),
+      messaging: () => ({ status: "available", version: "4.4.1" }),
       probe: (binary, args) => {
         calls.push([binary, args]);
         return binary === "docker"
@@ -1103,7 +1103,8 @@ test("messaging availability requires compatible public message CLI metadata", (
     ["4.2.1", "missing"],
     ["4.2.2", "missing"],
     ["4.3.0", "missing"],
-    ["4.4.0", "available"],
+    ["4.4.0", "missing"],
+    ["4.4.1", "available"],
     ["4.5.0", "available"],
     ["5.0.0", "missing"],
   ]) {
@@ -1117,7 +1118,7 @@ test("messaging availability requires compatible public message CLI metadata", (
     join(directory, "package.json"),
     JSON.stringify({
       ...metadata,
-      version: "4.4.0",
+      version: "4.4.1",
       exports: {
         "./registry": "./dist/registry.js",
         "./transport": "./dist/transport.js",

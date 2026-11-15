@@ -46,7 +46,10 @@ export function installedMessaging(root) {
       readFileSync(join(directory, "package.json"), "utf8"),
     );
     const version = /^4\.(\d+)\.(\d+)$/.exec(pkg.version ?? "");
-    const compatible = version && Number(version[1]) >= 4;
+    const compatible =
+      version &&
+      (Number(version[1]) > 4 ||
+        (Number(version[1]) === 4 && Number(version[2]) >= 1));
     if (
       !compatible ||
       pkg.name !== "@andornaut/delivery-kit" ||
@@ -62,7 +65,7 @@ export function installedMessaging(root) {
       status: "missing",
       cli,
       reason:
-        "Coordinator delivery-kit 4.4.0+ CLI/canonical build exports missing or incompatible",
+        "Coordinator delivery-kit 4.4.1+ CLI/canonical build exports missing or incompatible",
     };
   }
 }

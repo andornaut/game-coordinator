@@ -52,7 +52,7 @@ Delivery-kit 4 requires explicit `resources.memoryMiB` from 6 through 8192 in ev
 
 ## Role messaging
 
-All roles use the coordinator-installed CLI with its absolute root, including from a game or kit worktree. Delivery-kit 4.4.0 provides the commands below; native capability and per-recipient adoption require separate qualification. Follow the [communication and recipient guards](docs/game-policies.md#communication).
+All roles use the coordinator-installed CLI with its absolute root, including from a game or kit worktree. Delivery-kit 4.4.1 provides the commands below; native capability and per-recipient adoption require separate qualification. Follow the [communication and recipient guards](docs/game-policies.md#communication).
 
 SDK imports use `@andornaut/delivery-kit/build/registry`, `@andornaut/delivery-kit/build/transport` and `@andornaut/delivery-kit/build/source-identity`. The CLI remains `dist/cli.js`.
 
