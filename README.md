@@ -19,19 +19,7 @@ Games consume kits as dev dependencies pinned to GitHub release tarballs.
 
 ## Roles
 
-Each role is one agent conversation with a fixed scope.
-
-- **Art, Gameplay and Tech**, per game:
-  - Art owns assets and art pipelines.
-  - Gameplay owns rules, values, tuning and player strings.
-  - Tech owns implementation, integration, approval of exact release packages and the game's runner.
-- **art-kit, game-kit and delivery-kit**, one coordinator each. Each owns its kit's source, tests, docs, CI and versioned releases. Kits release only after container checks and green CI on the exact commit.
-- **game-coordinator**, one shared role that coordinates and runs the scheduled reviews:
-  - triages and routes work between roles;
-  - relays decisions to and from the user;
-  - sets each game's desired delivery state;
-  - reviews health on a schedule;
-  - tracks every release through gate, CI and deployment.
+The generated [role catalog](docs/roles.md) defines scopes, ownership and startup requirements for both harnesses. Its source is `roles.json`; edit that catalog rather than duplicating role descriptions.
 
 The shared [communication contract](docs/game-policies.md#communication) defines role-addressed delivery for Claude and Codex, including kits. Coordinators delegate substantive work to short-lived worker agents, each in its own Git worktree and branch.
 
@@ -58,7 +46,7 @@ npx --no-install delivery-kit status --game ID
 
 Pausing blocks new scheduled and requested departures. Already admitted gates, CI watches and deployments finish, and scheduled reviews continue. Missing or invalid control fails closed until explicitly initialized or repaired.
 
-Before Tech adopts a runner version that requires persistent control, game-coordinator initializes each game's approved desired state with the upgraded CLI. Tech owns runner adoption and replaces the runner only when idle and drained. Check status before and after replacement, preserve existing desired state on later upgrades, and observe the next normal scheduled slot without a manual departure.
+Before adopting a runner version that requires persistent control, game-coordinator initializes each game's approved desired state with the upgraded CLI. The current operational owner defined in the [role catalog](docs/roles.md) performs authorized runner adoption only when idle and drained. Check status before and after replacement, preserve existing desired state on later upgrades, and observe the next normal scheduled slot without a manual departure.
 
 Delivery-kit 4 requires explicit `resources.memoryMiB` from 6 through 8192 in every registered game's delivery configuration. Version 3 rejects this field. Coordinate configuration and package adoption while affected residents and the shared route host are idle and drained; validate the complete layout with `check-config` before startup. Preserve controls, routes, singleton ownership and schedules.
 
@@ -102,7 +90,7 @@ Use the existing hourly :30 reviews; add no timers or teams. Preserve handoff an
 
 ## Sessions and handoffs
 
-Each role keeps its exact conversation IDs and one shared edit worktree. Native cwd stays at the game root, or game-coordinator for kits and game-coordinator. Shared windows belong in `codex-game` or `claude-game`; each game's `art`, `gameplay` and `tech` windows belong in its own harness-prefixed session. The coordinator windows are `codex-game-coordinator` and `claude-game-coordinator`. Windows are alphabetical. Moving windows preserves processes and does not activate a role.
+Each role keeps its exact conversation IDs and one shared edit worktree. Native cwd stays at the game root, or game-coordinator for kits and game-coordinator. Shared windows belong in `codex-game` or `claude-game`; each game's `art`, `gameplay` and `tech` windows belong in its own harness-prefixed session. The coordinator window is `game-coordinator` in either shared session. Windows are alphabetical. Moving windows preserves processes and does not activate a role.
 
 Delivery-kit resolves each role through its optional harness override, otherwise the registry default. Handoffs select explicit games and any included kit/game-coordinator roles; unselected owners remain unchanged.
 
@@ -112,10 +100,12 @@ Run from game-coordinator, or pass `--root` with its authoritative checkout. Sel
 
 ```bash
 node scripts/sessions.mjs plan --role game-coordinator --role art-kit
+node scripts/sessions.mjs brief --role game-coordinator
 ```
 
-- `plan` reports sorted exact-ID slots and local blockers; `check` also exits nonzero for blockers.
-- `resume` preserves live panes and resumes only eligible missing/dead slots. Another harness needs `--harness TARGET --held`, asserting caller-verified source HOLD.
+- `plan` reports sorted exact-ID slots, catalog/tool checks and local blockers; `check` also exits nonzero for blockers. Optional role tools are reported separately from launch requirements.
+- `brief` writes the generated orientation artifact without delivery. Include it once in a new role's initial HOLD request after verified registry enrollment, or in an existing handoff activation packet.
+- `resume` preserves live panes and resumes only eligible missing/dead slots. A fresh resume queues one idempotent orientation through guarded messaging after local identity readback; acceptance is not handling or activation. `--held` suppresses standalone orientation for held preparation, including newly enrolled roles; include the artifact once in the HOLD or activation packet. Another harness also needs `--harness TARGET`, asserting caller-verified source HOLD.
 - Repeat `--runner-pid PID` to inspect resident socket configuration. `--handoff-marker TEXT` preserves the original marker separately from the bounded role marker.
 
 Local inspection does not prove native project identity, pending-question state, quota or an effective Remote Control connection. The helper never selects ownership, activates work, stops frontends or changes a runner/daemon.
