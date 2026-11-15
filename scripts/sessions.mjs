@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   closeSync,
   existsSync,
@@ -19,6 +20,13 @@ import { pathToFileURL } from "node:url";
 import { loadLayout, readRegistry } from "@andornaut/delivery-kit/registry";
 import { resolveCodexControlSocket } from "@andornaut/delivery-kit/transport";
 import {
+  catalogHash,
+  loadCatalog,
+  renderBrief,
+  roleContract,
+} from "./role-catalog.mjs";
+import { probeBinary, roleTools } from "./role-tools.mjs";
+import {
   identity,
   launchArgs,
   plan,
@@ -29,6 +37,175 @@ import {
 
 export function controlSocket(env = process.env) {
   return resolveCodexControlSocket({ env }).path;
+}
+
+export function checkpointFor(root, role) {
+  const scope = role.includes("/")
+    ? `games/${role}`
+    : role === "game-coordinator"
+      ? role
+      : `kits/${role}`;
+  return resolve(root, `var/handoffs/${scope}/current.md`);
+}
+
+export function startupBrief(
+  root,
+  registry,
+  config,
+  catalog,
+  slot,
+  tools,
+  held,
+  write = false,
+) {
+  const contacts = [];
+  const unavailableContacts = [];
+  for (const role of Object.keys(registry.roles)
+    .sort()
+    .filter(
+      (role) =>
+        slot.role === "game-coordinator" ||
+        !role.includes("/") ||
+        (slot.role.includes("/") &&
+          role.split("/")[0] === slot.role.split("/")[0]),
+    )) {
+    try {
+      const { harness, id, cwd, worktree } = plan(
+        root,
+        registry,
+        { roles: [role], config },
+        [],
+        [],
+      )[0];
+      contacts.push({
+        role,
+        harness,
+        id,
+        cwd,
+        worktree,
+        checkpoint: checkpointFor(root, role),
+      });
+    } catch {
+      unavailableContacts.push(role);
+    }
+  }
+  const text =
+    "Orientation only. Preserve native questions, WIP and independent holds.\n" +
+    renderBrief(catalog, {
+      root,
+      role: slot.role,
+      harness: slot.harness,
+      id: slot.id,
+      cwd: slot.cwd,
+      worktree: slot.worktree,
+      registryRevision: registry.revision,
+      checkpoint: checkpointFor(root, slot.role),
+      held,
+      contacts,
+      tools: tools.capabilities,
+    }) +
+    (unavailableContacts.length
+      ? `Unavailable registry contacts: ${unavailableContacts.join(", ")}. Use supported owner reconciliation.\n`
+      : "");
+  const hash = createHash("sha256").update(text).digest("hex");
+  const path = resolve(root, `var/session-briefs/${slot.id}-${hash}.md`);
+  if (write) {
+    for (const directory of [
+      resolve(root, "var"),
+      resolve(root, "var/session-briefs"),
+    ]) {
+      if (existsSync(directory)) {
+        const stat = lstatSync(directory);
+        if (!stat.isDirectory() || stat.uid !== process.getuid())
+          throw new Error("Brief directory is not an owned directory");
+      } else mkdirSync(directory, { mode: 0o700 });
+    }
+    if (existsSync(path)) {
+      const stat = lstatSync(path);
+      if (
+        !stat.isFile() ||
+        stat.uid !== process.getuid() ||
+        readFileSync(path, "utf8") !== text
+      )
+        throw new Error("Brief file is not an exact owned match");
+    } else writeFileSync(path, text, { flag: "wx", mode: 0o600 });
+  }
+  return {
+    path,
+    hash,
+    catalogHash: catalogHash(catalog),
+    authority: "orientation-only",
+  };
+}
+
+export function orientationId(slot, brief) {
+  const bytes = createHash("sha256")
+    .update(
+      JSON.stringify([
+        "role-orientation",
+        slot.role,
+        slot.harness,
+        slot.id,
+        brief.hash,
+      ]),
+    )
+    .digest()
+    .subarray(0, 16);
+  bytes[6] = (bytes[6] & 0x0f) | 0x50;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = bytes.toString("hex");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+export function queueOrientation(
+  root,
+  slot,
+  brief,
+  invoke = (args) =>
+    JSON.parse(
+      execFileSync(process.execPath, args, {
+        encoding: "utf8",
+        timeout: 30000,
+        maxBuffer: 65536,
+        stdio: ["ignore", "pipe", "ignore"],
+      }),
+    ),
+) {
+  const id = orientationId(slot, brief);
+  const prefix = [
+    resolve(root, "node_modules/@andornaut/delivery-kit/dist/cli.js"),
+    "--root",
+    root,
+  ];
+  try {
+    const queued = invoke([
+      ...prefix,
+      "message",
+      "send",
+      "--from",
+      "game-coordinator",
+      "--recipient",
+      slot.role,
+      "--id",
+      id,
+      "--body-file",
+      brief.path,
+    ]);
+    const result = invoke([...prefix, "message", "dispatch", "--id", id]);
+    return {
+      id,
+      state: result.state ?? queued.state ?? "unknown",
+      handling: "unverified",
+    };
+  } catch {
+    return {
+      id,
+      state: "unavailable",
+      handling: "unverified",
+      reason:
+        "Public message command unavailable; retain exact ID and inspect its receipt before any retry",
+    };
+  }
 }
 const run = (args) =>
   execFileSync("tmux", args, {
@@ -344,15 +521,16 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
   const [command] = positionals;
   if (
     positionals.length !== 1 ||
-    !["plan", "check", "resume"].includes(command)
+    !["plan", "check", "brief", "resume"].includes(command)
   )
     throw new Error(
-      "Usage: sessions.mjs plan|check|resume --role ROLE [--role ROLE] [--root PATH] [--harness codex|claude --held] [--runner-pid PID] [--handoff-marker TEXT]",
+      "Usage: sessions.mjs plan|check|brief|resume --role ROLE [--role ROLE] [--root PATH] [--harness codex|claude --held] [--runner-pid PID] [--handoff-marker TEXT]",
     );
   const root = realpathSync(values.root);
   const socketPath = controlSocket();
   const layout = loadLayout(root);
   const registry = readRegistry(layout);
+  const catalog = loadCatalog(root);
   const options = {
     roles: values.role,
     harness: values.harness,
@@ -370,6 +548,34 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
     );
   };
   let slots = snapshot();
+  const probes = new Map();
+  const probe = (binary, args) => {
+    const key = JSON.stringify([binary, args]);
+    if (!probes.has(key)) probes.set(key, probeBinary(binary, args));
+    return probes.get(key);
+  };
+  const toolReports = new Map(
+    slots.map((slot) => [
+      slot.role,
+      (ports.tools ?? roleTools)(root, slot, roleContract(catalog, slot.role), {
+        probe,
+      }),
+    ]),
+  );
+  slots = slots.map((slot) => ({
+    ...slot,
+    tools: toolReports.get(slot.role),
+    brief: startupBrief(
+      root,
+      registry,
+      layout.config,
+      catalog,
+      slot,
+      toolReports.get(slot.role),
+      values.held,
+      command === "brief",
+    ),
+  }));
   const available = await (ports.socketAvailable ?? socketAvailable)(
     socketPath,
   );
@@ -377,6 +583,8 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
   const issues = slots
     .filter((s) => s.state === "blocked")
     .map((s) => `${s.role}: ${s.reason}`);
+  for (const slot of slots)
+    issues.push(...toolReports.get(slot.role).launchIssues);
   for (const slot of slots)
     if (slot.state === "live" && !slot.remoteRequested)
       issues.push(
@@ -407,7 +615,19 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
       for (const slot of slots) {
         if (readRegistry(layout).revision !== registry.revision)
           throw new Error("Registry changed; re-plan");
+        if (catalogHash(loadCatalog(root)) !== catalogHash(catalog))
+          throw new Error("Role catalog changed; re-plan");
         let fresh = snapshot().find((s) => s.role === slot.role);
+        const brief = startupBrief(
+          root,
+          registry,
+          layout.config,
+          catalog,
+          fresh,
+          toolReports.get(slot.role),
+          values.held,
+          true,
+        );
         if (fresh.state !== "live") fresh = roleChannel(root, true, fresh);
         const result = resumeSlot(
           fresh,
@@ -418,9 +638,29 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
         if (fresh.state === "missing")
           sortWindows(registry, fresh, ports.tmux ?? run);
         const observed = snapshot().find((s) => s.role === slot.role);
+        const orientation =
+          result.action === "resume-requested" &&
+          !values.held &&
+          readRegistry(layout).revision === registry.revision &&
+          fresh.harness === fresh.effectiveHarness &&
+          observed.state === "live" &&
+          observed.remoteRequested
+            ? queueOrientation(root, fresh, brief, ports.message)
+            : {
+                state: "not-sent",
+                reason: values.held
+                  ? "HOLD preparation is artifact-only"
+                  : "Existing owner preserved or new frontend identity unverified",
+              };
         slots = slots.map((s) =>
           s.role === slot.role
-            ? { ...result, observedState: observed.state }
+            ? {
+                ...result,
+                tools: toolReports.get(slot.role),
+                brief,
+                orientation,
+                observedState: observed.state,
+              }
             : s,
         );
       }

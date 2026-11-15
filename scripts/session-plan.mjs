@@ -7,7 +7,7 @@ export const verification =
 
 export function windowName(harness, role) {
   return role === "game-coordinator"
-    ? `${harness}-game-coordinator`
+    ? "game-coordinator"
     : role.split("/").at(-1);
 }
 
@@ -167,6 +167,7 @@ export function plan(root, registry, options, panes, processes) {
     }
     return {
       role,
+      effectiveHarness: effective,
       harness,
       id,
       cwd,

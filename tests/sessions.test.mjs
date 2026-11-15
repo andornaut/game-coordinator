@@ -23,6 +23,9 @@ import {
   controlSocket,
   inspectPanes,
   main,
+  startupBrief,
+  orientationId,
+  queueOrientation,
   roleChannel,
   processes,
   resumeLock,
@@ -30,6 +33,13 @@ import {
   runnerSocket,
   sortWindows,
 } from "../scripts/sessions.mjs";
+
+import { loadCatalog } from "../scripts/role-catalog.mjs";
+import {
+  installedMessaging,
+  probeBinary,
+  roleTools,
+} from "../scripts/role-tools.mjs";
 
 const id = "12345678-1234-1234-1234-123456789abc";
 const target = "abcdefab-1234-1234-1234-123456789abc";
@@ -62,7 +72,7 @@ const frontend = {
 const pane = {
   pane: "%1",
   session: "codex-game",
-  name: "codex-game-coordinator",
+  name: "game-coordinator",
   dead: false,
   role: "game-coordinator",
   harness: "codex",
@@ -140,7 +150,7 @@ test("canonical native roots differ from role worktrees for games and kits", () 
   ]);
 });
 
-test("coordinator windows use harness prefixes while shared sessions and kit windows stay unchanged", () => {
+test("coordinator windows omit harness prefixes while sessions retain them", () => {
   for (const harness of ["codex", "claude"]) {
     const value = structuredClone(registry);
     value.harness = harness;
@@ -162,7 +172,7 @@ test("coordinator windows use harness prefixes while shared sessions and kit win
         [
           "game-coordinator",
           `${harness}-game`,
-          `${harness}-game-coordinator`,
+          "game-coordinator",
           "/game-coordinator",
         ],
       ],
@@ -228,9 +238,14 @@ test("CLI parser passes layout config and resolves --root independently of calle
       transfers: [],
     }),
   );
+  writeFileSync(
+    join(root, "roles.json"),
+    readFileSync(new URL("../roles.json", import.meta.url)),
+  );
   let output;
   await main(
     {
+      tools: () => ({ launchIssues: [], capabilities: [] }),
       processes: () => [],
       panes: () => [],
       socketAvailable: async () => true,
@@ -435,7 +450,7 @@ test("alphabetical insertion swaps only known windows and leaves unknown windows
   sortWindows(value, slot(), (args) => {
     calls.push(args);
     return args[0] === "list-panes"
-      ? "@1\t1\tcodex-game-coordinator\tgame-coordinator\tcodex\n@2\t2\tscratch\t\t\n@3\t3\tart-kit\tart-kit\tcodex"
+      ? "@1\t1\tgame-coordinator\tgame-coordinator\tcodex\n@2\t2\tscratch\t\t\n@3\t3\tart-kit\tart-kit\tcodex"
       : "";
   });
   assert.deepEqual(calls.slice(1), [["swap-window", "-s", "@3", "-t", "@1"]]);
@@ -622,7 +637,7 @@ test("Bash wrapper descendants are inspected without pane_start_command or termi
   const panes = inspectPanes(all, (args) => {
     assert.equal(args.includes("capture-pane"), false);
     assert.equal(args.join(" ").includes("pane_start_command"), false);
-    return "%1\tcodex-game\tcodex-game-coordinator\t0\t40\t\t\t";
+    return "%1\tcodex-game\tgame-coordinator\t0\t40\t\t\t";
   });
   assert.deepEqual(panes[0].frontends, [frontend]);
   assert.equal(
@@ -737,10 +752,363 @@ test("missing shared slot joins canonical session and repeated live observation 
   assert.equal(result.action, "resume-requested");
   const created = calls.find((args) => args[0] === "new-window");
   assert.equal(created.includes("codex-game:"), true);
-  assert.equal(created[created.indexOf("-n") + 1], "codex-game-coordinator");
+  assert.equal(created[created.indexOf("-n") + 1], "game-coordinator");
   const before = calls.length;
   resumeSlot({ ...result, state: "live" }, "/socket", null, (args) =>
     calls.push(args),
   );
   assert.equal(calls.length, before);
+});
+
+function startupFixture(t) {
+  const dir = mkdtempSync(join(tmpdir(), "session-startup-"));
+  t.after(() => rmSync(dir, { recursive: true }));
+  const root = join(dir, "repo");
+  mkdirSync(join(root, "var"), { recursive: true });
+  mkdirSync(join(dir, "game/.worktrees/art"), { recursive: true });
+  writeFileSync(
+    join(root, "roles.json"),
+    readFileSync(new URL("../roles.json", import.meta.url)),
+  );
+  writeFileSync(
+    join(root, "config.json"),
+    JSON.stringify({
+      schema: 1,
+      timezone: "America/Toronto",
+      wakeMinutes: [],
+      games: { game: { name: "Game", path: "../game", roles: ["art"] } },
+      kits: {},
+      sharedRoles: ["game-coordinator"],
+    }),
+  );
+  const value = {
+    ...registry,
+    schema: 1,
+    updatedAt: "2026-11-12T00:00:00Z",
+    operations: {},
+    transfers: [],
+    roles: Object.fromEntries(
+      Object.entries(registry.roles).map(([role, record]) => [
+        role,
+        { ...record, ownership: role.replace("/", "-") },
+      ]),
+    ),
+  };
+  writeFileSync(join(root, "var/registry.json"), JSON.stringify(value));
+  return { root, registry: value, catalog: loadCatalog(root) };
+}
+
+const availableTools = () => ({ launchIssues: [], capabilities: [] });
+
+test("tool discovery separates required launch failures from optional native capabilities", (t) => {
+  const { root } = startupFixture(t);
+  const calls = [];
+  const tools = roleTools(
+    root,
+    { ...slot(), cwd: root, worktree: root },
+    {
+      tools: {
+        required: ["repository", "git", "role-messaging"],
+        whenNeeded: [
+          "browser",
+          "image-generation",
+          "image-inspection",
+          "native-session",
+          "isolated-checks",
+        ],
+      },
+    },
+    {
+      messaging: () => ({ status: "available", version: "4.2.2" }),
+      probe: (binary, args) => {
+        calls.push([binary, args]);
+        return binary === "docker"
+          ? { status: "missing", reason: "absent" }
+          : { status: "available" };
+      },
+    },
+  );
+  assert.deepEqual(tools.launchIssues, []);
+  assert.equal(tools.nativeCapabilities, "unknown");
+  for (const id of [
+    "browser",
+    "image-generation",
+    "image-inspection",
+    "native-session",
+  ])
+    assert.equal(
+      tools.capabilities.find((tool) => tool.id === id).status,
+      "unavailable",
+    );
+  assert.equal(
+    tools.capabilities.find((tool) => tool.id === "isolated-checks").status,
+    "missing",
+  );
+  assert.deepEqual(
+    calls.map(([binary]) => binary),
+    ["codex", "tmux", "flock", "git", "docker"],
+  );
+  const missing = roleTools(
+    root,
+    slot(),
+    { tools: { required: [], whenNeeded: [] } },
+    {
+      messaging: () => ({ status: "missing", reason: "missing CLI" }),
+      probe: () => ({ status: "missing", reason: "missing executable" }),
+    },
+  );
+  assert.equal(missing.launchIssues.length, 4);
+});
+
+test("bounded probes report only executable metadata and sanitized version", (t) => {
+  const { root } = startupFixture(t);
+  const binary = join(root, "example-tool");
+  writeFileSync(
+    binary,
+    '#!/bin/sh\nprintf "example-tool 1.2.3 private-output\\n"\n',
+    { mode: 0o700 },
+  );
+  assert.deepEqual(probeBinary("example-tool", ["--version"], { PATH: root }), {
+    status: "available",
+    executable: binary,
+    version: "1.2.3",
+  });
+  assert.equal(probeBinary("absent", [], { PATH: root }).status, "missing");
+  writeFileSync(binary, "#!/bin/sh\nexit 1\n");
+  assert.equal(
+    probeBinary("example-tool", [], { PATH: root }).status,
+    "unavailable",
+  );
+  assert.equal(installedMessaging(root).status, "missing");
+});
+
+test("brief artifacts bind exact identity, contacts and catalog without granting native clearance", (t) => {
+  const { root, registry: value, catalog } = startupFixture(t);
+  const current = plan(root, value, options, [], [])[0];
+  const brief = startupBrief(
+    root,
+    value,
+    config,
+    catalog,
+    current,
+    availableTools(),
+    true,
+    true,
+  );
+  const text = readFileSync(brief.path, "utf8");
+  for (const expected of [
+    current.id,
+    current.cwd,
+    current.worktree,
+    "game/art",
+    "orientation",
+    "HOLD",
+  ])
+    assert.ok(text.toLowerCase().includes(expected.toLowerCase()), expected);
+  assert.equal(statSync(brief.path).mode & 0o777, 0o600);
+  assert.deepEqual(
+    startupBrief(
+      root,
+      value,
+      config,
+      catalog,
+      current,
+      availableTools(),
+      true,
+      true,
+    ),
+    brief,
+  );
+  assert.match(
+    orientationId(current, brief),
+    /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+  );
+  assert.notEqual(
+    orientationId(current, brief),
+    orientationId(current, { ...brief, hash: "changed" }),
+  );
+  writeFileSync(brief.path, "changed");
+  assert.throws(
+    () =>
+      startupBrief(
+        root,
+        value,
+        config,
+        catalog,
+        current,
+        availableTools(),
+        true,
+        true,
+      ),
+    /exact owned match/,
+  );
+});
+
+test("orientation uses root-qualified public queue and guarded dispatch with a stable ID", () => {
+  const calls = [];
+  const brief = {
+    hash: "brief-hash",
+    path: "/repo/var/session-briefs/brief.md",
+  };
+  const send = (args) => {
+    calls.push(args);
+    return { state: args.includes("dispatch") ? "ambiguous" : "queued" };
+  };
+  const first = queueOrientation("/repo", slot(), brief, send);
+  const second = queueOrientation("/repo", slot(), brief, send);
+  assert.equal(first.id, second.id);
+  assert.equal(first.state, "ambiguous");
+  assert.equal(first.handling, "unverified");
+  assert.equal(
+    calls[0][0],
+    "/repo/node_modules/@andornaut/delivery-kit/dist/cli.js",
+  );
+  assert.deepEqual(calls[0].slice(1, 7), [
+    "--root",
+    "/repo",
+    "message",
+    "send",
+    "--from",
+    "game-coordinator",
+  ]);
+  assert.ok(calls[1].includes("dispatch"));
+  assert.equal(calls.flat().includes("unblock"), false);
+  const failure = queueOrientation("/repo", slot(), brief, () => {
+    throw new Error("private output");
+  });
+  assert.equal(failure.id, first.id);
+  assert.equal(failure.state, "unavailable");
+  assert.equal(JSON.stringify(failure).includes("private output"), false);
+});
+
+test("brief CLI writes orientation only and never launches or messages", async (t) => {
+  const { root } = startupFixture(t);
+  let output;
+  await main(
+    {
+      processes: () => [],
+      panes: () => [],
+      tools: availableTools,
+      socketAvailable: async () => false,
+      tmux: () => assert.fail("artifact command launched frontend"),
+      message: () => assert.fail("artifact command sent message"),
+      output: (text) => {
+        output = JSON.parse(text);
+      },
+    },
+    ["brief", "--root", root, "--role", "game-coordinator", "--held"],
+  );
+  assert.equal(output.slots[0].state, "missing");
+  assert.match(readFileSync(output.slots[0].brief.path, "utf8"), /HOLD/);
+});
+
+for (const mode of ["normal", "held", "live", "unverified", "missing-core"]) {
+  test(`resume startup boundary: ${mode}`, async (t) => {
+    const { root } = startupFixture(t);
+    let launched = mode === "live";
+    let output;
+    const calls = [];
+    const currentFrontend = { ...frontend, cwd: root };
+    const ports = {
+      tools: () => ({
+        capabilities: [],
+        launchIssues: mode === "missing-core" ? ["missing core CLI"] : [],
+      }),
+      processes: () => (launched ? [currentFrontend] : []),
+      panes: () =>
+        launched ? [{ ...pane, frontends: [currentFrontend] }] : [],
+      socketAvailable: async () => true,
+      tmux: (args) => {
+        calls.push(args);
+        if (args[0] === "new-window" || args[0] === "new-session") {
+          if (mode !== "unverified") launched = true;
+          return "%1";
+        }
+        return "";
+      },
+      message: (args) => {
+        calls.push(args);
+        return { state: "native-accepted" };
+      },
+      output: (text) => {
+        output = JSON.parse(text);
+      },
+    };
+    const args = [
+      "resume",
+      "--root",
+      root,
+      "--role",
+      "game-coordinator",
+      ...(mode === "held" ? ["--held"] : []),
+    ];
+    if (mode === "missing-core") {
+      await assert.rejects(main(ports, args), /missing core CLI/);
+      assert.deepEqual(calls, []);
+      return;
+    }
+    await main(ports, args);
+    const sent = calls.filter((args) => args.includes("message"));
+    assert.equal(sent.length, mode === "normal" ? 2 : 0);
+    assert.equal(
+      output.slots[0].orientation.state,
+      mode === "normal" ? "native-accepted" : "not-sent",
+    );
+    if (mode === "live") assert.deepEqual(calls, []);
+    const launch = calls.find((args) => args.includes("new-session"));
+    if (launch) {
+      assert.equal(launch.at(-1).includes("brief.md"), false);
+      assert.equal(launch[launch.indexOf("-n") + 1], "game-coordinator");
+    }
+  });
+}
+
+test("unavailable unrelated registry contact is explicit without blocking a selected owner", (t) => {
+  const { root, registry: value, catalog } = startupFixture(t);
+  value.roles["art-kit"] = {
+    worktree: ".",
+    conversations: { codex: null, claude: null },
+  };
+  const current = plan(root, value, options, [], [])[0];
+  const brief = startupBrief(
+    root,
+    value,
+    config,
+    catalog,
+    current,
+    availableTools(),
+    false,
+    true,
+  );
+  assert.match(
+    readFileSync(brief.path, "utf8"),
+    /Unavailable registry contacts: art-kit/,
+  );
+});
+
+test("messaging availability requires compatible public message CLI metadata", (t) => {
+  const { root } = startupFixture(t);
+  const directory = join(root, "node_modules/@andornaut/delivery-kit");
+  mkdirSync(join(directory, "dist"), { recursive: true });
+  writeFileSync(join(directory, "dist/cli.js"), "");
+  const metadata = {
+    name: "@andornaut/delivery-kit",
+    exports: {
+      "./registry": "./dist/registry.js",
+      "./transport": "./dist/transport.js",
+    },
+  };
+  for (const [version, status] of [
+    ["4.1.0", "missing"],
+    ["4.2.1", "missing"],
+    ["4.2.2", "available"],
+    ["4.3.0", "available"],
+    ["5.0.0", "missing"],
+  ]) {
+    writeFileSync(
+      join(directory, "package.json"),
+      JSON.stringify({ ...metadata, version }),
+    );
+    assert.equal(installedMessaging(root).status, status, version);
+  }
 });
