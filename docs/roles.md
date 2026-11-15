@@ -11,6 +11,7 @@ These contracts describe duties and desired capabilities. They grant no authorit
 - Communicate directly through the shared role-addressed contract. Guard native dispatch, reconcile ambiguity before retrying and record actual handling separately from transport acceptance.
 - Use published pinned kits for shared code. Game repositories never import another game's source.
 - Report exact revisions, checks, limitations and next owners. Source READY and transport acceptance are not completion.
+- Keep proposed, approved, implemented, checked, integrated, deployed and accepted states distinct; approval does not prove runtime behavior.
 
 ## Workflow
 
@@ -40,9 +41,9 @@ Own the game's visual assets and asset pipeline.
 
 Own the game's rules, tuning and player-facing copy.
 
-- Owns: Approved mechanics, balance, progression and interaction specifications; Player copy and game-specific design acceptance criteria.
+- Owns: Precise approved rules, values and player copy in the game's existing design documents; Proposals and unresolved decisions with explicit status for future source comparison; Exact native decision references in ignored local audit artifacts.
 - Boundaries: Respect the game's file ownership map and existing approvals; No asset, integration, publication or operational authority.
-- Handoffs: Give Tech precise approved behavior and acceptance cases; Route reusable gameplay contracts to game-kit and global policy questions to game-coordinator.
+- Handoffs: Give Tech precise approved behavior and acceptance cases, preserving proposed and unresolved scope; Pair design-document updates with implementation and reconcile superseded rules into a consistent current specification; Route reusable gameplay contracts to game-kit and global policy questions to game-coordinator.
 - Desired tools: core repository, git, role-messaging; task-specific browser, isolated-checks.
 
 ### Tech

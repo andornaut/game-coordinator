@@ -233,3 +233,36 @@ test("generation and check distinguish missing or stale output without changing 
     assert.throws(() => main(["--unknown"]), /Usage/);
   });
 });
+
+test("Gameplay preserves precise design decisions and distinct delivery evidence", () => {
+  const contract = roleContract(catalog, "example/gameplay");
+  const brief = renderBrief(catalog, { ...context, role: "example/gameplay" });
+  assert.match(
+    contract.owns.join(" "),
+    /Precise approved rules, values and player copy/,
+  );
+  assert.match(brief, /existing design documents/);
+  assert.match(brief, /Proposals and unresolved decisions/);
+  assert.match(brief, /future source comparison/);
+  assert.match(
+    brief,
+    /Exact native decision references in ignored local audit artifacts/,
+  );
+  assert.match(brief, /Pair design-document updates with implementation/);
+  assert.match(
+    brief,
+    /reconcile superseded rules into a consistent current specification/,
+  );
+  assert.match(brief, /approval does not prove runtime behavior/);
+  for (const state of [
+    "proposed",
+    "approved",
+    "implemented",
+    "checked",
+    "integrated",
+    "deployed",
+    "accepted",
+  ]) {
+    assert.ok(catalog.protocol.some((rule) => rule.includes(state)));
+  }
+});
