@@ -87,7 +87,7 @@ node "$COORDINATOR_ROOT/node_modules/@andornaut/delivery-kit/dist/cli.js" \
 
 ## Monitoring
 
-delivery-kit sends game-coordinator reviews at :20 and :50 each hour and bus events as they happen. Both arrive over the existing channel. At every review, game-coordinator works with owners to drain the whole message backlog, including independent work:
+delivery-kit sends game-coordinator reviews once per hour at :30 in America/Toronto and bus events as they happen. Both arrive over the existing channel. At every review, game-coordinator works with owners to drain the whole message backlog, including independent work:
 
 1. Inventory both the durable message inbox and native queues for every registered role, including game Art, Gameplay and Tech, shared coordinators and kits, plus their verified workers' queues and ready handoffs. Read actual queued payloads and current owner evidence. Report unavailable queue or question visibility; never infer an empty backlog from an idle session.
 2. Reconcile every exact original as handled, superseded or retained. Handled and superseded require actual recipient reconciliation; transport acceptance proves delivery only. Retained items name an owner, reason and next review boundary. Do not skip ordinary independent work after prioritizing user replies and dependency unblockers.
@@ -98,7 +98,7 @@ delivery-kit sends game-coordinator reviews at :20 and :50 each hour and bus eve
 
 Durable collection is not native wake or delivery. Message handling receipts and scheduled release reporters are distinct; there is no public reporter acknowledgment command.
 
-Use the existing :20/:50 reviews; add no timers or teams. Preserve handoff and activation guards when communicating with held owners.
+Use the existing hourly :30 reviews; add no timers or teams. Preserve handoff and activation guards when communicating with held owners.
 
 ## Sessions and handoffs
 
