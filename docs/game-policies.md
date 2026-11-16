@@ -71,9 +71,8 @@ Prefer simple, explicit designs and consistent behavior across games. Treat like
 
 - Disable text selection in noneditable UI, including mobile long-press selection of counters. Preserve normal editable inputs and game interactions.
 - Center the button in every action row with one visible button, including Close, Back, Retry or a primary action. Hidden buttons do not count; native wrappers do not change the count. Keep bottom dismissal footers.
-- For modal footers with multiple visible actions, place secondary actions left and the primary action right. Preserve approved order, roles and alignment in other multi-button rows. Preserve labels, navigation, controls and story guards.
+- In every action layout or group, place the existing primary action last at the bottom in vertical layouts and rightmost in horizontal layouts. For example, Resume goes below Back to title. Preserve existing primary and safety roles, secondary actions' relative order, callbacks, hidden-control identities, readiness, dismissal semantics, labels, navigation, controls, story and choice guards.
 - Place existing version/build metadata above the bottom Close or dismissal footer wherever both already appear. Keep that dismissal footer last, preserving existing typography, spacing, targets and centered sole-action rows. In rows-only scrolling layouts, keep metadata and dismissal fixed.
-- In vertical menus, place the primary action last, at the bottom: Resume or Close as applicable.
 
 ### Controls and input
 
