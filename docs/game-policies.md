@@ -82,6 +82,12 @@ Use the canonical published kit timing, action and gesture APIs through one shar
 
 Each game audits all current control bindings and migrates bypasses to that shared binding, with a meaningful construction or architecture guard against future bypasses. Before changing a kit, distinguish an existing published hold fallback from a caller that bypasses it.
 
+### Modal background isolation
+
+Keep all game content outside the top modal window painted and laid out, visibly dimmed and inactive, including top controls, HUD and lower cards. Only the top modal is interactive; do not exempt a live topbar or substitute hiding, removing or reparenting background content.
+
+A click anywhere in the background invokes the existing Cancel or Back action once when the modal is closeable. Mandatory choices remain nondismissible: add no cancellation or progress skip. Preserve existing callbacks, labels, choices, save behavior, foreground and readiness guards, pointer and drag cancellation, disposal and focus. Use canonical published kit ports when available; do not fork a local controller or assume an unpublished API. Policy approval alone does not establish consumer implementation or acceptance.
+
 ### Analytics
 
 Keep analytics out of playable-game HTML and runtime, including authored, bundled and edge-injected beacons. Surrounding websites and landing pages may retain analytics. Verify generated and actually served game HTML and runtime network requests; preserve offline integrity, cache and security contracts.
