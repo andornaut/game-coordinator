@@ -88,7 +88,7 @@ Keep analytics out of playable-game HTML and runtime, including authored, bundle
 
 ### Pause and Menu navigation
 
-Remove standalone Settings icons. Put Settings inside the Pause/Menu modal alongside navigation. Keep the entry control's position and navigation function consistent across screens: Pause only during active pausable gameplay; use a hamburger Menu everywhere else, including Start, Maps and nonpausable story screens. Center screen and modal titles and keep controls from occluding them.
+Remove standalone Settings icons. Put Settings inside the Pause/Menu modal alongside navigation. Keep the entry control's position and navigation function consistent across screens. Show Pause whenever the current runtime context supports pausing; show a hamburger Menu when pausing is inapplicable, including Start/title and nonpausable Maps or story screens. Derive this from actual pause applicability, not merely whether the game has started. Center screen and modal titles and keep controls from occluding them.
 
 Every Pause/Menu outside Start/title includes Back to title immediately above its bottom primary Resume or Close, including Ada's Earth narrative Menu. Omit Back to title only on Start/title; ordinary dialogs and choice cards keep their existing actions. Game callers own this navigation policy; preserve actual pausability, save/progress, settlement and exit-confirmation guards.
 
