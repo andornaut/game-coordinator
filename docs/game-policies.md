@@ -23,7 +23,9 @@ Route dependencies to the role that can clear them. Never answer, cancel or clea
 
 Use one delivery-kit role-addressed messaging contract for Claude and Codex, including all game, coordinator and kit roles. Harness adapters implement the same interface and report unavailable or unsupported native capabilities explicitly. All roles use the coordinator-installed CLI; game-local delivery-runner package pins remain separate.
 
-Deliver exact payloads directly through supported tools. The coordinator owns communication health, reconciliation and escalation; it is not a mandatory relay for every message. Frontend bridge and authentication repair remain separate integration-owner responsibilities; never bypass a refusal, type payloads into tmux as a fallback or overwrite user drafts.
+Use native messaging first. If it fails, ask the coordinator to relay the same original. Use the recipient's tmux pane only if the coordinator route also fails. Preserve the original ID and exact body, record every attempt and reconcile ambiguous or accepted delivery before changing transport. Verify the exact current recipient pane, pending questions and input drafts before tmux input; retain the original if safe delivery cannot be verified. Never interrupt a turn, answer or clear a question, overwrite a draft or duplicate an action on replay.
+
+The coordinator owns communication health, reconciliation and escalation; it is not a mandatory relay for every message. Frontend bridge and authentication repair remain separate integration-owner responsibilities.
 
 Durably record each original's stable ID, exact payload, recipient role and intent before dispatch. Resolve the current registry route at send time, including the recipient's effective harness. Use normal queues for ordinary independent work and supported native live delivery only for confirmed unblockers. Guard both queued and live native dispatch against pending questions and HOLDs. If recipient clearance is unknown, retain the original in the durable local inbox without native dispatch or wake; a native queue can wake an idle owner.
 
@@ -34,6 +36,12 @@ Durably record each original's stable ID, exact payload, recipient role and inte
 Preserve unavailable and ambiguous outcomes with an owner, reason and next boundary. Reconcile accepted or ambiguous delivery before retrying; never blindly resend or acknowledge an unreconciled original. Preserve recipient questions, independent holds and parent-owned native worker guards. Communication does not authorize activation, interruption, restart or routing changes.
 
 Use the existing hourly :30 America/Toronto reviews to reconcile the whole backlog, retry only after reconciliation and escalate items unhandled or repeatedly deferred across two slots. Follow the [review procedure](../README.md#monitoring); add no daemon or timer.
+
+## Session startup
+
+Start every interactive game-development owner inside its appropriate managed tmux session and window on both Claude and Codex: game Art, Gameplay and Tech, shared kits and the coordinator. Follow the [session layout](../README.md#sessions-and-handoffs).
+
+Preserve existing owners' identities, processes, working directories, worktrees, WIP, providers, questions and independent HOLDs. This rule does not authorize restarting or duplicating owners, changing ownership or treating regrouping as activation. Backend workers remain parent-managed; do not create interactive frontends solely for this policy.
 
 ## Development and delivery
 
