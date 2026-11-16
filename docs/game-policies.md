@@ -75,6 +75,10 @@ Prefer simple, explicit designs and consistent behavior across games. Treat like
 - Place existing version/build metadata above the bottom Close or dismissal footer wherever both already appear. Keep that dismissal footer last, preserving existing typography, spacing, targets and centered sole-action rows. In rows-only scrolling layouts, keep metadata and dismissal fixed.
 - In vertical menus, place the primary action last, at the bottom: Resume or Close as applicable.
 
+### Analytics
+
+Keep analytics out of playable-game HTML and runtime, including authored, bundled and edge-injected beacons. Surrounding websites and landing pages may retain analytics. Verify generated and actually served game HTML and runtime network requests; preserve offline integrity, cache and security contracts.
+
 ### Pause and Menu navigation
 
 Remove standalone Settings icons. Put Settings inside the Pause/Menu modal alongside navigation. Keep the entry control's position and navigation function consistent across screens: Pause only during active pausable gameplay; use a hamburger Menu everywhere else, including Start, Maps and nonpausable story screens. Center screen and modal titles and keep controls from occluding them.
