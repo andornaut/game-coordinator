@@ -62,7 +62,8 @@ Do not delete failing tests to get green, weaken timeouts, run mass mutation cam
 Prefer simple, explicit designs and consistent behavior across games. Treat like cases alike; keep a difference only for a concrete current requirement. Review ergonomics against actual use, including controls, readability, layout and navigation. Preserve approved details and disclose unverified behavior rather than claiming completion.
 
 - Disable UI text selection, including mobile long-press selection of counters. Preserve normal editable inputs and game interactions.
-- Center Close when it is a modal's only visible footer action; hidden actions do not count. With multiple visible actions, place secondary actions left and the primary action right. Preserve labels, navigation, controls and story guards.
+- Center the button in every action row with one visible button, including Close, Back, Retry or a primary action. Hidden buttons do not count; native wrappers do not change the count. Keep bottom dismissal footers.
+- For modal footers with multiple visible actions, place secondary actions left and the primary action right. Preserve approved order, roles and alignment in other multi-button rows. Preserve labels, navigation, controls and story guards.
 - In vertical menus, place the primary action last, at the bottom: Resume or Close as applicable.
 
 ### Pause and Menu navigation
