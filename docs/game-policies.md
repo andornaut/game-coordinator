@@ -156,12 +156,11 @@ Determine compatibility requirements from the current game/runtime release versi
 - From game version 1.0 onward, published save-schema changes require compatibility or a migration preserving player progress.
 - Cheats are available in browser tabs and unavailable in installed PWA windows. Detect this at runtime, both when opening cheats and when running an action.
 - Settings is the only entry point: where cheats are available, Settings shows an Open Cheats button next to its Back button. It opens a Cheats modal sized to the game's content, whose body scrolls rather than pages, with Close as its bottom primary button.
-- The modal has two groups, Run-only and Save-changing. Hide a group with no actions. Run-only cheats preserve normal saves, progression, statistics and achievements. Save-changing actions explicitly persist their grants.
+- Cheats never touch the save. Using any cheat starts a cheat session: from that moment nothing is saved, earned or banked (progress, unlocks, currency, achievements, statistics), and returning to Start/title ends the session. Continue then loads the save as it was before the first cheat.
 - Grants that add an amount (currency, resources) are buttons that add a fixed amount on every press.
-- Achievements and statistics come only from real play. No cheat grants an achievement, counts toward one or adds statistics, and unlocking content marks nothing cleared.
-- Every game with first-time tips or hints offers Show tips again in Save-changing, which clears the seen record.
-- Every game offers Reset save, last in Save-changing, after a confirmation. It resets the save entirely, including achievements and every cheat grant. Device settings that are not part of the save stay.
-- Every game offers an FPS counter toggle, Off by default, showing frames per second in the bottom-right corner of the device viewport (inset from the safe area), drawn above everything, even over letterbox bars.
+- The modal also holds three actions that are not cheats and start no cheat session: Show tips again (in every game with first-time tips or hints; it clears the seen record in the save), the FPS counter toggle, and Reset save.
+- Reset save comes last, after a confirmation, and resets the save entirely, including achievements. Device settings that are not part of the save stay.
+- The FPS counter is Off by default and shows frames per second in the bottom-right corner of the device viewport (inset from the safe area), drawn above everything, even over letterbox bars.
 - Each game lists its cheats in its own cheats spec.
 
 ## Shared code
