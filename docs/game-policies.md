@@ -161,7 +161,7 @@ Determine compatibility requirements from the current game/runtime release versi
 - Achievements and statistics come only from real play. No cheat grants an achievement, counts toward one or adds statistics, and unlocking content marks nothing cleared.
 - Every game with first-time tips or hints offers Show tips again in Save-changing, which clears the seen record.
 - Every game offers Reset save, last in Save-changing, after a confirmation. It resets the save entirely, including achievements and every cheat grant. Device settings that are not part of the save stay.
-- Every game offers an FPS counter toggle, Off by default, showing frames per second in the top-left corner, inset from the safe area and above the game view.
+- Every game offers an FPS counter toggle, Off by default, showing frames per second in the bottom-right corner, inset from the safe area and above the game view.
 - Each game lists its cheats in its own cheats spec.
 
 ## Shared code
