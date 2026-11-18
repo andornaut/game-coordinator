@@ -123,7 +123,8 @@ Keep downloads small and the file count low; measure actual transferred (compres
 - Store each shared asset once and reference it; ship no duplicate copies.
 - Round vector coordinates to the precision the display needs (one decimal unless a set proves it needs more) and minify generated SVG.
 - Subset fonts to the glyphs the game's strings use, with a build check that every player-visible string is covered.
-- Ship no file the runtime does not reference.
+- Ship no file the runtime does not reference, and keep non-player copies (such as art galleries) out of the deployed build.
+- Download one audio format per sound: the one the device plays.
 - Keep vector art vector and pixel art at its authored resolution; do not rasterize vector sets or convert pixel art to SVG for size.
 
 ### Loading failures
