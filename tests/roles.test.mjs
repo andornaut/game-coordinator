@@ -136,7 +136,7 @@ test("both harness briefs retain exact caller identity and holds without grantin
       assert.ok(brief.includes(`${role}: ${catalog.roles[role].purpose}`));
     assert.ok(
       brief.includes(
-        "'/coordinator/node_modules/@andornaut/delivery-kit/dist/cli.js' --root '/coordinator'",
+        "'/coordinator/node_modules/@andornaut/coordination-kit/dist/cli.js' --root '/coordinator'",
       ),
     );
     assert.ok(brief.includes("--recipient 'example-game/tech' --include-body"));

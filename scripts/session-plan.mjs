@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import {
   resolveHarness,
   resolveRole,
-} from "@andornaut/delivery-kit/build/registry";
+} from "@andornaut/coordination-kit/build/registry";
 
 export const verification =
   "Native project, pending questions, quota, HOLD and Remote Control connection require supported native verification by the caller.";

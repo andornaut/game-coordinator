@@ -282,13 +282,13 @@ test("Claude role channel requires installed CLI and preserves immutable owned c
   const current = { ...slot(), harness: "claude", id: target };
   assert.throws(
     () => roleChannel(root, false, current),
-    /installed delivery-kit/,
+    /installed coordination-kit/,
   );
-  mkdirSync(join(root, "node_modules/@andornaut/delivery-kit/dist"), {
+  mkdirSync(join(root, "node_modules/@andornaut/coordination-kit/dist"), {
     recursive: true,
   });
   writeFileSync(
-    join(root, "node_modules/@andornaut/delivery-kit/dist/cli.js"),
+    join(root, "node_modules/@andornaut/coordination-kit/dist/cli.js"),
     "",
   );
   const configured = roleChannel(root, true, current);
@@ -312,8 +312,11 @@ for (const [role, conversation] of [
   test(`Claude channel binds exact identity for ${role} without changing startup authority`, (t) => {
     const root = mkdtempSync(join(tmpdir(), "sessions-role-channel-"));
     t.after(() => rmSync(root, { recursive: true }));
-    const cli = join(root, "node_modules/@andornaut/delivery-kit/dist/cli.js");
-    mkdirSync(join(root, "node_modules/@andornaut/delivery-kit/dist"), {
+    const cli = join(
+      root,
+      "node_modules/@andornaut/coordination-kit/dist/cli.js",
+    );
+    mkdirSync(join(root, "node_modules/@andornaut/coordination-kit/dist"), {
       recursive: true,
     });
     writeFileSync(cli, "");
@@ -382,11 +385,11 @@ test("Codex roles do not require or create Claude channel configuration", (t) =>
 test("Claude channel refuses a symlink config without changing its target", (t) => {
   const root = mkdtempSync(join(tmpdir(), "sessions-channel-link-"));
   t.after(() => rmSync(root, { recursive: true }));
-  mkdirSync(join(root, "node_modules/@andornaut/delivery-kit/dist"), {
+  mkdirSync(join(root, "node_modules/@andornaut/coordination-kit/dist"), {
     recursive: true,
   });
   writeFileSync(
-    join(root, "node_modules/@andornaut/delivery-kit/dist/cli.js"),
+    join(root, "node_modules/@andornaut/coordination-kit/dist/cli.js"),
     "",
   );
   mkdirSync(join(root, "var/session-frontends"), { recursive: true });
@@ -819,7 +822,7 @@ test("tool discovery separates required launch failures from optional native cap
       },
     },
     {
-      messaging: () => ({ status: "available", version: "4.4.1" }),
+      messaging: () => ({ status: "available", version: "1.0.0" }),
       probe: (binary, args) => {
         calls.push([binary, args]);
         return binary === "docker"
@@ -961,7 +964,7 @@ test("orientation uses root-qualified public queue and guarded dispatch with a s
   assert.equal(first.handling, "unverified");
   assert.equal(
     calls[0][0],
-    "/repo/node_modules/@andornaut/delivery-kit/dist/cli.js",
+    "/repo/node_modules/@andornaut/coordination-kit/dist/cli.js",
   );
   assert.deepEqual(calls[0].slice(1, 7), [
     "--root",
@@ -1088,25 +1091,22 @@ test("unavailable unrelated registry contact is explicit without blocking a sele
 
 test("messaging availability requires compatible public message CLI metadata", (t) => {
   const { root } = startupFixture(t);
-  const directory = join(root, "node_modules/@andornaut/delivery-kit");
+  const directory = join(root, "node_modules/@andornaut/coordination-kit");
   mkdirSync(join(directory, "dist"), { recursive: true });
   writeFileSync(join(directory, "dist/cli.js"), "");
   const metadata = {
-    name: "@andornaut/delivery-kit",
+    name: "@andornaut/coordination-kit",
     exports: {
       "./build/registry": "./dist/registry.js",
       "./build/transport": "./dist/transport.js",
     },
   };
   for (const [version, status] of [
-    ["4.1.0", "missing"],
-    ["4.2.1", "missing"],
-    ["4.2.2", "missing"],
-    ["4.3.0", "missing"],
-    ["4.4.0", "missing"],
-    ["4.4.1", "available"],
-    ["4.5.0", "available"],
-    ["5.0.0", "missing"],
+    ["0.9.0", "missing"],
+    ["1.0.0", "available"],
+    ["1.2.3", "available"],
+    ["1.0.0-rc.1", "missing"],
+    ["2.0.0", "missing"],
   ]) {
     writeFileSync(
       join(directory, "package.json"),
@@ -1118,7 +1118,20 @@ test("messaging availability requires compatible public message CLI metadata", (
     join(directory, "package.json"),
     JSON.stringify({
       ...metadata,
-      version: "4.4.1",
+      name: "@andornaut/delivery-kit",
+      version: "1.0.0",
+    }),
+  );
+  assert.equal(
+    installedMessaging(root).status,
+    "missing",
+    "Another package at the coordination-kit path is not the messaging CLI",
+  );
+  writeFileSync(
+    join(directory, "package.json"),
+    JSON.stringify({
+      ...metadata,
+      version: "1.0.0",
       exports: {
         "./registry": "./dist/registry.js",
         "./transport": "./dist/transport.js",
@@ -1128,7 +1141,7 @@ test("messaging availability requires compatible public message CLI metadata", (
   assert.equal(
     installedMessaging(root).status,
     "missing",
-    "Legacy aliases alone do not establish canonical SDK readiness",
+    "Unprefixed aliases alone do not establish canonical SDK readiness",
   );
 });
 
@@ -1138,7 +1151,7 @@ test("delayed frontend visibility requires explicit guarded orientation completi
   let output;
   const messages = [];
   const realCli = new URL(
-    "../node_modules/@andornaut/delivery-kit/dist/cli.js",
+    "../node_modules/@andornaut/coordination-kit/dist/cli.js",
     import.meta.url,
   ).pathname;
   const ports = {

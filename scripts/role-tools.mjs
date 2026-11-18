@@ -39,21 +39,16 @@ export function probeBinary(command, args, env = process.env) {
 }
 
 export function installedMessaging(root) {
-  const directory = resolve(root, "node_modules/@andornaut/delivery-kit");
+  const directory = resolve(root, "node_modules/@andornaut/coordination-kit");
   const cli = join(directory, "dist/cli.js");
   try {
     const pkg = JSON.parse(
       readFileSync(join(directory, "package.json"), "utf8"),
     );
-    const version = /^4\.(\d+)\.(\d+)$/.exec(pkg.version ?? "");
-    const compatible =
-      version &&
-      (Number(version[1]) > 4 ||
-        (Number(version[1]) === 4 && Number(version[2]) >= 1));
     if (
-      !compatible ||
-      pkg.name !== "@andornaut/delivery-kit" ||
+      pkg.name !== "@andornaut/coordination-kit" ||
       typeof pkg.version !== "string" ||
+      !/^1\.\d+\.\d+$/.test(pkg.version) ||
       !pkg.exports?.["./build/registry"] ||
       !pkg.exports?.["./build/transport"] ||
       !statSync(cli).isFile()
@@ -65,7 +60,7 @@ export function installedMessaging(root) {
       status: "missing",
       cli,
       reason:
-        "Coordinator delivery-kit 4.4.1+ CLI/canonical build exports missing or incompatible",
+        "Coordinator coordination-kit 1.x CLI/canonical build exports missing or incompatible",
     };
   }
 }

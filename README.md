@@ -1,6 +1,6 @@
 # game-coordinator
 
-Coordination home for three games and three shared kits. Each game and each kit is worked on by long-running AI coding agent sessions, one per role. This repository holds the coordination layout and documents how the pieces fit together. Machine-local state lives in an ignored directory.
+Coordination home for three games and four shared kits. Each game and each kit is worked on by long-running AI coding agent sessions, one per role. This repository holds the coordination layout and documents how the pieces fit together. Machine-local state lives in an ignored directory.
 
 [Cross-game policies](docs/game-policies.md) define shared product and development rules and how the game-coordinator communicates changes.
 
@@ -14,6 +14,7 @@ Coordination home for three games and three shared kits. Each game and each kit 
 | art-kit           | [art-kit](https://github.com/andornaut/art-kit)                     | Raster, frame, font and Aseprite export primitives           |
 | game-kit          | [game-kit](https://github.com/andornaut/game-kit)                   | Shared TypeScript runtime, input, layout and Phaser adapters |
 | delivery-kit      | [delivery-kit](https://github.com/andornaut/delivery-kit)           | Scheduled gate, push, CI watch, deploy and reviews           |
+| coordination-kit  | [coordination-kit](https://github.com/andornaut/coordination-kit)   | Role registry, messaging, harness adapters, ledger, protocol |
 
 Games consume kits as dev dependencies pinned to GitHub release tarballs.
 
@@ -52,9 +53,9 @@ Delivery-kit 4 requires explicit `resources.memoryMiB` from 6 through 8192 in ev
 
 ## Role messaging
 
-All roles use the coordinator-installed CLI with its absolute root, including from a game or kit worktree. Delivery-kit 4.4.1 provides the commands below; native capability and per-recipient adoption require separate qualification. Follow the [communication and recipient guards](docs/game-policies.md#communication).
+All roles use the coordinator-installed coordination-kit CLI with its absolute root, including from a game or kit worktree. Coordination-kit 1.0.0 provides the commands below; native capability and per-recipient adoption require separate qualification. Follow the [communication and recipient guards](docs/game-policies.md#communication).
 
-SDK imports use `@andornaut/delivery-kit/build/registry`, `@andornaut/delivery-kit/build/transport` and `@andornaut/delivery-kit/build/source-identity`. The CLI remains `dist/cli.js`.
+SDK imports use `@andornaut/coordination-kit/build/registry` and `@andornaut/coordination-kit/build/transport`; `@andornaut/delivery-kit/build/source-identity` stays in delivery-kit. Each kit's CLI is its `dist/cli.js`.
 
 Use the shared CLI and root prefix shown below, followed by these arguments:
 
@@ -70,7 +71,7 @@ For example, record an approved payload without dispatching it:
 
 ```bash
 COORDINATOR_ROOT=/absolute/path/to/game-coordinator
-node "$COORDINATOR_ROOT/node_modules/@andornaut/delivery-kit/dist/cli.js" \
+node "$COORDINATOR_ROOT/node_modules/@andornaut/coordination-kit/dist/cli.js" \
   --root "$COORDINATOR_ROOT" message send --from art-kit \
   --recipient game-coordinator --id UUID --body-file /absolute/path/to/message.txt
 ```
@@ -94,7 +95,7 @@ Use the existing hourly :30 reviews; add no timers or teams. Preserve handoff an
 
 Each role keeps its exact conversation IDs and one shared edit worktree. Native cwd stays at the game root, or game-coordinator for kits and game-coordinator. Shared windows belong in `codex-game` or `claude-game`; each game's `art`, `gameplay` and `tech` windows belong in its own harness-prefixed session. The coordinator window is `game-coordinator` in either shared session. Windows are alphabetical. Moving windows preserves processes and does not activate a role.
 
-Delivery-kit resolves each role through its optional harness override, otherwise the registry default. Handoffs select explicit games and any included kit/game-coordinator roles; unselected owners remain unchanged.
+The coordination-kit registry resolves each role through its optional harness override, otherwise the registry default. Handoffs select explicit games and any included kit/game-coordinator roles; unselected owners remain unchanged.
 
 ### Inspect and resume
 
@@ -116,7 +117,7 @@ Local inspection does not prove native project identity, pending-question state,
 1. Verify native identities, source HOLDs, checkpoints, owned jobs and pending questions. Commit unfinished work to named branches and preserve all independent holds. Keep current checkpoints concise; archive superseded state unchanged in sibling history before removing obsolete receipts.
 2. Reuse matching live target panes. Resume missing or verified dead targets by exact ID, without an appended prompt. Verify effective Remote Control separately from launch flags and actual receipt. Select visible authorized trust choices explicitly; a default No or exit choice must not receive blind Enter.
 3. Obtain each target's exact marker/role/ID acceptance before selecting its harness. Reconcile matching existing acceptance on retries instead of repeating activation. Delivery acceptance alone is not handling.
-4. Apply scoped `delivery-kit harness select` with a fresh expected revision, reconcile compatibility records under locks, then validate configuration and scoped readiness. Keep delivery controls, route and cadence unchanged unless separately authorized. The route host's resident must have the effective target adapter/socket; a fresh CLI probe is not resident proof.
+4. Apply scoped `coordination-kit harness select` with a fresh expected revision, reconcile compatibility records under locks, then validate configuration and scoped readiness. Keep delivery controls, route and cadence unchanged unless separately authorized. The route host's resident must have the effective target adapter/socket; a fresh CLI probe is not resident proof.
 5. Exit held source frontends through their supported idle exit, verify owned MCP cleanup, then record role completion. If game-coordinator moves, keep scheduled review coverage pending until actual receipt at the next genuine review. Preserve runners, their gate containers and unrelated services.
 
 If quota prevents activation, leave explicitly prepared targets idle and keep routing unchanged. A handoff never starts tests, builds or releases merely to move ownership.
@@ -132,9 +133,9 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 | Path                                | Committed | Contents                                                                                                                                         |
 | ----------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `README.md`                         | yes       | This overview                                                                                                                                    |
-| `config.json`                       | yes       | delivery-kit configuration: games, kits, role names and the review schedule                                                                      |
-| `package.json`, `package-lock.json` | yes       | The pinned delivery-kit release                                                                                                                  |
-| `node_modules/`                     | no        | The installed delivery-kit                                                                                                                       |
+| `config.json`                       | yes       | Kit configuration: games, kits, role names and the review schedule                                                                               |
+| `package.json`, `package-lock.json` | yes       | The pinned delivery-kit and coordination-kit releases                                                                                            |
+| `node_modules/`                     | no        | The installed delivery-kit and coordination-kit                                                                                                  |
 | `.worktrees/`                       | no        | Worktrees for changes to this repository                                                                                                         |
 | `var/`                              | no        | Registry (`registry.json`), review route (`route.json`), channel config, per-role checkpoints and each game's runner state (`games/<game>/bus/`) |
 | `.claude/`                          | no        | Harness-local files                                                                                                                              |

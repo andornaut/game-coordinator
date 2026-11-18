@@ -20,8 +20,8 @@ import { pathToFileURL } from "node:url";
 import {
   loadLayout,
   readRegistry,
-} from "@andornaut/delivery-kit/build/registry";
-import { resolveCodexControlSocket } from "@andornaut/delivery-kit/build/transport";
+} from "@andornaut/coordination-kit/build/registry";
+import { resolveCodexControlSocket } from "@andornaut/coordination-kit/build/transport";
 import {
   catalogHash,
   loadCatalog,
@@ -176,7 +176,7 @@ export function queueOrientation(
 ) {
   const id = orientationId(slot, brief);
   const prefix = [
-    resolve(root, "node_modules/@andornaut/delivery-kit/dist/cli.js"),
+    resolve(root, "node_modules/@andornaut/coordination-kit/dist/cli.js"),
     "--root",
     root,
   ];
@@ -237,10 +237,13 @@ export function resumeLock(path, action) {
 
 export function roleChannel(root, write, slot) {
   if (slot.harness !== "claude") return slot;
-  const cli = resolve(root, "node_modules/@andornaut/delivery-kit/dist/cli.js");
+  const cli = resolve(
+    root,
+    "node_modules/@andornaut/coordination-kit/dist/cli.js",
+  );
   if (!existsSync(cli))
     throw new Error(
-      "Claude role requires the installed delivery-kit channel CLI",
+      "Claude role requires the installed coordination-kit channel CLI",
     );
   const path = resolve(root, `var/session-frontends/${slot.id}.mcp.json`);
   const content = `${JSON.stringify(

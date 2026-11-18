@@ -21,7 +21,7 @@ Route dependencies to the role that can clear them. Never answer, cancel or clea
 
 ## Communication
 
-Use one delivery-kit role-addressed messaging contract for Claude and Codex, including all game, coordinator and kit roles. Harness adapters implement the same interface and report unavailable or unsupported native capabilities explicitly. All roles use the coordinator-installed CLI; game-local delivery-runner package pins remain separate.
+Use one coordination-kit role-addressed messaging contract for Claude and Codex, including all game, coordinator and kit roles. Harness adapters implement the same interface and report unavailable or unsupported native capabilities explicitly. All roles use the coordinator-installed CLI; game-local delivery-runner package pins remain separate.
 
 Use native messaging first. If it fails, ask the coordinator to relay the same original. Use the recipient's tmux pane only if the coordinator route also fails. Preserve the original ID and exact body, record every attempt and reconcile ambiguous or accepted delivery before changing transport. Verify the exact current recipient pane, pending questions and input drafts before tmux input; retain the original if safe delivery cannot be verified. Never interrupt a turn, answer or clear a question, overwrite a draft or duplicate an action on replay.
 

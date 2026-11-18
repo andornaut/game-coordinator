@@ -178,7 +178,10 @@ export function renderBrief(catalog, context) {
   const cli =
     "node " +
     quote(
-      resolve(context.root, "node_modules/@andornaut/delivery-kit/dist/cli.js"),
+      resolve(
+        context.root,
+        "node_modules/@andornaut/coordination-kit/dist/cli.js",
+      ),
     ) +
     " --root " +
     quote(context.root);
