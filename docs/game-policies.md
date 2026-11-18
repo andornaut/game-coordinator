@@ -59,11 +59,11 @@ Use only the one-minute load average for admission: ordinary containers start be
 
 ## Testing
 
-Target a 40% reduction in actual executed test cases across existing game suites and 20% across each of the three shared kits' existing suites. Prioritize realistic user scenarios and plausible critical edge cases. Prefer shared tables and helpers over repeated test bodies, but parameterization alone is not case reduction.
+Prune existing game and shared-kit test suites to reduce runtime while preserving coverage of realistic user scenarios and plausible critical edge cases. There is no fixed case-count reduction target. Prefer shared tables and helpers over repeated test bodies, but parameterization alone is not pruning.
 
-Record baseline and after case counts and runtime separately, using comparable suite scope and execution settings. Report the achieved reduction and explicitly document accepted coverage losses in low-risk, low-churn areas.
+Record baseline and after case counts and runtime separately, using comparable suite scope and execution settings. Report the achieved runtime and case-count changes and explicitly document accepted coverage losses in low-risk, low-churn areas.
 
-Do not delete failing tests to get green, weaken timeouts, run mass mutation campaigns or add a new test matrix to meet the target. Test pruning does not authorize application changes or cross-game source imports. Use existing owners and assigned workers; focused worker checks and owner combined gates remain required. Preserve independent holds, publication controls and runtime state.
+Do not delete failing tests to get green, weaken timeouts, run mass mutation campaigns or add a new test matrix to reduce runtime. Test pruning does not authorize application changes or cross-game source imports. Use existing owners and assigned workers; focused worker checks and owner combined gates remain required. Preserve independent holds, publication controls and runtime state.
 
 ## Product consistency
 
@@ -72,13 +72,14 @@ Prefer simple, explicit designs and consistent behavior across games. Treat like
 - Disable text selection in noneditable UI, including mobile long-press selection of counters. Preserve normal editable inputs and game interactions.
 - Center the button in every action row with one visible button, including Close, Back, Retry or a primary action. Hidden buttons do not count; native wrappers do not change the count. Keep bottom dismissal footers.
 - In every action layout or group, place the existing primary action last at the bottom in vertical layouts and rightmost in horizontal layouts. For example, Resume goes below Back to title. Preserve existing primary and safety roles, secondary actions' relative order, callbacks, hidden-control identities, readiness, dismissal semantics, labels, navigation, controls, story and choice guards.
+- Size modal windows by width family with a 16 logical px screen margin; height follows content and fonts stay full size. Widths: Ada and Chibi Large 688, Medium 500, Small 400; Archie Large 328, Medium 264.
 - Place existing version/build metadata above the bottom Close or dismissal footer wherever both already appear. Keep that dismissal footer last, preserving existing typography, spacing, targets and centered sole-action rows. In rows-only scrolling layouts, keep metadata and dismissal fixed.
 
 ### Controls and input
 
 Every discrete click/tap control defaults to the same action on hold unless a different hold action is explicitly bound. A hold fires once and suppresses the release click.
 
-Use the canonical published kit timing, action and gesture APIs through one shared binding. Preserve explicit overrides, availability, focus, foreground and modal scopes, readiness guards, pointer and drag cancellation, and disposal. Continuous controls, dragging and native editable input retain their existing semantics; do not suppress scrolling or selection globally.
+A hold on a discrete control fires after 500 ms in every game. Archie keeps its tuned hold timing only for drag input where no control is targeted. Use the canonical published kit action and gesture APIs through one shared binding, with the hold duration supplied by the game. Preserve explicit overrides, availability, focus, foreground and modal scopes, readiness guards, pointer and drag cancellation, and disposal. Continuous controls, dragging and native editable input retain their existing semantics; do not suppress scrolling or selection globally.
 
 Each game audits all current control bindings and migrates bypasses to that shared binding, with a meaningful construction or architecture guard against future bypasses. Before changing a kit, distinguish an existing published hold fallback from a caller that bypasses it.
 
@@ -104,7 +105,7 @@ Use consistent settings structure, labels, state text and help across games. Lab
 
 ### Loading failures
 
-Required assets must load before game entry. On failure, show **Loading failed**, the message **Some game files could not load. Try again.**, and **Retry**. Keep the error readable if the normal font fails.
+Required assets must load before game entry. On failure, show **Loading failed**, the message **Some game files could not load. Try again.**, and **Retry**. Keep the error readable if the normal font fails. Present it through the published game-kit loading-failure presentation, with the Retry label in the same visible text colour as the game's primary Start button.
 
 Retry is explicit, with at most one load attempt in flight. Use the single top loading bar for new loads and retries; success continues and another failure returns to the same error. Preserve saves and existing optional-asset placeholders.
 
