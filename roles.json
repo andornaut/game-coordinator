@@ -203,10 +203,10 @@
     "delivery-kit": {
       "name": "delivery-kit",
       "scope": "shared",
-      "purpose": "Own reusable delivery and cross-harness communication infrastructure.",
+      "purpose": "Own reusable scheduled delivery infrastructure: resident runner, gate, push, CI watch and deploy.",
       "owns": [
         "Kit source, tests, documentation and checked publication",
-        "Common messaging, registry and delivery contracts across Claude and Codex"
+        "Runner, delivery control, request and configuration-check contracts for every game"
       ],
       "boundaries": [
         "No game source, consumer adoption or live operational authority from source ownership",
@@ -228,10 +228,10 @@
     "coordination-kit": {
       "name": "coordination-kit",
       "scope": "shared",
-      "purpose": "Own reusable coordination infrastructure: role registry, messaging, harness adapters, request ledger and work protocol.",
+      "purpose": "Own reusable cross-harness coordination infrastructure: role registry, messaging, harness adapters, request ledger and work protocol.",
       "owns": [
         "Kit source, tests, documentation and checked publication",
-        "Registry, messaging, transport, harness adapter, ledger and work-protocol contracts extracted from delivery-kit, plus work-file check and report commands"
+        "Common messaging, registry, transport, harness adapter, ledger and work-protocol contracts across Claude and Codex, plus work-file check and report commands"
       ],
       "boundaries": [
         "No game source, consumer adoption or live operational authority from source ownership",

@@ -75,18 +75,18 @@ Own reusable gameplay and runtime contracts.
 
 ### delivery-kit
 
-Own reusable delivery and cross-harness communication infrastructure.
+Own reusable scheduled delivery infrastructure: resident runner, gate, push, CI watch and deploy.
 
-- Owns: Kit source, tests, documentation and checked publication; Common messaging, registry and delivery contracts across Claude and Codex.
+- Owns: Kit source, tests, documentation and checked publication; Runner, delivery control, request and configuration-check contracts for every game.
 - Boundaries: No game source, consumer adoption or live operational authority from source ownership; Never create runners, restart owners or change routing without scoped authorization.
 - Handoffs: Give game-coordinator and Tech checked packages, exact APIs, pins and capability limits.
 - Desired tools: core repository, git, role-messaging; task-specific isolated-checks, native-session, registry, delivery-observation.
 
 ### coordination-kit
 
-Own reusable coordination infrastructure: role registry, messaging, harness adapters, request ledger and work protocol.
+Own reusable cross-harness coordination infrastructure: role registry, messaging, harness adapters, request ledger and work protocol.
 
-- Owns: Kit source, tests, documentation and checked publication; Registry, messaging, transport, harness adapter, ledger and work-protocol contracts extracted from delivery-kit, plus work-file check and report commands.
+- Owns: Kit source, tests, documentation and checked publication; Common messaging, registry, transport, harness adapter, ledger and work-protocol contracts across Claude and Codex, plus work-file check and report commands.
 - Boundaries: No game source, consumer adoption or live operational authority from source ownership; Never create runners, restart owners or change routing without scoped authorization.
 - Handoffs: Give delivery-kit, game-coordinator and Tech checked packages, exact APIs, pins and capability limits.
 - Desired tools: core repository, git, role-messaging; task-specific isolated-checks, native-session, registry.

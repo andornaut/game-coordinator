@@ -49,7 +49,7 @@ Pausing blocks new scheduled and requested departures. Already admitted gates, C
 
 Before adopting a runner version that requires persistent control, game-coordinator initializes each game's approved desired state with the upgraded CLI. The current operational owner defined in the [role catalog](docs/roles.md) performs authorized runner adoption only when idle and drained. Check status before and after replacement, preserve existing desired state on later upgrades, and observe the next normal scheduled slot without a manual departure.
 
-Delivery-kit 4 requires explicit `resources.memoryMiB` from 6 through 8192 in every registered game's delivery configuration. Version 3 rejects this field. Coordinate configuration and package adoption while affected residents and the shared route host are idle and drained; validate the complete layout with `check-config` before startup. Preserve controls, routes, singleton ownership and schedules.
+Delivery-kit 4 and later require explicit `resources.memoryMiB` from 6 through 8192 in every registered game's delivery configuration. Version 3 rejects this field. Coordinate configuration and package adoption while affected residents and the shared route host are idle and drained; validate the complete layout with `check-config` before startup. Preserve controls, routes, singleton ownership and schedules.
 
 ## Role messaging
 
