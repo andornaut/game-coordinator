@@ -115,6 +115,17 @@ Every game follows one install model through the shared game-kit loader:
 - There is one loading screen; do not chain a second loader or splash.
 - Revisit staged first installs only if a measured first launch on a real phone is too slow; reduce asset size first.
 
+### Download size
+
+Keep downloads small and the file count low; measure actual transferred (compressed) bytes and file count, not disk usage.
+
+- Consolidate frames into one sheet per asset set with frame data, instead of one file per frame. Keep each sheet within the texture limits verified on mid-range Android.
+- Store each shared asset once and reference it; ship no duplicate copies.
+- Round vector coordinates to the precision the display needs (one decimal unless a set proves it needs more) and minify generated SVG.
+- Subset fonts to the glyphs the game's strings use, with a build check that every player-visible string is covered.
+- Ship no file the runtime does not reference.
+- Keep vector art vector and pixel art at its authored resolution; do not rasterize vector sets or convert pixel art to SVG for size.
+
 ### Loading failures
 
 Required assets must load before game entry. On failure, show **Loading failed**, the message **Some game files could not load. Try again.**, and **Retry**. Keep the error readable if the normal font fails. Present it through the published game-kit loading-failure presentation, with the Retry label in the same visible text colour as the game's primary Start button.
