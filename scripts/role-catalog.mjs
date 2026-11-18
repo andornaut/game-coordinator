@@ -10,6 +10,7 @@ const types = [
   "art-kit",
   "game-kit",
   "delivery-kit",
+  "coordination-kit",
   "game-coordinator",
 ];
 const text = (value) =>
@@ -33,7 +34,7 @@ function validate(catalog) {
     throw new Error("Invalid role catalog header");
   }
   if (Object.keys(catalog.roles).sort().join() !== [...types].sort().join())
-    throw new Error("Catalog must define exactly seven role types");
+    throw new Error("Catalog must define exactly the known role types");
   if (
     !Object.entries(catalog.tools).every(
       ([id, tool]) =>
@@ -181,7 +182,13 @@ export function renderBrief(catalog, context) {
     ) +
     " --root " +
     quote(context.root);
-  const peers = ["game-coordinator", "art-kit", "game-kit", "delivery-kit"];
+  const peers = [
+    "game-coordinator",
+    "art-kit",
+    "game-kit",
+    "delivery-kit",
+    "coordination-kit",
+  ];
   return [
     `Role: ${context.role} (${context.harness})`,
     `Registered conversation: ${context.id}; registry revision: ${context.registryRevision}.`,

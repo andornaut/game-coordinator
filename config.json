@@ -28,7 +28,16 @@
     },
     "game-kit": {
       "path": "../game-kit"
+    },
+    "coordination-kit": {
+      "path": "../coordination-kit"
     }
   },
-  "sharedRoles": ["game-coordinator", "art-kit", "delivery-kit", "game-kit"]
+  "sharedRoles": [
+    "game-coordinator",
+    "art-kit",
+    "delivery-kit",
+    "game-kit",
+    "coordination-kit"
+  ]
 }

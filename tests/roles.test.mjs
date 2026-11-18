@@ -44,7 +44,7 @@ function fixture(run) {
   }
 }
 
-test("seven contracts resolve game ownership and shared kits without guessing unknown roles", () => {
+test("role contracts resolve game ownership and shared kits without guessing unknown roles", () => {
   assert.deepEqual(Object.keys(catalog.roles), [
     "art",
     "gameplay",
@@ -52,13 +52,19 @@ test("seven contracts resolve game ownership and shared kits without guessing un
     "art-kit",
     "game-kit",
     "delivery-kit",
+    "coordination-kit",
     "game-coordinator",
   ]);
   for (const type of ["art", "gameplay", "tech"]) {
     assert.equal(roleContract(catalog, `Any_game.v2/${type}`).type, type);
     assert.equal(roleContract(catalog, type).scope, "game");
   }
-  for (const type of ["art-kit", "game-kit", "delivery-kit"]) {
+  for (const type of [
+    "art-kit",
+    "game-kit",
+    "delivery-kit",
+    "coordination-kit",
+  ]) {
     const contract = roleContract(catalog, type);
     assert.equal(contract.scope, "shared");
     assert.match(
@@ -90,7 +96,10 @@ test("catalog validation rejects missing ownership, unknown capabilities and uns
       const value = structuredClone(catalog);
       mutate(value);
       writeFileSync(join(directory, "roles.json"), JSON.stringify(value));
-      assert.throws(() => loadCatalog(directory), /Invalid|Unknown|seven/);
+      assert.throws(
+        () => loadCatalog(directory),
+        /Invalid|Unknown|known role types/,
+      );
     }
   });
 });
@@ -122,6 +131,7 @@ test("both harness briefs retain exact caller identity and holds without grantin
       "art-kit",
       "game-kit",
       "delivery-kit",
+      "coordination-kit",
     ])
       assert.ok(brief.includes(`${role}: ${catalog.roles[role].purpose}`));
     assert.ok(

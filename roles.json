@@ -225,6 +225,26 @@
         ]
       }
     },
+    "coordination-kit": {
+      "name": "coordination-kit",
+      "scope": "shared",
+      "purpose": "Own reusable coordination infrastructure: role registry, messaging, harness adapters, request ledger and work protocol.",
+      "owns": [
+        "Kit source, tests, documentation and checked publication",
+        "Registry, messaging, transport, harness adapter, ledger and work-protocol contracts extracted from delivery-kit, plus work-file check and report commands"
+      ],
+      "boundaries": [
+        "No game source, consumer adoption or live operational authority from source ownership",
+        "Never create runners, restart owners or change routing without scoped authorization"
+      ],
+      "handoffs": [
+        "Give delivery-kit, game-coordinator and Tech checked packages, exact APIs, pins and capability limits"
+      ],
+      "tools": {
+        "required": ["repository", "git", "role-messaging"],
+        "whenNeeded": ["isolated-checks", "native-session", "registry"]
+      }
+    },
     "game-coordinator": {
       "name": "game-coordinator",
       "scope": "shared",
