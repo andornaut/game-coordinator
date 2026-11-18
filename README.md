@@ -59,13 +59,13 @@ SDK imports use `@andornaut/coordination-kit/build/registry` and `@andornaut/coo
 
 Use the shared CLI and root prefix shown below, followed by these arguments:
 
-| Operation | Arguments                                                                                    | Result                                                                                                                                       |
-| --------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Record    | `message send --from ROLE --recipient ROLE --id UUID --body-file FILE`                       | Persist locally, without native wake or delivery. Optional `--intent INTENT` (`queue` or `unblock`) and `--parent ROLE`.                     |
-| Inspect   | `message status --id UUID` or `message status --recipient ROLE`                              | Inspect durable state; `--include-body` includes the payload.                                                                                |
-| Dispatch  | `message dispatch --id UUID`                                                                 | Explicit guarded native delivery; acceptance is not handling.                                                                                |
-| Reconcile | `message reconcile --id UUID --expected-revision N --disposition DISPOSITION --evidence REF` | Record `handled`, `superseded` or `retained`. Retention also requires `--reason TEXT --next-boundary TEXT`; `--owner-role ROLE` is optional. |
-| Diagnose  | `harness doctor --role ROLE`                                                                 | Inspect the selected role's harness capabilities.                                                                                            |
+| Operation | Arguments                                                                                    | Result                                                                                                                                                   |
+| --------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Record    | `message send --from ROLE --recipient ROLE --id UUID --body-file FILE`                       | Persist locally, without native wake or delivery. Optional `--intent INTENT` (`queue` or `unblock`) and `--parent ROLE`.                                 |
+| Inspect   | `message status --id UUID` or `message status --recipient ROLE`                              | Inspect durable state; `--include-body` includes the payload.                                                                                            |
+| Dispatch  | `message dispatch --id UUID`                                                                 | Explicit guarded native delivery; acceptance is not handling.                                                                                            |
+| Reconcile | `message reconcile --id UUID --expected-revision N --disposition DISPOSITION --evidence REF` | Record `accepted`, `handled`, `superseded` or `retained`. Retention also requires `--reason TEXT --next-boundary TEXT`; `--owner-role ROLE` is optional. |
+| Diagnose  | `harness doctor --role ROLE`                                                                 | Inspect the selected role's harness capabilities.                                                                                                        |
 
 For example, record an approved payload without dispatching it:
 
