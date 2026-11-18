@@ -158,6 +158,8 @@ Determine compatibility requirements from the current game/runtime release versi
 - Settings is the only entry point: where cheats are available, Settings shows an Open Cheats button next to its Back button. It opens a Cheats modal sized to the game's content, whose body scrolls rather than pages, with Close as its bottom primary button.
 - The modal has two groups, Run-only and Save-changing. Hide a group with no actions. Run-only cheats preserve normal saves, progression, statistics and achievements. Save-changing actions explicitly persist their grants.
 - Grants that add an amount (currency, resources) are buttons that add a fixed amount on every press.
+- Achievements and statistics come only from real play. No cheat grants an achievement, counts toward one or adds statistics, and unlocking content marks nothing cleared.
+- Every game with first-time tips or hints offers Show tips again in Save-changing, which clears the seen record.
 - Every game offers Reset save, last in Save-changing, after a confirmation. It resets the save entirely, including achievements and every cheat grant. Device settings that are not part of the save stay.
 - Every game offers an FPS counter toggle, Off by default, showing frames per second in the top-left corner, inset from the safe area and above the game view.
 - Each game lists its cheats in its own cheats spec.
