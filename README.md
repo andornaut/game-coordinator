@@ -2,7 +2,7 @@
 
 Coordination home for three games and four shared kits. Each game and each kit is worked on by long-running AI coding agent sessions, one per role. This repository holds the coordination layout and documents how the pieces fit together. Machine-local state lives in an ignored directory.
 
-[Cross-game policies](docs/game-policies.md) define shared product and development rules and how the game-coordinator communicates changes.
+[Architecture](docs/architecture.md) explains how the roles, coordination-kit and delivery-kit fit together. [Cross-game policies](docs/game-policies.md) define shared product and development rules and how the game-coordinator communicates changes.
 
 ## Projects
 
@@ -137,7 +137,7 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 | `README.md`                         | yes       | This overview                                                                                                                                    |
 | `config.json`                       | yes       | Kit configuration: games, kits, role names and the review schedule                                                                               |
 | `roles.json`                        | yes       | Role catalog source for the generated `docs/roles.md`                                                                                            |
-| `docs/`                             | yes       | Cross-game policies, the approval ledger contract and the generated role catalog                                                                 |
+| `docs/`                             | yes       | Architecture overview, cross-game policies, the approval ledger contract and the generated role catalog                                          |
 | `scripts/`                          | yes       | The role catalog generator (`role-catalog.mjs`) and the session helper (`sessions.mjs` and its modules)                                          |
 | `tests/`                            | yes       | Role catalog and session tests; `container/` holds the isolated check wrappers                                                                   |
 | `Makefile`                          | yes       | `make check` and `make lint` entry points                                                                                                        |
