@@ -107,6 +107,14 @@ Pause and Menu are one modal. On Start/title the entry control is Menu and the b
 
 Use consistent settings structure, labels, state text and help across games. Labels name the setting; state text uses On/Off or Shown/Hidden as appropriate. Help is stable, declarative text describing the actual effect, rather than changing instructions for the next click. Include only settings the game supports; consistency does not authorize inventing toggles.
 
+### Installs
+
+Every game follows one install model through the shared game-kit loader:
+
+- The first install downloads only what the first playable section needs (Ada the Navigator: galaxy 1; each game names its equivalent), with determinate progress.
+- Everything else downloads in the background after play starts. A later section that is not yet downloaded waits for its files rather than failing.
+- There is one loading screen; do not chain a second loader or splash.
+
 ### Loading failures
 
 Required assets must load before game entry. On failure, show **Loading failed**, the message **Some game files could not load. Try again.**, and **Retry**. Keep the error readable if the normal font fails. Present it through the published game-kit loading-failure presentation, with the Retry label in the same visible text colour as the game's primary Start button.
@@ -115,9 +123,9 @@ Retry is explicit, with at most one load attempt in flight. Use the single top l
 
 ### Updates
 
-Check online for updates on every return to the home screen and present available updates. Preserve each game's offer presentation and lifecycle.
+Download updates in the background, fetching only files that changed from the active build and reusing unchanged cached files. Stage the new build apart from the active build until it is complete, then prompt at the next launch. Switching after the prompt needs no further download.
 
-For normal updates, serve the active build's assets from cache first; fetch only missing files matching that build. Check for versions separately and stage a complete new build apart from the active build. Activate normal updates only on Update now or a fresh document launch/restart before gameplay and save initialization, never automatically during play, a title return or a visibility resume. Reject incomplete staging and mixed-build assets, pages or manifests.
+Serve the active build's assets from cache first; fetch only missing files matching that build. Activate normal updates only from the launch prompt, before gameplay and save initialization, never automatically during play, a title return or a visibility resume. Reject incomplete staging and mixed-build assets, pages or manifests.
 
 An explicitly approved newer-save recovery path may activate automatically when saved progress, statistics or achievements require a newer game. Block gameplay start, incompatible save loading and all save writes throughout recovery. Switch only to a complete, hash-verified build; resume only after the new document proves compatibility. Missing, unsafe or incomplete candidates, timeouts and continued incompatibility retain the fence and untouched saves, with connection/retry recovery. Activation alone is not compatibility proof.
 
