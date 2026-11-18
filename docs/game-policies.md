@@ -111,9 +111,9 @@ Use consistent settings structure, labels, state text and help across games. Lab
 
 Every game follows one install model through the shared game-kit loader:
 
-- The first install downloads only what the first playable section needs (Ada the Navigator: galaxy 1; each game names its equivalent), with determinate progress.
-- Everything else downloads in the background after play starts. A later section that is not yet downloaded waits for its files rather than failing.
+- The first install downloads the complete build up front, with determinate progress, and verifies it before play. After install the game is fully playable offline.
 - There is one loading screen; do not chain a second loader or splash.
+- Revisit staged first installs only if a measured first launch on a real phone is too slow; reduce asset size first.
 
 ### Loading failures
 
