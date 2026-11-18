@@ -99,7 +99,7 @@ Remove standalone Settings icons. Put Settings inside the Pause/Menu modal along
 
 Every Pause/Menu outside Start/title includes Back to title immediately above its bottom primary Resume or Close, including Ada's Earth narrative Menu. Omit Back to title only on Start/title; ordinary dialogs and choice cards keep their existing actions. Game callers own this navigation policy; preserve actual pausability, save/progress, settlement and exit-confirmation guards.
 
-Start/title shows the Menu control and an Exit button. Show Exit only where exiting actually works in the current runtime, such as the installed Chrome app (PWA) on Android, and hide it everywhere else. Detect this at runtime; do not decide it per game or per build.
+Start/title shows the Menu control and an Exit button. Show Exit only where exiting actually closes the app in the current runtime, such as the installed Chrome app (PWA) on Android, and hide it everywhere else, including plain browser tabs. Exit never navigates elsewhere. Detect this at runtime; do not decide it per game or per build.
 
 Pause and Menu are one modal. On Start/title the entry control is Menu and the bottom button is Close; in game the entry control is Pause and the bottom button is Resume. The bottom button is the modal's primary action and uses the primary style. In game, Back to title sits directly above it. All other buttons in the modal are ordered alphabetically by label.
 
