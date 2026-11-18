@@ -47,13 +47,13 @@ npx --no-install delivery-kit status --game ID
 
 Pausing blocks new scheduled and requested departures. Already admitted gates, CI watches and deployments finish, and scheduled reviews continue. Missing or invalid control fails closed until explicitly initialized or repaired.
 
-Before adopting a runner version that requires persistent control, game-coordinator initializes each game's approved desired state with the upgraded CLI. The current operational owner defined in the [role catalog](docs/roles.md) performs authorized runner adoption only when idle and drained. Check status before and after replacement, preserve existing desired state on later upgrades, and observe the next normal scheduled slot without a manual departure.
+The current operational owner defined in the [role catalog](docs/roles.md) performs authorized runner adoption only while the affected residents and the shared route host are idle and drained. Validate the complete layout with `check-config` before startup, check status before and after replacement, preserve controls, routes, singleton ownership and schedules, and observe the next normal scheduled slot without a manual departure.
 
-Delivery-kit 4 and later require explicit `resources.memoryMiB` from 6 through 8192 in every registered game's delivery configuration. Version 3 rejects this field. Coordinate configuration and package adoption while affected residents and the shared route host are idle and drained; validate the complete layout with `check-config` before startup. Preserve controls, routes, singleton ownership and schedules.
+Every registered game's `delivery-kit.json` sets `resources.memoryMiB`, an integer from 6 through 8192.
 
 ## Role messaging
 
-All roles use the coordinator-installed coordination-kit CLI with its absolute root, including from a game or kit worktree. Coordination-kit 1.0.0 provides the commands below; native capability and per-recipient adoption require separate qualification. Follow the [communication and recipient guards](docs/game-policies.md#communication).
+All roles use the coordinator-installed coordination-kit CLI with its absolute root, including from a game or kit worktree. The coordination-kit release pinned in `package.json` provides the commands below; native capability and per-recipient adoption require separate qualification. Follow the [communication and recipient guards](docs/game-policies.md#communication).
 
 SDK imports use `@andornaut/coordination-kit/build/registry` and `@andornaut/coordination-kit/build/transport`; `@andornaut/delivery-kit/build/source-identity` stays in delivery-kit. Each kit's CLI is its `dist/cli.js`.
 
@@ -134,6 +134,11 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 | ----------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `README.md`                         | yes       | This overview                                                                                                                                    |
 | `config.json`                       | yes       | Kit configuration: games, kits, role names and the review schedule                                                                               |
+| `roles.json`                        | yes       | Role catalog source for the generated `docs/roles.md`                                                                                            |
+| `docs/`                             | yes       | Cross-game policies, the approval ledger contract and the generated role catalog                                                                 |
+| `scripts/`                          | yes       | The role catalog generator (`role-catalog.mjs`) and the session helper (`sessions.mjs` and its modules)                                          |
+| `tests/`                            | yes       | Role catalog and session tests; `container/` holds the isolated check wrappers                                                                   |
+| `Makefile`                          | yes       | `make check` and `make lint` entry points                                                                                                        |
 | `package.json`, `package-lock.json` | yes       | The pinned delivery-kit and coordination-kit releases                                                                                            |
 | `node_modules/`                     | no        | The installed delivery-kit and coordination-kit                                                                                                  |
 | `.worktrees/`                       | no        | Worktrees for changes to this repository                                                                                                         |
@@ -142,8 +147,9 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 
 ### Source checks
 
-Run `make check` or `make lint` for ShellCheck, Markdown lint and session lifecycle tests in isolated
-stock containers. Dependencies install in the temporary working copy with lifecycle scripts disabled;
-no project image is built. CI uses the same stock images and native tools.
-`npm run lint` is lint-only; `npm run check` also runs lifecycle tests and requires the same test isolation.
+Run `make check` or `make lint` for ShellCheck, Markdown lint, the role catalog drift check and the
+role and session tests in isolated stock containers. Dependencies install in the temporary working
+copy with lifecycle scripts disabled; no project image is built. CI uses the same stock images and
+native tools. `npm run lint` is lint-only; `npm run check` also runs `npm test` and requires the same
+test isolation.
 Husky runs ordinary lint-staged on the host with serial native Prettier tasks.
