@@ -154,8 +154,13 @@ Determine compatibility requirements from the current game/runtime release versi
 
 - Before game version 1.0, backward compatibility and migrations are not required; incompatible saves may reset safely. This does not authorize deleting current progress or automatically resetting existing cloud saves.
 - From game version 1.0 onward, published save-schema changes require compatibility or a migration preserving player progress.
-- Cheats are available in browser tabs and unavailable in installed PWA windows. Use consistent Save-changing and Run-only groups.
-- Run-only cheats preserve normal saves, progression, statistics and achievements. Save-changing actions explicitly persist their grants.
+- Cheats are available in browser tabs and unavailable in installed PWA windows. Detect this at runtime, both when opening cheats and when running an action.
+- Settings is the only entry point: where cheats are available, Settings shows an Open Cheats button next to its Back button. It opens a Cheats modal sized to the game's content, whose body scrolls rather than pages, with Close as its bottom primary button.
+- The modal has two groups, Run-only and Save-changing. Hide a group with no actions. Run-only cheats preserve normal saves, progression, statistics and achievements. Save-changing actions explicitly persist their grants.
+- Grants that add an amount (currency, resources) are buttons that add a fixed amount on every press.
+- Every game offers Reset save, last in Save-changing, after a confirmation. It resets the save entirely, including achievements and every cheat grant. Device settings that are not part of the save stay.
+- Every game offers an FPS counter toggle, Off by default, showing frames per second in the top-left corner, inset from the safe area and above the game view.
+- Each game lists its cheats in its own cheats spec.
 
 ## Shared code
 
