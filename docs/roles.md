@@ -15,14 +15,14 @@ These contracts describe duties and desired capabilities. They grant no authorit
 
 ## Workflow
 
-| Stage                          | Owner                                                                                           | Evidence                                                                                                |
-| ------------------------------ | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Approved intent                | User and scoped owner                                                                           | Explicit scope and preserved independent decisions and holds.                                           |
-| Implementation                 | Owning role and assigned workers                                                                | Changes within the repository ownership map.                                                            |
-| Focused proof and review       | Workers, then game Tech or kit main                                                             | Relevant checks and a reviewed exact SHA, base and dependencies.                                        |
-| Required full gate             | Integration owner                                                                               | Combined checks on the exact integrated revision; existing runners execute game delivery gates.         |
-| CI, publication and deployment | Kit owner publishes kits; coordinator tracks approved game delivery; runner executes            | Exact-revision CI and immutable publication or deployment receipts. Consumer adoption remains separate. |
-| Remaining acceptance           | Art reviews artifacts; Tech verifies interactions; coordinator alone writes the approval ledger | Scoped proof closes exact clauses; visual acceptance can remain open after delivery.                    |
+| Stage | Owner | Evidence |
+| --- | --- | --- |
+| Approved intent | User and scoped owner | Explicit scope and preserved independent decisions and holds. |
+| Implementation | Owning role and assigned workers | Changes within the repository ownership map. |
+| Focused proof and review | Workers, then game Tech or kit main | Relevant checks and a reviewed exact SHA, base and dependencies. |
+| Required full gate | Integration owner | Combined checks on the exact integrated revision; existing runners execute game delivery gates. |
+| CI, publication and deployment | Kit owner publishes kits; coordinator tracks approved game delivery; runner executes | Exact-revision CI and immutable publication or deployment receipts. Consumer adoption remains separate. |
+| Remaining acceptance | Art reviews artifacts; Tech verifies interactions; coordinator alone writes the approval ledger | Scoped proof closes exact clauses; visual acceptance can remain open after delivery. |
 
 ## Roles
 
@@ -104,18 +104,18 @@ Coordinate roles, shared policy, decisions and approved operational delivery.
 
 Capability IDs are shared by Claude and Codex. Startup checks must report actual availability separately; this list is not installation evidence.
 
-| ID                   | Capability                                                                                     |
-| -------------------- | ---------------------------------------------------------------------------------------------- |
-| repository           | Read and edit the selected checkout within its ownership map.                                  |
-| git                  | Inspect exact revisions and preserve worktrees and uncommitted work.                           |
-| role-messaging       | Read, send and reconcile guarded role-addressed messages through the qualified shared CLI.     |
-| browser              | Inspect actual browser behavior and collect task-relevant visual evidence.                     |
-| image-generation     | Generate or edit authorized raster assets through the image tool.                              |
-| isolated-checks      | Run relevant checks in isolated containers under current resource limits.                      |
-| native-session       | Inspect exact native identity, question state and session status through supported interfaces. |
-| registry             | Resolve current role routes; mutate routing only within explicitly authorized scope.           |
-| delivery-observation | Inspect existing gate, CI, publication and deployment evidence without triggering departures.  |
-| image-inspection     | Inspect actual local images and screenshots against approved visual requirements.              |
+| ID | Capability |
+| --- | --- |
+| repository | Read and edit the selected checkout within its ownership map. |
+| git | Inspect exact revisions and preserve worktrees and uncommitted work. |
+| role-messaging | Read, send and reconcile guarded role-addressed messages through the qualified shared CLI. |
+| browser | Inspect actual browser behavior and collect task-relevant visual evidence. |
+| image-generation | Generate or edit authorized raster assets through the image tool. |
+| isolated-checks | Run relevant checks in isolated containers under current resource limits. |
+| native-session | Inspect exact native identity, question state and session status through supported interfaces. |
+| registry | Resolve current role routes; mutate routing only within explicitly authorized scope. |
+| delivery-observation | Inspect existing gate, CI, publication and deployment evidence without triggering departures. |
+| image-inspection | Inspect actual local images and screenshots against approved visual requirements. |
 
 ## References
 
