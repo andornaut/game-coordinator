@@ -133,3 +133,16 @@ Determine compatibility requirements from the current game/runtime release versi
 ## Shared code
 
 Games never import, link or depend on another game's source tree. Reuse code through published, pinned shared kit packages, or keep independent copies where appropriate. Kit owners retain reusable source; game Tech owners retain consumer adoption and integration. Kit publication and each consumer's adoption and deployment are separate outcomes.
+
+## Design and work files
+
+Every game and kit repository records design and approved work as committed files.
+
+- `docs/design/<area>.md` holds a short design summary and an index table of ID, title and link, with no status column.
+- Each approved task is `docs/work/<id>.md`. Its front matter holds `id`, `title`, `status` (milestone only: `approved`, `done`, `cancelled` or `superseded`), the approval reference, the design area, related IDs and `supersedes`. Its sections are scope, criteria, decisions and outcome.
+- Live progress (claimed, in progress, blocked, ready, receipts and acceptance) stays in the protocol state root, not in work files.
+- Only `main` edits index tables and approved scope. Approval commits the work-file stub and its index row on `main`; that commit allocates the ID. Workers edit only their own work file and the design prose that ships with their feature. Integration sets `status: done` in the merge.
+- A changed or reverted decision is a new work item with `supersedes`; never rewrite a finished item's outcome.
+- Work files are public. Use short approval references such as "user, 2026-11-18, option b"; never record session IDs, hostnames or quoted conversation.
+- Condense old history only on request, and verify that no open item or live link is dropped.
+- Docs-only changes run only the attribution and lint checks. Split CI so a first job detects changed paths, lint always runs, and heavier jobs are skipped by condition; games never serve or package `docs/`.
