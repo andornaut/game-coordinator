@@ -135,9 +135,12 @@ Retry is explicit, with at most one load attempt in flight. Use the single top l
 
 ### Updates
 
-Download updates in the background, fetching only files that changed from the active build and reusing unchanged cached files. Stage the new build apart from the active build until it is complete, then prompt at the next launch. Switching after the prompt needs no further download.
+Download updates in the background, fetching only files that changed from the active build and reusing unchanged cached files. Stage the new build apart from the active build until it is complete. Switching to a staged build needs no further download.
 
-Serve the active build's assets from cache first; fetch only missing files matching that build. Activate normal updates only from the launch prompt, before gameplay and save initialization, never automatically during play, a title return or a visibility resume. Reject incomplete staging and mixed-build assets, pages or manifests.
+- **At launch:** when a complete staged build exists, activate it silently before gameplay and save initialization, with no prompt.
+- **During a session:** when staging completes, show an **Update now** prompt wherever the player is, pausing play while it is shown. Update now saves, then switches. Dismissing it continues play on the active build, and the next launch activates the staged build silently.
+
+Serve the active build's assets from cache first; fetch only missing files matching that build. Never activate an update without the player's Update now choice while a session is running, including during play, a title return or a visibility resume. Reject incomplete staging and mixed-build assets, pages or manifests.
 
 An explicitly approved newer-save recovery path may activate automatically when saved progress, statistics or achievements require a newer game. Block gameplay start, incompatible save loading and all save writes throughout recovery. Switch only to a complete, hash-verified build; resume only after the new document proves compatibility. Missing, unsafe or incomplete candidates, timeouts and continued incompatibility retain the fence and untouched saves, with connection/retry recovery. Activation alone is not compatibility proof.
 
