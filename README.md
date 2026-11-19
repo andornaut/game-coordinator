@@ -145,6 +145,7 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 | `roles.json`                        | yes       | Role catalog source for the generated `docs/roles.md`                                                                                            |
 | `docs/`                             | yes       | Architecture overview, cross-game policies and the generated role catalog                                                                        |
 | `scripts/`                          | yes       | The role catalog generator (`role-catalog.mjs`) and the session helper (`sessions.mjs` and its modules)                                          |
+| `skills/`                           | yes       | The `game-create`, `game-handoff`, `game-sessions` and `game-status` agent skills; `~/.claude/skills` and `~/.codex/skills` link here            |
 | `tests/`                            | yes       | Role catalog and session tests; `container/` holds the isolated check wrappers                                                                   |
 | `Makefile`                          | yes       | `make check` and `make lint` entry points                                                                                                        |
 | `package.json`, `package-lock.json` | yes       | The pinned delivery-kit and coordination-kit releases                                                                                            |
