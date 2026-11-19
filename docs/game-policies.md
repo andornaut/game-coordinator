@@ -10,7 +10,7 @@ When defining or changing a policy:
 
 1. Update the canonical policy and identify affected roles and approved scope.
 2. Notify every registered game, including inactive and past games with retained owners, and any affected kit owners. Give the exact policy revision, required action and applicable exceptions. Notify retained owners without activating work, restarting sessions or releasing holds.
-3. Track each recipient's delivery and handling receipt separately. Native acceptance proves delivery only. Record adopted, already compliant, blocked or deliberately retained outcomes with evidence, an owner and the next review boundary. Unavailable delivery or visibility stays unresolved; reconcile ambiguous delivery before retrying.
+3. Send each notice with `msg send` and track each recipient's delivery (its own `inbox` read) and close (`msg done` or `msg retain`) separately. Record adopted, already compliant, blocked or deliberately retained outcomes with evidence, an owner and the next review boundary. Unavailable visibility stays unresolved.
 4. Include current policies in new-game onboarding, recovery and handoff. Verify adoption rather than inferring it from a message or registry entry.
 
 ## Decisions and ownership guards
@@ -21,21 +21,21 @@ Route dependencies to the role that can clear them. Never answer, cancel or clea
 
 ## Communication
 
-Use one coordination-kit role-addressed messaging contract for Claude and Codex, including all game, coordinator and kit roles. Harness adapters implement the same interface and report unavailable or unsupported native capabilities explicitly. All roles use the coordinator-installed CLI; game-local delivery-runner package pins remain separate.
+Every game, coordinator and kit role, in Claude and Codex, uses one coordination-kit store and the same verbs, with identical output in both harnesses. All roles run the coordinator-installed CLI as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> ...`, never through `npx`; game-local delivery-runner package pins remain separate. The [role messaging](../README.md#role-messaging) table lists the verbs.
 
-Use native messaging first. If it fails, ask the coordinator to relay the same original. Use the recipient's tmux pane only if the coordinator route also fails. Preserve the original ID and exact body, record every attempt and reconcile ambiguous or accepted delivery before changing transport. Verify the exact current recipient pane, pending questions and input drafts before tmux input; retain the original if safe delivery cannot be verified. Never interrupt a turn, answer or clear a question, overwrite a draft or duplicate an action on replay.
+- **Send.** `msg send --to ROLE --body-file FILE` is the only payload path for role-to-role coordination. It stores the message before anything native happens, then attempts at most one wake. Use `--intent unblock` for a confirmed unblocker, `--link work=ID` for related work, and a fixed `--id UUID` when a retry must not duplicate.
+- **Wake only.** Native session messages and channel notifications only wake a recipient. They never carry content; their text names the message count and tells the recipient to run `inbox`. Never paste a payload into another role's session, pane or queue, and never resend a stored message natively.
+- **Read and close.** Recipients run `coordination-kit inbox` (with `--include-body` for bodies) at startup, on every wake and at each safe boundary, then close each message with `msg done ID` (with `--superseded-by ID` for a superseded one) or `msg retain ID --reason TEXT --next-boundary TEXT`. Only the recipient closes its own messages, in one write.
+- **History.** `msg history` lists the store's append-only message events and is the durable record of what was sent, delivered and closed.
+- **Fence.** Each writing verb identifies its caller as the registry role whose effective harness binding equals the caller's native conversation ID. There are no epochs for messages; `harness select` rotates the binding. A worker writes under its parent's binding, with `--worker NAME` as an unverified label.
 
-The coordinator owns communication health, reconciliation and escalation; it is not a mandatory relay for every message. Frontend bridge and authentication repair remain separate integration-owner responsibilities.
+Delivered means the recipient's own `inbox` read. Handled means its `msg done`. A wake, its acceptance or its failure is not delivery and never changes message state.
 
-Durably record each original's stable ID, exact payload, recipient role and intent before dispatch. Resolve the current registry route at send time, including the recipient's effective harness. Use normal queues for ordinary independent work and supported native live delivery only for confirmed unblockers. Guard both queued and live native dispatch against pending questions and HOLDs. If recipient clearance is unknown, retain the original in the durable local inbox without native dispatch or wake; a native queue can wake an idle owner.
+The store sends no wake to an unregistered, unbound or held recipient, and a Codex wake also passes the native question guard; a guarded or failed wake leaves the message stored for the recipient's next pull or the next review. Recipient guards still apply to everything a message asks for: never answer, cancel or clear another owner's question, and preserve independent holds, WIP and parent-owned worker guards. A held recipient pulls at its next boundary; reading or closing a message does not activate it. Communication does not authorize activation, interruption, restart or routing changes.
 
-- Queued means the original is durably retained for delivery.
-- Accepted means the transport accepted delivery, not that the recipient handled it.
-- Handled requires actual recipient reconciliation of the exact original.
+The coordinator owns communication health and escalation; it is not a relay. Frontend bridge and authentication repair remain separate integration-owner responsibilities.
 
-Preserve unavailable and ambiguous outcomes with an owner, reason and next boundary. Reconcile accepted or ambiguous delivery before retrying; never blindly resend or acknowledge an unreconciled original. Preserve recipient questions, independent holds and parent-owned native worker guards. Communication does not authorize activation, interruption, restart or routing changes.
-
-Use the existing hourly :30 America/Toronto reviews to reconcile the whole backlog, retry only after reconciliation and escalate items unhandled or repeatedly deferred across two slots. Follow the [review procedure](../README.md#monitoring); add no daemon or timer.
+Use the existing hourly :30 America/Toronto reviews to drain the whole backlog and escalate messages open across two slots. Follow the [review procedure](../README.md#monitoring); add no daemon or timer.
 
 ## Session startup
 

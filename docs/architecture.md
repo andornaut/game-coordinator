@@ -7,8 +7,8 @@ How the games, the shared kits and the agent sessions fit together. This page is
           routing, scheduled reviews, shared policy, approval ledger
                                     |
          +----------------- coordination-kit -----------------+
-         | role registry, messages, request ledger,           |
-         | work protocol, harness adapters, session channels  |
+         | role registry, coordination store, request ledger, |
+         | work protocol, wake adapters, session channels     |
          +--+---------------+---------------+---------------+-+
             |               |               |               |
        Ada roles      Archie roles     Chibi roles      kit roles
@@ -38,13 +38,21 @@ The [role catalog](roles.md), generated from `roles.json`, is the authoritative 
 
 ## coordination-kit: how roles talk and keep records
 
-[coordination-kit](https://github.com/andornaut/coordination-kit) is the common contract every role uses through one CLI installed at the game-coordinator root.
+[coordination-kit](https://github.com/andornaut/coordination-kit) is the common contract every role uses through one CLI installed at the game-coordinator root, invoked as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root>`.
 
-- **Registry.** `var/registry.json` maps each role name to its current conversation per harness and its worktree. Senders always address roles by name. Every send resolves the recipient's current conversation, so a relaunched or transferred session keeps receiving messages without changes elsewhere.
-- **Messages.** A message is first stored durably, then delivered into the recipient's session through its channel. Delivery is not handling: the recipient later reconciles each message as handled, superseded or retained, backed by a receipt it publishes. Retained messages name an owner, a reason and the next boundary at which they are reviewed.
-- **Work protocol.** Each role enrolls in its own namespace. Work starts only from an approved work reference, and passes boundaries at start, before work, review, integration and cleanup. This makes who is doing what, and who approved it, auditable after the fact.
+- **Registry.** `var/registry.json` maps each role name to its current conversation per harness and its worktree. Senders always address roles by name. Every send resolves the recipient's current conversation, so a relaunched or transferred session keeps receiving messages without changes elsewhere. The registry binding is also the writer fence: a writing command is accepted only from the role whose effective binding equals the caller's native conversation ID.
+- **Coordination store.** `coordination.db`, a SQLite file in the protocol state root, holds an append-only, hash-chained event log and the message projections built from it. Review briefs and ingested runner events are stored there too, as messages from `delivery-kit`.
+- **Messages.** Store first, wake second, pull third:
+  1. `msg send` commits the message to the store. Nothing native happens before that commit.
+  2. The store attempts at most one outstanding wake per recipient, skipping unregistered, unbound and held recipients. A wake carries no content, only `N new messages for ROLE: run coordination-kit inbox`. Claude wakes through a per-conversation wake file that the channel server announces; Codex wakes through one guarded control-socket queue add. A wake outcome is logged apart from message state.
+  3. The recipient runs `inbox`, which records its messages `delivered`.
+  4. The recipient closes each message in one write: `msg done` (handled or superseded) or `msg retain` with an owner, a reason and the next boundary.
+
+  `msg history` reads the event log, the durable record of every send, delivery and close.
+
+- **Work protocol.** Each role enrolls in its own namespace. Work starts only from an approved work reference, and passes boundaries at start, before work, review, integration and cleanup. This makes who is doing what, and who approved it, auditable after the fact. Messages do not depend on it.
 - **Request ledger.** A durable record of every incoming request with its owner, status, targets and coverage, kept in the protocol state root outside all repositories.
-- **Channels.** Each Claude session runs a channel server that pushes new messages, delivery events and review briefs into the conversation. A session reads its channel command at launch, so a channel configuration change takes effect when the session is relaunched.
+- **Channels.** Each Claude session runs a channel server that watches its conversation's wake file and emits one notification per new wake. Channels use the stable command `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> claude channel`, so a kit upgrade needs only `npm ci` and an `/mcp` reconnect; a changed command needs a relaunch.
 
 ## delivery-kit: how games ship
 
@@ -57,7 +65,7 @@ Each game has a fixed hourly departure slot (Ada the Navigator :00, Archie :10, 
 3. watches CI for it;
 4. deploys when CI passes.
 
-There is no release queue, rollback or revert. A failed gate or CI run is fixed forward on `main`, and the next slot ships the fix. The runner reports each step as a delivery event, and sends game-coordinator a scheduled review brief at :30 each hour.
+There is no release queue, rollback or revert. A failed gate or CI run is fixed forward on `main`, and the next slot ships the fix. The runner reports each step as a delivery event, and at :30 each hour calls the coordinator-installed CLI to store game-coordinator's one-page review brief. A 6.1 runner appends events to `var/games/<g>/bus/events.jsonl`, which `events ingest` stores as messages; a 6.0 runner flushes its event outbox through the channel.
 
 ## How work flows
 
@@ -73,7 +81,7 @@ Work records live with their repository: `docs/design/` holds the current rules 
 
 At each :30 review, game-coordinator:
 
-- inventories every role's inbox and ready handoffs and reconciles every message;
+- inventories every role's open store messages and ready handoffs, and has each recipient close or retain them;
 - finds every hold, block and pending user decision, and makes sure each decision is open as a prompt in its owner's session;
 - escalates anything stuck for two scheduled slots with its owner, blocker and next action;
 - closes stalled or ownerless containers, worktrees and scratch after preserving their diagnostics.
@@ -89,9 +97,9 @@ At each :30 review, game-coordinator:
 
 ## Where state lives
 
-| Location                                                | Contents                                                               |
-| ------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Each repository                                         | Source, design and work files, checks; role worktrees in `.worktrees/` |
-| game-coordinator `var/` (ignored)                       | Registry, runner bus state, review snapshots and role checkpoints      |
-| Protocol state root (outside all repositories, ignored) | Messages, receipts, request ledger, work records and artifacts         |
-| GitHub releases                                         | Pinned kit archives consumed by the games and game-coordinator         |
+| Location                                                | Contents                                                                |
+| ------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Each repository                                         | Source, design and work files, checks; role worktrees in `.worktrees/`  |
+| game-coordinator `var/` (ignored)                       | Registry, runner bus state, review snapshots and role checkpoints       |
+| Protocol state root (outside all repositories, ignored) | Coordination store, wake files, request ledger, work records, artifacts |
+| GitHub releases                                         | Pinned kit archives consumed by the games and game-coordinator          |

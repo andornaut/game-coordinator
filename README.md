@@ -53,43 +53,49 @@ Every registered game's `delivery-kit.json` sets `resources.memoryMiB`, an integ
 
 ## Role messaging
 
-All roles use the coordinator-installed coordination-kit CLI with its absolute root, including from a game or kit worktree. The coordination-kit release pinned in `package.json` provides the commands below; native capability and per-recipient adoption require separate qualification. Follow the [communication and recipient guards](docs/game-policies.md#communication).
+All roles, in Claude and Codex, use the coordinator-installed coordination-kit CLI with its absolute root, including from a game or kit worktree. Invoke it as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> ...`, never through `npx`. Follow the [communication and recipient guards](docs/game-policies.md#communication).
 
 SDK imports use `@andornaut/coordination-kit/build/registry` and `@andornaut/coordination-kit/build/transport`; `@andornaut/delivery-kit/build/source-identity` stays in delivery-kit. Each kit's CLI is its `dist/cli.js`.
 
+Every message is stored in the coordination store (`coordination.db` in the protocol state root) before anything native happens. `msg send` is the only payload path for role-to-role coordination. Native session messages and channel notifications are wakes only: their fixed text, `N new messages for ROLE: run coordination-kit inbox`, never carries content, and a payload sent natively without a stored original is a policy violation.
+
+The writing verbs (`msg send`, `inbox`, `msg done`, `msg retain`) identify the caller by the registry fence: the role whose effective harness binding equals the caller's native conversation ID (`CLAUDE_CODE_SESSION_ID` or `CODEX_THREAD_ID`, or `--native-id ID`). There are no epochs, claims or enrollment for messages, and `harness select` rotates the binding. Workers write under their parent's binding; `--worker NAME` is an unverified attribution.
+
 Use the shared CLI and root prefix shown below, followed by these arguments:
 
-| Operation | Arguments                                                                                    | Result                                                                                                                                                   |
-| --------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Record    | `message send --from ROLE --recipient ROLE --id UUID --body-file FILE`                       | Persist locally, without native wake or delivery. Optional `--intent INTENT` (`queue` or `unblock`) and `--parent ROLE`.                                 |
-| Inspect   | `message status --id UUID` or `message status --recipient ROLE`                              | Inspect durable state; `--include-body` includes the payload, and `--include-retention` adds local blocker diagnostics for one ID.                       |
-| Dispatch  | `message dispatch --id UUID`                                                                 | Explicit guarded native delivery; acceptance is not handling.                                                                                            |
-| Reconcile | `message reconcile --id UUID --expected-revision N --disposition DISPOSITION --evidence REF` | Record `accepted`, `handled`, `superseded` or `retained`. Retention also requires `--reason TEXT --next-boundary TEXT`; `--owner-role ROLE` is optional. |
-| Receipt   | `message reconcile --id UUID --receipt`                                                      | Read existing bound receipt evidence for an ambiguous delivery.                                                                                          |
-| Retire    | `message retire-spool --recipient ROLE [--dry-run]`                                          | Move unclaimed terminal Claude spool entries to `claude-retired/`.                                                                                       |
-| Diagnose  | `harness doctor --role ROLE`                                                                 | Inspect the selected role's harness capabilities.                                                                                                        |
+| Operation | Arguments                                                                                        | Result                                                                                                                                               |
+| --------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Send      | `msg send --to ROLE --body-file FILE [--intent queue\|unblock] [--id UUID] [--link KIND=REF]...` | Store the message, then attempt at most one guarded wake. Pass `--id` when a retry must not duplicate; `--link` takes values such as `work=ck-0017`. |
+| Read      | `inbox [--include-body] [--all]`                                                                 | List your undelivered and open messages and record them `delivered`.                                                                                 |
+| Close     | `msg done ID [--work WORK_ID] [--superseded-by ID] [--evidence REF]...`                          | Close your own message as `handled`, or `superseded` with `--superseded-by`, in one write.                                                           |
+| Retain    | `msg retain ID --reason TEXT --next-boundary TEXT [--owner ROLE]`                                | Keep your own message open with an owner, reason and next boundary; retain again or close later.                                                     |
+| Inspect   | `msg status ID`                                                                                  | Read one message's metadata, without its body.                                                                                                       |
+| History   | `msg history [--role ROLE] [--since ISO_TIMESTAMP] [--limit N]`                                  | Read message events in order, without bodies. The store's append-only event chain is the durable record.                                             |
+| Diagnose  | `harness doctor --role ROLE`                                                                     | Inspect the selected role's harness capabilities, including the Claude channel command and loaded version.                                           |
 
-For example, record an approved payload without dispatching it:
+States are `sent`, `delivered` (the recipient's own `inbox` read), then `handled`, `superseded` or `retained`. Only the recipient delivers, closes or retains its messages; a wake outcome never changes message state. The legacy `message send`, `dispatch`, `reconcile` and `retire-spool` writes are refused with `store-cutover` once the store is selected; `message status` reads the frozen legacy records.
+
+For example, send a note to game-coordinator, then, as the recipient, read and close it:
 
 ```bash
 COORDINATOR_ROOT=/absolute/path/to/game-coordinator
-node "$COORDINATOR_ROOT/node_modules/@andornaut/coordination-kit/dist/cli.js" \
-  --root "$COORDINATOR_ROOT" message send --from art-kit \
-  --recipient game-coordinator --id UUID --body-file /absolute/path/to/message.txt
+CK="$COORDINATOR_ROOT/node_modules/@andornaut/coordination-kit/dist/cli.js"
+node "$CK" --root "$COORDINATOR_ROOT" msg send --to game-coordinator \
+  --body-file /absolute/path/to/message.md --link work=ck-0017
+node "$CK" --root "$COORDINATOR_ROOT" inbox --include-body
+node "$CK" --root "$COORDINATOR_ROOT" msg done ID --work ck-0017
 ```
 
 ## Monitoring
 
-delivery-kit sends game-coordinator reviews once per hour at :30 in America/Toronto and bus events as they happen. Both arrive over the existing channel. At every review, game-coordinator works with owners to drain the whole message backlog, including independent work:
+delivery-kit delivers game-coordinator's review once per hour at :30 in America/Toronto and bus events as they happen. In store mode the review brief is a stored message from `delivery-kit`, at most one page, with `review show` for detail. At every review, game-coordinator works with owners to drain the whole message backlog, including independent work:
 
-1. Inventory both the durable message inbox and native queues for every registered role, including game Art, Gameplay and Tech, shared coordinators and kits, plus their verified workers' queues and ready handoffs. Read actual queued payloads and current owner evidence. Report unavailable queue or question visibility; never infer an empty backlog from an idle session.
-2. Reconcile every exact original as handled, superseded or retained. Handled and superseded require actual recipient reconciliation; transport acceptance proves delivery only. Retained items name an owner, reason and next review boundary. Do not skip ordinary independent work after prioritizing user replies and dependency unblockers.
-3. Deliver confirmed unblockers through supported native live steering and ordinary independent work through normal queues. Reconcile accepted or ambiguous deliveries before retrying. Acknowledge or remove only exact unchanged originals after confirmed reconciliation, preserving evidence for retained deliveries awaiting handling.
+1. Inventory the store's open messages for every registered role, including game Art, Gameplay and Tech, shared coordinators and kits, plus ready handoffs, from the brief, `review show` and `msg history`. Report unavailable question visibility; never infer an empty backlog from an idle session.
+2. Ask each recipient to run `inbox` and close every open message with `msg done` or `msg retain`. Only the recipient closes its own messages; a wake proves nothing about delivery or handling. Retained items name an owner, reason and next boundary. Do not skip ordinary independent work after prioritizing user replies and dependency unblockers.
+3. Follow up stalled, unconfirmed and failed, ambiguous or guarded wake exceptions from the brief with the owning recipient. Send unblockers with `msg send --intent unblock`; never resend a stored message natively.
 4. Surface pending user decisions through their owning session's structured prompt. Preserve unanswered questions, source holds and independent work. Never answer or cancel another owner's question, interrupt or restart its turn, or treat silence as a decision. Route release failures and cross-role dependencies to the role that can resolve them.
 5. Escalate any item unhandled or repeatedly deferred across two scheduled slots with its exact ID, owner, blocker and next action. Ask owners to close finished or stalled jobs after preserving diagnostics; retain protected live resources and unresolved ownership.
-6. Finish each pass with exact counts of originals inspected, handled, superseded and retained, plus unavailable scopes. Identify each remaining item's owner, reason and next boundary; record new arrivals at safe boundaries so they are included or explicitly retained for the next pass. Claim a fully drained backlog only when no originals remain and visibility is complete.
-
-Durable collection is not native wake or delivery. Message handling receipts and scheduled release reporters are distinct; there is no public reporter acknowledgment command.
+6. Finish each pass with exact counts of messages inspected, handled, superseded and retained, plus unavailable scopes. Identify each remaining item's owner, reason and next boundary; record new arrivals at safe boundaries so they are included or explicitly retained for the next pass. Claim a fully drained backlog only when no open messages remain and visibility is complete.
 
 Use the existing hourly :30 reviews; add no timers or teams. Preserve handoff and activation guards when communicating with held owners.
 
