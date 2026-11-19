@@ -131,14 +131,17 @@ test("both harness briefs retain exact caller identity and holds without grantin
       brief,
       /source READY, work ready and transport acceptance are not completion/,
     );
+    const owners = brief.match(
+      /^Shared kit owners \(purposes in docs\/roles\.md\): (.*)\.$/m,
+    );
+    assert.ok(owners, "shared kit owner line");
     for (const role of [
-      "game-coordinator",
       "art-kit",
       "game-kit",
       "delivery-kit",
       "coordination-kit",
     ])
-      assert.ok(brief.includes(`${role}: ${catalog.roles[role].purpose}`));
+      assert.ok(owners[1].split(", ").includes(role), role);
     assert.ok(
       brief.includes(
         "COORDINATION_KIT_ROOT='/coordinator' node '/coordinator/node_modules/@andornaut/coordination-kit/dist/cli.js'",
@@ -191,7 +194,11 @@ test("brief observations remain supplied evidence and retain unavailable tool st
       },
     ],
   });
-  assert.match(brief, /art-kit: claude\/retained-peer/);
+  assert.match(brief, /^Roles \(`CK msg send --to NAME`;.*\): art-kit\.$/m);
+  assert.ok(
+    !brief.includes("retained-peer"),
+    "contact IDs stay in the registry",
+  );
   assert.match(
     brief,
     /browser: unavailable; native capability not inspected; task-specific/,
@@ -294,8 +301,41 @@ test("every role brief stays within 60 lines and 4 KB with long absolute paths",
   };
   for (const path of [long.root, long.cwd, long.worktree])
     assert.ok(path.length >= 80, path);
+  const games = ["ada-the-navigator", "archies-dog-walks", "chibis-way-home"];
+  const contacts = [
+    "game-coordinator",
+    "art-kit",
+    "coordination-kit",
+    "delivery-kit",
+    "game-kit",
+    ...games.flatMap((game) =>
+      ["art", "gameplay", "tech"].map((type) => `${game}/${type}`),
+    ),
+  ];
+  // sessions.mjs gives game-coordinator every role, a game role the shared roles plus its own game, a kit the shared roles.
+  const visible = (role) =>
+    contacts
+      .filter(
+        (name) =>
+          role === "game-coordinator" ||
+          !name.includes("/") ||
+          (["art", "gameplay", "tech"].includes(role) &&
+            name.startsWith(`${games[0]}/`)),
+      )
+      .map((name) => ({
+        role: name,
+        harness: "claude",
+        id: long.id,
+        cwd: long.cwd,
+        worktree: long.worktree,
+        checkpoint: long.checkpoint,
+      }));
   for (const role of roles) {
-    const brief = renderBrief(catalog, { ...long, role });
+    const brief = renderBrief(catalog, {
+      ...long,
+      role,
+      contacts: visible(role),
+    });
     assert.ok(brief.includes(long.worktree), role);
     assert.ok(brief.split("\n").length - 1 <= 60, role);
     assert.ok(

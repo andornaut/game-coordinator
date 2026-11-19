@@ -132,6 +132,30 @@ export function catalogHash(catalog) {
 }
 
 /** Context is supplied by the verified startup caller; this function performs no native work. */
+// Game roles collapse per game: `game/{art,gameplay,tech}`.
+function roleNames(names) {
+  const games = new Map();
+  const out = [];
+  for (const name of names) {
+    const [game, type] = name.split("/");
+    if (!type) out.push(name);
+    else if (games.has(game)) games.get(game).push(type);
+    else {
+      games.set(game, [type]);
+      out.push(game);
+    }
+  }
+  return out
+    .map((name) =>
+      games.has(name)
+        ? games.get(name).length > 1
+          ? `${name}/{${games.get(name).join(",")}}`
+          : `${name}/${games.get(name)[0]}`
+        : name,
+    )
+    .join(", ");
+}
+
 export function renderBrief(catalog, context) {
   if (
     !record(context) ||
@@ -210,14 +234,15 @@ export function renderBrief(catalog, context) {
     `Own: ${contract.owns.join("; ")}.`,
     `Boundaries: ${contract.boundaries.join("; ")}.`,
     `Handoffs: ${contract.handoffs.join("; ")}.`,
-    `Shared owners: ${peers.map((type) => `${type}: ${catalog.roles[type].purpose}`).join(" ")}`,
+    `Shared kit owners (purposes in docs/roles.md): ${peers.join(", ")}.`,
     `Protocol: ${catalog.protocol.join(" ")}`,
     `Workflow: ${catalog.workflow.map((step) => `${step.stage} (${step.owner})`).join(" -> ")}.`,
     `Desired tools, not installed proof; verify: core ${contract.tools.required.join(", ")}; task-specific ${contract.tools.whenNeeded.join(", ") || "none"}.`,
-    ...contacts.map(
-      (contact) =>
-        `Contact ${contact.role}: ${contact.harness}/${contact.id}; cwd ${contact.cwd}; worktree ${contact.worktree}; checkpoint ${contact.checkpoint}.`,
-    ),
+    ...(contacts.length
+      ? [
+          `Roles (\`CK msg send --to NAME\`; harness, cwd and checkpoint in var/registry.json): ${roleNames(contacts.map((contact) => contact.role))}.`,
+        ]
+      : []),
     ...tools.map(
       (tool) =>
         `Observed tool ${tool.id}: ${tool.status}${tool.version ? " (" + tool.version + ")" : ""}${tool.reason ? "; " + tool.reason : ""}; ${tool.required ? "required by startup check" : "task-specific"}.`,
