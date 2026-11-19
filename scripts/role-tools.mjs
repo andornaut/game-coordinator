@@ -48,7 +48,7 @@ export function installedMessaging(root) {
     if (
       pkg.name !== "@andornaut/coordination-kit" ||
       typeof pkg.version !== "string" ||
-      !/^1\.\d+\.\d+$/.test(pkg.version) ||
+      !/^2\.\d+\.\d+$/.test(pkg.version) ||
       !pkg.exports?.["./build/registry"] ||
       !pkg.exports?.["./build/transport"] ||
       !statSync(cli).isFile()
@@ -60,7 +60,7 @@ export function installedMessaging(root) {
       status: "missing",
       cli,
       reason:
-        "Coordinator coordination-kit 1.x CLI/canonical build exports missing or incompatible",
+        "Coordinator coordination-kit 2.x CLI/canonical build exports missing or incompatible",
     };
   }
 }

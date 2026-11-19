@@ -822,7 +822,7 @@ test("tool discovery separates required launch failures from optional native cap
       },
     },
     {
-      messaging: () => ({ status: "available", version: "1.0.0" }),
+      messaging: () => ({ status: "available", version: "2.0.0" }),
       probe: (binary, args) => {
         calls.push([binary, args]);
         return binary === "docker"
@@ -947,7 +947,7 @@ test("brief artifacts bind exact identity, contacts and catalog without granting
   );
 });
 
-test("orientation uses root-qualified public queue and guarded dispatch with a stable ID", () => {
+test("orientation is one root-qualified store send that wakes itself, with a stable ID", () => {
   const calls = [];
   const brief = {
     hash: "brief-hash",
@@ -955,27 +955,37 @@ test("orientation uses root-qualified public queue and guarded dispatch with a s
   };
   const send = (args) => {
     calls.push(args);
-    return { state: args.includes("dispatch") ? "ambiguous" : "queued" };
+    return {
+      duplicate: calls.length > 1,
+      message: { state: "sent" },
+      wake: { status: "accepted" },
+    };
   };
   const first = queueOrientation("/repo", slot(), brief, send);
   const second = queueOrientation("/repo", slot(), brief, send);
   assert.equal(first.id, second.id);
-  assert.equal(first.state, "ambiguous");
+  assert.equal(first.state, "sent");
+  assert.equal(first.wake, "accepted");
   assert.equal(first.handling, "unverified");
+  assert.equal(calls.length, 2, "one send per orientation, no dispatch");
   assert.equal(
     calls[0][0],
     "/repo/node_modules/@andornaut/coordination-kit/dist/cli.js",
   );
-  assert.deepEqual(calls[0].slice(1, 7), [
+  assert.deepEqual(calls[0].slice(1), [
     "--root",
     "/repo",
-    "message",
+    "msg",
     "send",
-    "--from",
-    "game-coordinator",
+    "--to",
+    slot().role,
+    "--id",
+    first.id,
+    "--body-file",
+    brief.path,
   ]);
-  assert.ok(calls[1].includes("dispatch"));
-  assert.equal(calls.flat().includes("unblock"), false);
+  for (const flag of ["dispatch", "message", "--from", "unblock"])
+    assert.equal(calls.flat().includes(flag), false, flag);
   const failure = queueOrientation("/repo", slot(), brief, () => {
     throw new Error("private output");
   });
@@ -1031,7 +1041,7 @@ for (const mode of ["normal", "held", "live", "unverified", "missing-core"]) {
       },
       message: (args) => {
         calls.push(args);
-        return { state: "native-accepted" };
+        return { message: { state: "sent" }, wake: { status: "accepted" } };
       },
       output: (text) => {
         output = JSON.parse(text);
@@ -1051,11 +1061,11 @@ for (const mode of ["normal", "held", "live", "unverified", "missing-core"]) {
       return;
     }
     await main(ports, args);
-    const sent = calls.filter((args) => args.includes("message"));
-    assert.equal(sent.length, mode === "normal" ? 2 : 0);
+    const sent = calls.filter((args) => args.includes("msg"));
+    assert.equal(sent.length, mode === "normal" ? 1 : 0);
     assert.equal(
       output.slots[0].orientation.state,
-      mode === "normal" ? "native-accepted" : "not-sent",
+      mode === "normal" ? "sent" : "not-sent",
     );
     if (mode === "live") assert.deepEqual(calls, []);
     const launch = calls.find((args) => args.includes("new-session"));
@@ -1102,11 +1112,11 @@ test("messaging availability requires compatible public message CLI metadata", (
     },
   };
   for (const [version, status] of [
-    ["0.9.0", "missing"],
-    ["1.0.0", "available"],
-    ["1.2.3", "available"],
-    ["1.0.0-rc.1", "missing"],
-    ["2.0.0", "missing"],
+    ["1.3.1", "missing"],
+    ["2.0.0", "available"],
+    ["2.3.4", "available"],
+    ["2.0.0-rc.1", "missing"],
+    ["3.0.0", "missing"],
   ]) {
     writeFileSync(
       join(directory, "package.json"),
@@ -1119,7 +1129,7 @@ test("messaging availability requires compatible public message CLI metadata", (
     JSON.stringify({
       ...metadata,
       name: "@andornaut/delivery-kit",
-      version: "1.0.0",
+      version: "2.0.0",
     }),
   );
   assert.equal(
@@ -1131,7 +1141,7 @@ test("messaging availability requires compatible public message CLI metadata", (
     join(directory, "package.json"),
     JSON.stringify({
       ...metadata,
-      version: "1.0.0",
+      version: "2.0.0",
       exports: {
         "./registry": "./dist/registry.js",
         "./transport": "./dist/transport.js",
@@ -1150,10 +1160,7 @@ test("delayed frontend visibility requires explicit guarded orientation completi
   let visible = false;
   let output;
   const messages = [];
-  const realCli = new URL(
-    "../node_modules/@andornaut/coordination-kit/dist/cli.js",
-    import.meta.url,
-  ).pathname;
+  const stored = new Map();
   const ports = {
     tools: availableTools,
     processes: () => (visible ? [{ ...frontend, cwd: root }] : []),
@@ -1163,14 +1170,22 @@ test("delayed frontend visibility requires explicit guarded orientation completi
     tmux: (args) => (args[0] === "new-session" ? "%1" : ""),
     message: (args) => {
       messages.push(args);
-      // Exercise real public local-queue deduplication; native acceptance uses the transport seam.
-      return args.includes("send")
-        ? JSON.parse(
-            execFileSync(process.execPath, [realCli, ...args.slice(1)], {
-              encoding: "utf8",
-            }),
-          )
-        : { state: "native-accepted" };
+      // The store send seam: a repeated ID with identical content stores nothing new.
+      const option = (name) => args[args.indexOf(name) + 1];
+      const id = option("--id");
+      const record = {
+        id,
+        to: option("--to"),
+        body: readFileSync(option("--body-file"), "utf8"),
+      };
+      const duplicate = stored.has(id);
+      if (duplicate) assert.deepEqual(stored.get(id), record, "id-conflict");
+      stored.set(id, record);
+      return {
+        duplicate,
+        message: { id, state: "sent" },
+        wake: { status: "accepted" },
+      };
     },
     output: (text) => {
       output = JSON.parse(text);
@@ -1186,29 +1201,19 @@ test("delayed frontend visibility requires explicit guarded orientation completi
   assert.deepEqual(messages, []);
   await main(ports, ["brief", "--dispatch", ...selection]);
   const first = output.slots[0].orientation;
-  assert.equal(first.state, "native-accepted");
+  assert.equal(first.state, "sent");
+  assert.equal(first.wake, "accepted");
   assert.equal(first.handling, "unverified");
   await main(ports, ["brief", "--dispatch", ...selection]);
   assert.equal(output.slots[0].orientation.id, first.id);
-  const records = JSON.parse(
-    execFileSync(
-      process.execPath,
-      [
-        realCli,
-        "--root",
-        root,
-        "message",
-        "status",
-        "--recipient",
-        "game-coordinator",
-      ],
-      { encoding: "utf8" },
-    ),
+  assert.equal(messages.length, 2);
+  assert.deepEqual([...stored.keys()], [first.id]);
+  assert.equal(stored.get(first.id).to, "game-coordinator");
+  assert.equal(
+    messages.flat().includes("--intent"),
+    false,
+    "orientation uses the default queue intent",
   );
-  assert.equal(records.length, 1);
-  assert.equal(records[0].id, first.id);
-  assert.equal(records[0].intent, "queue");
-  assert.equal(records[0].attempts, 0);
 });
 
 for (const mode of [

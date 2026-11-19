@@ -8,7 +8,7 @@ These contracts describe duties and desired capabilities. They grant no authorit
 
 - Implement only explicitly approved scope. Preserve repository file ownership maps, WIP, unanswered questions and independent holds.
 - A registry entry, startup brief or available tool grants no activation, write, publication or delivery authority.
-- Communicate directly through the shared role-addressed contract. Guard native dispatch, reconcile ambiguity before retrying and record actual handling separately from transport acceptance.
+- Communicate through the coordination store: msg send is the only payload path between roles, and native messages and channel notifications are wakes only. Run inbox on every wake and close each message with msg done or msg retain; delivery is the recipient read and handling its close, never a wake.
 - Use published pinned kits for shared code. Game repositories never import another game's source.
 - Report exact revisions, checks, limitations and next owners. Source READY and transport acceptance are not completion.
 - Keep proposed, approved, implemented, checked, integrated, deployed and accepted states distinct; approval does not prove runtime behavior.
@@ -108,7 +108,7 @@ Capability IDs are shared by Claude and Codex. Startup checks must report actual
 | --- | --- |
 | repository | Read and edit the selected checkout within its ownership map. |
 | git | Inspect exact revisions and preserve worktrees and uncommitted work. |
-| role-messaging | Read, send and reconcile guarded role-addressed messages through the qualified shared CLI. |
+| role-messaging | Send, read and close store messages (msg send, inbox, msg done, msg retain) through the coordinator-installed CLI. |
 | browser | Inspect actual browser behavior and collect task-relevant visual evidence. |
 | image-generation | Generate or edit authorized raster assets through the image tool. |
 | isolated-checks | Run relevant checks in isolated containers under current resource limits. |

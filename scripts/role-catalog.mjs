@@ -214,8 +214,9 @@ export function renderBrief(catalog, context) {
       (tool) =>
         `Observed tool ${tool.id}: ${tool.status}${tool.version ? " (" + tool.version + ")" : ""}${tool.reason ? "; " + tool.reason : ""}; ${tool.required ? "required by startup check" : "task-specific"}.`,
     ),
-    `Inbox: ${cli} message status --recipient ${quote(context.role)} --include-body`,
-    `Record approved work locally: ${cli} message send --from ${quote(context.role)} --recipient ROLE --id UUID --body-file FILE`,
+    `Inbox: ${cli} inbox --include-body; run it at startup, on every wake and at each safe boundary.`,
+    `Send: ${cli} msg send --to ROLE --body-file FILE is the only payload path between roles; native messages and channel notifications are wakes only.`,
+    `Close: ${cli} msg done ID, or ${cli} msg retain ID --reason TEXT --next-boundary TEXT.`,
     `References: ${catalog.references.map((reference) => `${reference.label}: ${resolve(context.root, reference.path)}`).join("; ")}.`,
     `Catalog: ${catalogHash(catalog)}`,
     "",

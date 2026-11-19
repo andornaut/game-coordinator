@@ -181,23 +181,23 @@ export function queueOrientation(
     root,
   ];
   try {
-    const queued = invoke([
+    // msg send stores the brief, then attempts one guarded wake itself; the
+    // sender is the caller's registry binding, and a repeated ID retries only the wake.
+    const sent = invoke([
       ...prefix,
-      "message",
+      "msg",
       "send",
-      "--from",
-      "game-coordinator",
-      "--recipient",
+      "--to",
       slot.role,
       "--id",
       id,
       "--body-file",
       brief.path,
     ]);
-    const result = invoke([...prefix, "message", "dispatch", "--id", id]);
     return {
       id,
-      state: result.state ?? queued.state ?? "unknown",
+      state: sent.message?.state ?? "unknown",
+      wake: sent.wake?.status ?? "unknown",
       handling: "unverified",
     };
   } catch {
@@ -206,7 +206,7 @@ export function queueOrientation(
       state: "unavailable",
       handling: "unverified",
       reason:
-        "Public message command unavailable; retain exact ID and inspect its receipt before any retry",
+        "Store message command unavailable or refused; resend with the same ID, which stores nothing new",
     };
   }
 }

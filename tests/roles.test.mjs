@@ -139,7 +139,14 @@ test("both harness briefs retain exact caller identity and holds without grantin
         "'/coordinator/node_modules/@andornaut/coordination-kit/dist/cli.js' --root '/coordinator'",
       ),
     );
-    assert.ok(brief.includes("--recipient 'example-game/tech' --include-body"));
+    for (const verb of [
+      "--root '/coordinator' inbox --include-body",
+      "--root '/coordinator' msg send --to ROLE --body-file FILE",
+      "--root '/coordinator' msg done ID",
+      "--root '/coordinator' msg retain ID --reason TEXT --next-boundary TEXT",
+    ])
+      assert.ok(brief.includes(verb), verb);
+    assert.doesNotMatch(brief, /message (send|status|dispatch)|--from/);
     assert.doesNotMatch(
       brief,
       /--resume|--session-id|turn\/start|thread\/queue\/add/,
