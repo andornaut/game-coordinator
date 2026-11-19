@@ -172,7 +172,8 @@ Games never import, link or depend on another game's source tree. Reuse code thr
 Every game and kit repository records design and approved work as committed files.
 
 - `docs/design/<area>.md` holds a short design summary and an index table of ID, title and link, with no status column.
-- Each approved task is `docs/work/<id>.md`. Its front matter holds `id`, `title`, `status` (milestone only: `approved`, `done`, `cancelled` or `superseded`), the approval reference, the design area, related IDs and `supersedes`. Its sections are scope, criteria, decisions and outcome.
+- Every user request is `docs/work/<id>.md`, approved or not. Its front matter holds `id`, `title`, `status` (milestone only: `proposed` until the user approves, `approved`, `done`, `declined` when the user declines, `cancelled` or `superseded`), the approval or request reference, the design area, related IDs and `supersedes`. Its sections are scope, criteria, decisions and outcome.
+- `coordination-kit status` derives each item's progress (requested, in progress, landed, deployed) from work files, protocol state, the commit on `main` that set `status: done` and the delivery record; `--audit` lists every user request with its evidence.
 - Live progress (claimed, in progress, blocked, ready, receipts and acceptance) stays in the protocol state root, not in work files.
 - Only `main` edits index tables and approved scope. Approval commits the work-file stub and its index row on `main`; that commit allocates the ID. Workers edit only their own work file and the design prose that ships with their feature. Integration sets `status: done` in the merge.
 - A changed or reverted decision is a new work item with `supersedes`; never rewrite a finished item's outcome.
