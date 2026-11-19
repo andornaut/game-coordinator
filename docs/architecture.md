@@ -4,7 +4,7 @@ How the games, the shared kits and the agent sessions fit together. This page is
 
 ```text
                           game-coordinator role
-          routing, scheduled reviews, shared policy, approval ledger
+          routing, scheduled reviews, shared policy, status audit
                                     |
          +----------------- coordination-kit -----------------+
          | role registry, coordination store, request ledger, |
@@ -30,7 +30,7 @@ Every game has three permanent roles, Art, Gameplay and Tech. Each kit has one r
 - Art and Gameplay design and build within their scope on their own branches.
 - Tech owns the game's `main`: it integrates reviewed work, runs the checks and owns the game's kit pins and runner.
 - Kit roles own their kit's source, interfaces, checks and releases.
-- game-coordinator owns shared policy, routing, the registry, the approval ledger and the scheduled reviews. It coordinates; it does not implement game or kit work.
+- game-coordinator owns shared policy, routing, the registry, the scheduled reviews and the status audit. It coordinates; it does not implement game or kit work.
 
 Substantive work goes to short-lived workers, each in its own worktree and branch. The parent role reviews and integrates their results.
 
@@ -41,7 +41,7 @@ The [role catalog](roles.md), generated from `roles.json`, is the authoritative 
 [coordination-kit](https://github.com/andornaut/coordination-kit) is the common contract every role uses through one CLI installed at the game-coordinator root, invoked as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root>`.
 
 - **Registry.** `var/registry.json` maps each role name to its current conversation per harness and its worktree. Senders always address roles by name. Every send resolves the recipient's current conversation, so a relaunched or transferred session keeps receiving messages without changes elsewhere. The registry binding is also the writer fence: a writing command is accepted only from the role whose effective binding equals the caller's native conversation ID.
-- **Coordination store.** `coordination.db`, a SQLite file in the protocol state root, holds an append-only, hash-chained event log and the message projections built from it. Review briefs and ingested runner events are stored there too, as messages from `delivery-kit`.
+- **Coordination store.** `coordination.db`, a SQLite file in the protocol state root, holds an append-only, hash-chained event log and the message, work, question and hold projections built from it. Review briefs and ingested runner events are stored there too, as messages from `delivery-kit`.
 - **Messages.** Store first, wake second, pull third:
   1. `msg send` commits the message to the store. Nothing native happens before that commit.
   2. The store attempts at most one outstanding wake per recipient, skipping unregistered, unbound and held recipients. A wake carries no content, only `N new messages for ROLE: run coordination-kit inbox`. Claude wakes through a per-conversation wake file that the channel server announces; Codex wakes through one guarded control-socket queue add. A wake outcome is logged apart from message state.
@@ -70,12 +70,12 @@ There is no release queue, rollback or revert. A failed gate or CI run is fixed 
 ## How work flows
 
 1. The user approves work, in the owning role's session or relayed through game-coordinator.
-2. The owner records the approved work reference and starts it. Cross-role needs travel as role-addressed messages.
+2. The owner starts the approved work file with `work start`. Cross-role needs travel as role-addressed messages.
 3. Art and Gameplay hand finished branches to Tech, which reviews, runs focused checks and integrates into local `main`.
 4. delivery-kit ships `main` at the next slot and reports gate, push, CI and deploy.
-5. game-coordinator follows the reports, routes any failure to the owning Tech and closes acceptance in the [approval ledger](approval-ledger.md).
+5. game-coordinator follows the reports, routes any failure to the owning Tech and audits acceptance with `coordination-kit status`. Owners record evidence and finish through the [work lifecycle](game-policies.md#work-lifecycle).
 
-Work records live with their repository: `docs/design/` holds the current rules for each area and `docs/work/` holds one file per approved task. Live progress stays in the protocol state, not in Git. The [Design and work files](game-policies.md#design-and-work-files) policy defines the convention.
+Work records live with their repository: `docs/design/` holds the current rules for each area and `docs/work/` holds one file per request. Live progress is coordination-store records, not Git. The [Design and work files](game-policies.md#design-and-work-files) policy defines the convention.
 
 ## Scheduled reviews
 
@@ -91,7 +91,7 @@ At each :30 review, game-coordinator:
 ## Ownership and authority
 
 - Only the user makes decisions. Roles ask through structured prompts with a recommendation first, and an unanswered question blocks only the work that depends on it.
-- Each role writes only its own protocol namespace, worktree and records. game-coordinator alone writes the approval ledger and the registry.
+- Each role writes only its own protocol namespace, worktree and records. Only the owner writes its work, question and hold records. game-coordinator alone writes the registry.
 - Delivery is never paused for polish. Required red gates, game-breaking failures and explicit user pauses are the only delivery blockers.
 - Shared product rules live in [game policies](game-policies.md); game-specific specifications stay with each game.
 

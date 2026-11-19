@@ -224,7 +224,10 @@ test("generated docs retain workflow boundaries, canonical references and actual
   for (const reference of catalog.references)
     assert.ok(docs.includes(`](${reference.path.slice(5)})`));
   assert.match(docs, /After confirmed transfer: queue admission/);
-  assert.match(docs, /coordinator alone writes the approval ledger/);
+  assert.match(
+    docs,
+    /Tech verifies interactions; the item owner records work evidence and work finish/,
+  );
   assert.match(docs, /existing runners execute game delivery gates/);
   assert.match(docs, /file ownership maps remain authoritative/);
   assert.doesNotMatch(

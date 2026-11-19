@@ -26,7 +26,7 @@ The shared [communication contract](docs/game-policies.md#communication) defines
 
 ## Delivery
 
-The [development and delivery policy](docs/game-policies.md#development-and-delivery) defines integration and release eligibility; the [approval ledger](docs/approval-ledger.md) tracks acceptance.
+The [development and delivery policy](docs/game-policies.md#development-and-delivery) defines integration and release eligibility; the [work lifecycle](docs/game-policies.md#work-lifecycle) records progress, evidence and acceptance.
 
 1. Art and Gameplay hand Tech an exact branch and commit. Tech reviews it, merges it into the game's local `main` once its tests pass, and deletes the branch. Kits merge their own approved work the same way.
 2. Each game uses at most one resident delivery-kit runner. Hourly departures are alphabetical in America/Toronto: Ada the Navigator at :00, Archie at :10 and Chibi at :20. Each game's delivery control enables or pauses its departures.
@@ -143,7 +143,7 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 | `README.md`                         | yes       | This overview                                                                                                                                    |
 | `config.json`                       | yes       | Kit configuration: games, kits, role names and the review schedule                                                                               |
 | `roles.json`                        | yes       | Role catalog source for the generated `docs/roles.md`                                                                                            |
-| `docs/`                             | yes       | Architecture overview, cross-game policies, the approval ledger contract and the generated role catalog                                          |
+| `docs/`                             | yes       | Architecture overview, cross-game policies and the generated role catalog                                                                        |
 | `scripts/`                          | yes       | The role catalog generator (`role-catalog.mjs`) and the session helper (`sessions.mjs` and its modules)                                          |
 | `tests/`                            | yes       | Role catalog and session tests; `container/` holds the isolated check wrappers                                                                   |
 | `Makefile`                          | yes       | `make check` and `make lint` entry points                                                                                                        |

@@ -36,8 +36,8 @@
     },
     {
       "stage": "Remaining acceptance",
-      "owner": "Art reviews artifacts; Tech verifies interactions; coordinator alone writes the approval ledger",
-      "evidence": "Scoped proof closes exact clauses; visual acceptance can remain open after delivery."
+      "owner": "Art reviews artifacts; Tech verifies interactions; the item owner records work evidence and work finish",
+      "evidence": "A worker's work ready is a handoff; scoped proof closes exact clauses, and visual acceptance can remain open after delivery."
     }
   ],
   "tools": {
@@ -252,7 +252,7 @@
       "owns": [
         "Desired controls, registry routing, backlog reconciliation and dependency triage",
         "After confirmed transfer: queue admission, gate/CI/deploy tracking and operational resource accounting",
-        "The approval ledger and exact delivery closure"
+        "Work-status audit and delivery reconciliation through coordination-kit status"
       ],
       "boundaries": [
         "No game implementation or kit source ownership",
@@ -281,11 +281,11 @@
     },
     {
       "label": "Art review",
-      "path": "docs/approval-ledger.md#art-review"
+      "path": "docs/game-policies.md#art-review"
     },
     {
-      "label": "Approval ledger",
-      "path": "docs/approval-ledger.md"
+      "label": "Work lifecycle",
+      "path": "docs/game-policies.md#work-lifecycle"
     }
   ]
 }

@@ -22,7 +22,7 @@ These contracts describe duties and desired capabilities. They grant no authorit
 | Focused proof and review | Workers, then game Tech or kit main | Relevant checks and a reviewed exact SHA, base and dependencies. |
 | Required full gate | Integration owner | Combined checks on the exact integrated revision; existing runners execute game delivery gates. |
 | CI, publication and deployment | Kit owner publishes kits; coordinator tracks approved game delivery; runner executes | Exact-revision CI and immutable publication or deployment receipts. Consumer adoption remains separate. |
-| Remaining acceptance | Art reviews artifacts; Tech verifies interactions; coordinator alone writes the approval ledger | Scoped proof closes exact clauses; visual acceptance can remain open after delivery. |
+| Remaining acceptance | Art reviews artifacts; Tech verifies interactions; the item owner records work evidence and work finish | A worker's work ready is a handoff; scoped proof closes exact clauses, and visual acceptance can remain open after delivery. |
 
 ## Roles
 
@@ -95,7 +95,7 @@ Own reusable cross-harness coordination infrastructure: role registry, messaging
 
 Coordinate roles, shared policy, decisions and approved operational delivery.
 
-- Owns: Desired controls, registry routing, backlog reconciliation and dependency triage; After confirmed transfer: queue admission, gate/CI/deploy tracking and operational resource accounting; The approval ledger and exact delivery closure.
+- Owns: Desired controls, registry routing, backlog reconciliation and dependency triage; After confirmed transfer: queue admission, gate/CI/deploy tracking and operational resource accounting; Work-status audit and delivery reconciliation through coordination-kit status.
 - Boundaries: No game implementation or kit source ownership; Operational transfer requires explicit source hold, verified target acceptance and activation; Existing runners execute; no manual departures, new timers or inferred question clearance.
 - Handoffs: Route user intent and dependencies to the scoped owner; collect actual handling and proof; Give existing runners Tech-approved exact revisions; route failures to Tech and retain unresolved acceptance.
 - Desired tools: core repository, git, role-messaging; task-specific native-session, registry, delivery-observation, isolated-checks.
@@ -120,5 +120,5 @@ Capability IDs are shared by Claude and Codex. Startup checks must report actual
 ## References
 
 - [Shared policies](game-policies.md)
-- [Art review](approval-ledger.md#art-review)
-- [Approval ledger](approval-ledger.md)
+- [Art review](game-policies.md#art-review)
+- [Work lifecycle](game-policies.md#work-lifecycle)

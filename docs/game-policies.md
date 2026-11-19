@@ -4,7 +4,7 @@ These policies apply to every current and future game. Game-specific rules and e
 
 ## Ownership and communication
 
-The game-coordinator owns cross-game policy coordination, documentation and communication. Keep shared principles here and game-specific specifications with their game. Repository documentation is the source of truth for each project's current specifications. The [approval ledger contract](approval-ledger.md) defines acceptance evidence and delivery closure.
+The game-coordinator owns cross-game policy coordination, documentation and communication. Keep shared principles here and game-specific specifications with their game. Repository documentation is the source of truth for each project's current specifications. The [work lifecycle](#work-lifecycle) defines how progress, evidence, questions and holds are recorded.
 
 When defining or changing a policy:
 
@@ -173,10 +173,31 @@ Every game and kit repository records design and approved work as committed file
 
 - `docs/design/<area>.md` holds a short design summary and an index table of ID, title and link, with no status column.
 - Every user request is `docs/work/<id>.md`, approved or not. Its front matter holds `id`, `title`, `status` (milestone only: `proposed` until the user approves, `approved`, `done`, `declined` when the user declines, `cancelled` or `superseded`), the approval or request reference, the design area, related IDs and `supersedes`. Its sections are scope, criteria, decisions and outcome.
-- `coordination-kit status` derives each item's progress (requested, in progress, landed, deployed) from work files, protocol state, the commit on `main` that set `status: done` and the delivery record; `--audit` lists every user request with its evidence.
-- Live progress (claimed, in progress, blocked, ready, receipts and acceptance) stays in the protocol state root, not in work files.
+- Live progress (started, blocked, ready, finished, evidence and retained items) is coordination-store records written through the [work lifecycle](#work-lifecycle) verbs, not work-file content.
 - Only `main` edits index tables and approved scope. Approval commits the work-file stub and its index row on `main`; that commit allocates the ID. Workers edit only their own work file and the design prose that ships with their feature. Integration sets `status: done` in the merge.
 - A changed or reverted decision is a new work item with `supersedes`; never rewrite a finished item's outcome.
 - Work files are public. Use short approval references such as "user, 2026-11-18, option b"; never record session IDs, hostnames or quoted conversation.
 - Condense old history only on request, and verify that no open item or live link is dropped.
 - Docs-only changes run only the attribution and lint checks. Split CI so a first job detects changed paths, lint always runs, and heavier jobs are skipped by condition; games never serve or package `docs/`.
+
+## Work lifecycle
+
+Work files and their coordination-store records are the single source of truth for every request. Run the verbs through the coordinator-installed CLI: the `work` verbs read `--root` as the repository and take the coordinator from `COORDINATION_KIT_ROOT`; `question`, `hold`, `status` and `graph` read `--root` as the coordinator. Every write is accepted only from the record's owner under the registry fence; a worker writes under its parent's binding. Work records add no admission gate and never change delivery controls.
+
+- **Requests.** Every user request is a work file under [Design and work files](#design-and-work-files), `proposed` until approved. There is no other request record.
+- **Progress.** The item's owner records `work start` (approved on `main`, no covering hold), `work block --reason TEXT --owner ROLE` naming the role that can clear it, `work unblock`, `work ready`, and `work finish` once integration has set `status: done` on `main`. A cross-role child request starts with `--parent REPOSITORY:WORK_ID`. `work show` and `work history` read an item's record, covering holds and events.
+- **Evidence.** `work evidence ID --stage STAGE --sha SHA [--ref REF]` records each stage commit: `implemented`, `merged`, `verified`, `published` (kits only) and `deployed`. References name receipts, never logs or secrets. Evidence continues after `work finish` while acceptance stays open. Kit publication, consumer adoption and each game's deployment are separate targets.
+- **Acceptance.** A worker's `work ready` is a handoff, not completion. Tech verifies real interactions and state changes on the integrated revision, activating controls and observing their effects; source presence, screenshots and worker reports alone are not interaction proof. The owner records `verified` evidence and `work finish` after that proof. Missing coverage stays open as a block or retained item with its owner and next boundary, and adds no delivery hold.
+- **Questions.** A user decision is a structured prompt in the owner's own pane plus a `question open --title TEXT [--work WORK_ID] [--options-file FILE]` record. After the user's explicit answer the owner runs `question answer --id ID --work WORK_ID --text TEXT`, which records the decision and appends its decision line, unstaged, to the work file in the main checkout for the owner's next commit. `question cancel --id ID --reason TEXT` records an explicit cancellation. A pending question withholds the owner's wakes.
+- **Holds.** `hold set --id ID --scope work:WORK_ID|role|game:ID --reason TEXT` records a hold and `hold release --id ID` releases it. A work hold covers one item, a role hold every item its owner owns, and a game hold every item in that game's repository; a covering hold refuses `work start`. Only a role hold withholds the owner's wakes. An imported hold with no registered owner goes to the user through game-coordinator.
+- **Status and audit.** `coordination-kit status` derives each item's status (requested, in progress, landed, deployed, done) from work files, store records, the commit on `main` that set `status: done` and the delivery record; `--audit` lists every user request with its evidence and `--format markdown` prints the digest. `question list --state pending` and `hold list --state active` list open questions and holds, and `graph` shows decisions and their supersedes chains. Unavailable output is reported as unavailable, never as clearance.
+
+Only the owner answers, cancels or releases its own records. Never answer, cancel or clear another owner's question or hold.
+
+### Art review
+
+All Art owners and workers inspect each actual mockup and production artifact before presenting it or recording `work ready` or `work finish`. Compare against cumulative latest instructions, applicable approved references and the specification; preserve approved details unless explicitly superseded.
+
+Check affected states, views and sizes, including visible pixel geometry and occlusion; DOM bounds alone are insufficient. Record the artifact or source pin and disclose deviations and unverified limits. Present incomplete or nonconforming work as WIP with its differences stated.
+
+Art review adds no delivery hold; the fix-forward policy remains in force.
