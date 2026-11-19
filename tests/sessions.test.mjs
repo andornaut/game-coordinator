@@ -1108,15 +1108,14 @@ test("messaging availability requires compatible public message CLI metadata", (
     name: "@andornaut/coordination-kit",
     exports: {
       "./build/registry": "./dist/registry.js",
-      "./build/transport": "./dist/transport.js",
     },
   };
   for (const [version, status] of [
-    ["1.3.1", "missing"],
-    ["2.0.0", "available"],
-    ["2.3.4", "available"],
-    ["2.0.0-rc.1", "missing"],
-    ["3.0.0", "missing"],
+    ["2.1.2", "missing"],
+    ["3.0.0", "available"],
+    ["3.4.5", "available"],
+    ["3.0.0-rc.1", "missing"],
+    ["4.0.0", "missing"],
   ]) {
     writeFileSync(
       join(directory, "package.json"),
@@ -1129,7 +1128,7 @@ test("messaging availability requires compatible public message CLI metadata", (
     JSON.stringify({
       ...metadata,
       name: "@andornaut/delivery-kit",
-      version: "2.0.0",
+      version: "3.0.0",
     }),
   );
   assert.equal(
@@ -1141,10 +1140,9 @@ test("messaging availability requires compatible public message CLI metadata", (
     join(directory, "package.json"),
     JSON.stringify({
       ...metadata,
-      version: "2.0.0",
+      version: "3.0.0",
       exports: {
         "./registry": "./dist/registry.js",
-        "./transport": "./dist/transport.js",
       },
     }),
   );

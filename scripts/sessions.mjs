@@ -13,7 +13,8 @@ import {
   realpathSync,
   writeFileSync,
 } from "node:fs";
-import { resolve } from "node:path";
+import { isAbsolute, resolve } from "node:path";
+import { homedir } from "node:os";
 import { createConnection } from "node:net";
 import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
@@ -21,7 +22,6 @@ import {
   loadLayout,
   readRegistry,
 } from "@andornaut/coordination-kit/build/registry";
-import { resolveCodexControlSocket } from "@andornaut/coordination-kit/build/transport";
 import {
   catalogHash,
   loadCatalog,
@@ -38,8 +38,18 @@ import {
   verification,
 } from "./session-plan.mjs";
 
+// The explicit CODEX_CONTROL_SOCKET, else the managed app-server socket; an invalid override fails closed.
 export function controlSocket(env = process.env) {
-  return resolveCodexControlSocket({ env }).path;
+  if (Object.hasOwn(env, "CODEX_CONTROL_SOCKET")) {
+    const value = env.CODEX_CONTROL_SOCKET;
+    if (!value || !isAbsolute(value))
+      throw new Error("CODEX_CONTROL_SOCKET must be an absolute path");
+    return value;
+  }
+  return resolve(
+    homedir(),
+    ".codex/app-server-control/app-server-control.sock",
+  );
 }
 
 export function checkpointFor(root, role) {

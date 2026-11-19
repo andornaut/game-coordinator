@@ -48,9 +48,8 @@ export function installedMessaging(root) {
     if (
       pkg.name !== "@andornaut/coordination-kit" ||
       typeof pkg.version !== "string" ||
-      !/^2\.\d+\.\d+$/.test(pkg.version) ||
+      !/^3\.\d+\.\d+$/.test(pkg.version) ||
       !pkg.exports?.["./build/registry"] ||
-      !pkg.exports?.["./build/transport"] ||
       !statSync(cli).isFile()
     )
       throw new Error("Unsupported installed CLI metadata");
