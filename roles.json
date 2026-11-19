@@ -1,12 +1,12 @@
 {
   "schema": 1,
   "protocol": [
-    "Implement only explicitly approved scope. Preserve repository file ownership maps, WIP, unanswered questions and independent holds.",
-    "A registry entry, startup brief or available tool grants no activation, write, publication or delivery authority.",
-    "Communicate through the coordination store: msg send is the only payload path between roles, and native messages and channel notifications are wakes only. Run inbox on every wake and close each message with msg done or msg retain; delivery is the recipient read and handling its close, never a wake.",
-    "Use published pinned kits for shared code. Game repositories never import another game's source.",
-    "Report exact revisions, checks, limitations and next owners. Source READY and transport acceptance are not completion.",
-    "Keep proposed, approved, implemented, checked, integrated, deployed and accepted states distinct; approval does not prove runtime behavior."
+    "Implement only explicitly approved scope; preserve file ownership maps, WIP, unanswered questions and independent holds.",
+    "Registry entries, briefs and available tools grant no activation, write, publication or delivery authority.",
+    "msg send is the only payload path between roles; native messages and notifications only wake. Run inbox at startup, each wake and each safe boundary, and close every message (delivery is the read, handling the close).",
+    "Share code only through published pinned kits; games never import another game's source.",
+    "Report exact revisions, checks, limitations and next owners; source READY, work ready and transport acceptance are not completion.",
+    "Keep proposed, approved, implemented, checked, integrated, deployed and accepted distinct; approval does not prove runtime behavior."
   ],
   "workflow": [
     {
@@ -16,7 +16,7 @@
     },
     {
       "stage": "Implementation",
-      "owner": "Owning role and assigned workers",
+      "owner": "Owning role and workers",
       "evidence": "Changes within the repository ownership map."
     },
     {
@@ -31,12 +31,12 @@
     },
     {
       "stage": "CI, publication and deployment",
-      "owner": "Kit owner publishes kits; coordinator tracks approved game delivery; runner executes",
+      "owner": "Kit owner publishes; coordinator tracks game delivery; runner executes",
       "evidence": "Exact-revision CI and immutable publication or deployment evidence. Consumer adoption remains separate."
     },
     {
       "stage": "Remaining acceptance",
-      "owner": "Art reviews artifacts; Tech verifies interactions; the item owner records work evidence and work finish",
+      "owner": "Art reviews artifacts; Tech verifies interactions; item owner records evidence and finish",
       "evidence": "A worker's work ready is a handoff; scoped proof closes exact clauses, and visual acceptance can remain open after delivery."
     }
   ],
@@ -82,7 +82,7 @@
         "Actual artifact review against cumulative requirements before READY"
       ],
       "boundaries": [
-        "Respect the game's file ownership map and approved details",
+        "Preserve approved details",
         "No gameplay rules, integration or delivery authority"
       ],
       "handoffs": [
@@ -109,13 +109,13 @@
         "Exact native decision references in ignored local audit artifacts"
       ],
       "boundaries": [
-        "Respect the game's file ownership map and existing approvals",
+        "Preserve existing approvals",
         "No asset, integration, publication or operational authority"
       ],
       "handoffs": [
-        "Give Tech precise approved behavior and acceptance cases, preserving proposed and unresolved scope",
+        "Give Tech precise approved behavior and acceptance cases",
         "Pair design-document updates with implementation and reconcile superseded rules into a consistent current specification",
-        "Route reusable gameplay contracts to game-kit and global policy questions to game-coordinator"
+        "Route reusable contracts to game-kit and global policy questions to game-coordinator"
       ],
       "tools": {
         "required": ["repository", "git", "role-messaging"],
@@ -151,7 +151,7 @@
     "art-kit": {
       "name": "art-kit",
       "scope": "shared",
-      "purpose": "Own reusable art tooling and asset-processing contracts.",
+      "purpose": "Own reusable art tooling and asset contracts.",
       "owns": [
         "Kit source, tests, documentation and checked publication",
         "Actual artifact review and explicit consumer-facing asset contracts"
@@ -203,7 +203,7 @@
     "delivery-kit": {
       "name": "delivery-kit",
       "scope": "shared",
-      "purpose": "Own reusable scheduled delivery infrastructure: resident runner, gate, push, CI watch and deploy.",
+      "purpose": "Own reusable scheduled delivery: runner, gate, push, CI watch and deploy.",
       "owns": [
         "Kit source, tests, documentation and checked publication",
         "Runner, delivery control, request and configuration-check contracts for every game"
@@ -228,7 +228,7 @@
     "coordination-kit": {
       "name": "coordination-kit",
       "scope": "shared",
-      "purpose": "Own reusable cross-harness coordination infrastructure: role registry, coordination store, messaging, harness adapters and work records.",
+      "purpose": "Own reusable cross-harness coordination: registry, store, messaging, harness adapters, work records.",
       "owns": [
         "Kit source, tests, documentation and checked publication",
         "Common registry, store, messaging, wake, harness adapter, session, handoff, work, question and hold contracts across Claude and Codex, plus work-file check and report commands"
@@ -252,12 +252,12 @@
       "owns": [
         "Desired controls, registry routing, backlog reconciliation and dependency triage",
         "After confirmed transfer: queue admission, gate/CI/deploy tracking and operational resource limits",
-        "Work-status audit and delivery reconciliation through coordination-kit status"
+        "Work-status and delivery audit through coordination-kit status"
       ],
       "boundaries": [
         "No game implementation or kit source ownership",
         "Operational transfer requires explicit source hold, verified target acceptance and activation",
-        "Existing runners execute; no manual departures, new timers or inferred question clearance"
+        "No manual departures, new timers or inferred question clearance"
       ],
       "handoffs": [
         "Route user intent and dependencies to the scoped owner; collect actual handling and proof",

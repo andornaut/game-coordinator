@@ -112,21 +112,24 @@ test("both harness briefs retain exact caller identity and holds without grantin
     for (const value of [
       context.id,
       context.cwd,
-      context.worktree,
-      context.checkpoint,
+      ".worktrees/tech under the native cwd",
+      "var/handoffs/games/example-game/tech/current.md under COORDINATION_KIT_ROOT",
       "registry revision: 42",
       "Handoff HOLD: preserve",
     ])
       assert.ok(brief.includes(value));
     assert.match(
       brief,
-      /grants no activation, write, publication or delivery authority/,
+      /grant no activation, write, publication or delivery authority/,
     );
-    assert.match(brief, /preserve independent holds and pending questions/);
+    assert.match(
+      brief,
+      /preserve file ownership maps, WIP, unanswered questions and independent holds/,
+    );
     assert.match(brief, /Desired tools, not installed proof/);
     assert.match(
       brief,
-      /Source READY and transport acceptance are not completion/,
+      /source READY, work ready and transport acceptance are not completion/,
     );
     for (const role of [
       "game-coordinator",
@@ -138,15 +141,15 @@ test("both harness briefs retain exact caller identity and holds without grantin
       assert.ok(brief.includes(`${role}: ${catalog.roles[role].purpose}`));
     assert.ok(
       brief.includes(
-        "'/coordinator/node_modules/@andornaut/coordination-kit/dist/cli.js' --root '/coordinator'",
+        "COORDINATION_KIT_ROOT='/coordinator' node '/coordinator/node_modules/@andornaut/coordination-kit/dist/cli.js'",
       ),
     );
     for (const verb of [
-      "--root '/coordinator' session start",
-      "--root '/coordinator' inbox --include-body",
-      "--root '/coordinator' msg send --to ROLE --body-file FILE",
-      "--root '/coordinator' msg done ID",
-      "--root '/coordinator' msg retain ID --reason TEXT --next-boundary TEXT",
+      "`CK session start`",
+      "`CK inbox --include-body`",
+      "`CK msg send --to ROLE --body-file FILE`",
+      "`CK msg done ID`",
+      "`CK msg retain ID --reason TEXT --next-boundary TEXT`",
     ])
       assert.ok(brief.includes(verb), verb);
     assert.doesNotMatch(brief, /message (send|status|dispatch)|--from/);
@@ -193,10 +196,7 @@ test("brief observations remain supplied evidence and retain unavailable tool st
     brief,
     /browser: unavailable; native capability not inspected; task-specific/,
   );
-  assert.match(
-    brief,
-    /Handoff HOLD: none asserted; preserve independent holds/,
-  );
+  assert.match(brief, /Handoff HOLD: none asserted\./);
   assert.throws(
     () =>
       renderBrief(catalog, {
@@ -229,7 +229,7 @@ test("generated docs retain workflow boundaries, canonical references and actual
   assert.match(docs, /After confirmed transfer: queue admission/);
   assert.match(
     docs,
-    /Tech verifies interactions; the item owner records work evidence and work finish/,
+    /Tech verifies interactions; item owner records evidence and finish/,
   );
   assert.match(docs, /existing runners execute game delivery gates/);
   assert.match(docs, /file ownership maps remain authoritative/);
@@ -271,10 +271,37 @@ test("docs/roles.md and every role brief match what roles.json produces", () => 
       ...onDisk.protocol,
       ...onDisk.workflow.map((step) => `${step.stage} (${step.owner})`),
       `core ${contract.tools.required.join(", ")};`,
-      `Catalog: ${catalogHash(onDisk)}`,
+      `Catalog: ${catalogHash(onDisk).slice(0, 16)}`,
     ])
       assert.ok(brief.includes(value), `${role}: ${value}`);
     assert.doesNotMatch(brief, retired, role);
+  }
+});
+
+test("every role brief stays within 60 lines and 4 KB with long absolute paths", () => {
+  const coordinator =
+    "/home/example-operator/src/github.com/example-organization/game-coordinator-main";
+  const long = {
+    root: coordinator,
+    harness: "codex",
+    id: "019a7f3e-5b2c-7d41-9e8f-0123456789ab",
+    cwd: "/home/example-operator/src/github.com/example-organization/example-game-repository",
+    worktree:
+      "/home/example-operator/src/github.com/example-organization/example-game-worktrees",
+    checkpoint: `${coordinator}/var/handoffs/games/example-game/gameplay/current.md`,
+    registryRevision: 1234,
+    held: true,
+  };
+  for (const path of [long.root, long.cwd, long.worktree])
+    assert.ok(path.length >= 80, path);
+  for (const role of roles) {
+    const brief = renderBrief(catalog, { ...long, role });
+    assert.ok(brief.includes(long.worktree), role);
+    assert.ok(brief.split("\n").length - 1 <= 60, role);
+    assert.ok(
+      Buffer.byteLength(brief) <= 4096,
+      `${role}: ${Buffer.byteLength(brief)} bytes`,
+    );
   }
 });
 
@@ -328,10 +355,7 @@ test("role briefs name only coordination-kit verbs the installed commands.md lis
     ["a b", "c"],
   );
   assert.ok(!known.has("message send") && !known.has("protocol boundary"));
-  assert.deepEqual(
-    [...briefVerbs("x/coordination-kit/dist/cli.js' --root '/r' message send")],
-    ["message send"],
-  );
+  assert.deepEqual([...briefVerbs("`CK message send`")], ["message send"]);
 });
 
 test("generation and check distinguish missing or stale output without changing it", () => {

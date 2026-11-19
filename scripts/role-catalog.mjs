@@ -183,34 +183,37 @@ export function renderBrief(catalog, context) {
         "node_modules/@andornaut/coordination-kit/dist/cli.js",
       ),
     );
-  const cli = `${node} --root ${quote(context.root)}`;
-  // The work verbs read --root as the repository and the coordinator only from the environment.
-  const work = `COORDINATION_KIT_ROOT=${quote(context.root)} ${node}`;
+  const under = (base, path, name) =>
+    path.startsWith(base.replace(/\/$/, "") + "/") && path !== base
+      ? `${path.slice(base.replace(/\/$/, "").length + 1)} under ${name}`
+      : path;
   const handoff =
     contract.type === "game-coordinator"
-      ? `${cli} handoff open|state|ready|active|show`
-      : `${cli} handoff ready|active|show; game-coordinator alone opens handoffs and sets their state`;
+      ? "`CK handoff open|state|ready|active|show`"
+      : "`CK handoff ready|active|show`; only game-coordinator opens handoffs and sets state";
   const peers = [
     "game-coordinator",
     "art-kit",
     "game-kit",
     "delivery-kit",
     "coordination-kit",
-  ];
+  ].filter((type) => type !== contract.type);
   return [
-    `Role: ${context.role} (${context.harness})`,
-    `Registered conversation: ${context.id}; registry revision: ${context.registryRevision}.`,
-    `Coordinator root: ${context.root}; native cwd: ${context.cwd}; role worktree: ${context.worktree}.`,
-    `Checkpoint: ${context.checkpoint}. Handoff HOLD: ${context.held ? "preserve" : "none asserted"}; preserve independent holds and pending questions.`,
+    `Role: ${context.role} (${context.harness}); conversation ${context.id}; registry revision: ${context.registryRevision}.`,
+    // Every verb takes the coordinator from the environment; work verbs read --root as the repository.
+    `CK is: COORDINATION_KIT_ROOT=${quote(context.root)} ${node}. Run work verbs from the repository checkout.`,
+    `Native cwd: ${context.cwd}`,
+    `Role worktree: ${under(context.cwd, context.worktree, "the native cwd")}`,
+    `Checkpoint: ${under(context.root, context.checkpoint, "COORDINATION_KIT_ROOT")}`,
+    `Handoff HOLD: ${context.held ? "preserve" : "none asserted"}.`,
     `Purpose: ${contract.purpose}`,
     `Own: ${contract.owns.join("; ")}.`,
     `Boundaries: ${contract.boundaries.join("; ")}.`,
     `Handoffs: ${contract.handoffs.join("; ")}.`,
-    "Shared owners:",
-    ...peers.map((type) => `${type}: ${catalog.roles[type].purpose}`),
+    `Shared owners: ${peers.map((type) => `${type}: ${catalog.roles[type].purpose}`).join(" ")}`,
     `Protocol: ${catalog.protocol.join(" ")}`,
     `Workflow: ${catalog.workflow.map((step) => `${step.stage} (${step.owner})`).join(" -> ")}.`,
-    `Desired tools, not installed proof: core ${contract.tools.required.join(", ")}; task-specific ${contract.tools.whenNeeded.join(", ") || "none"}. Verify task readiness before use.`,
+    `Desired tools, not installed proof; verify: core ${contract.tools.required.join(", ")}; task-specific ${contract.tools.whenNeeded.join(", ") || "none"}.`,
     ...contacts.map(
       (contact) =>
         `Contact ${contact.role}: ${contact.harness}/${contact.id}; cwd ${contact.cwd}; worktree ${contact.worktree}; checkpoint ${contact.checkpoint}.`,
@@ -219,17 +222,19 @@ export function renderBrief(catalog, context) {
       (tool) =>
         `Observed tool ${tool.id}: ${tool.status}${tool.version ? " (" + tool.version + ")" : ""}${tool.reason ? "; " + tool.reason : ""}; ${tool.required ? "required by startup check" : "task-specific"}.`,
     ),
-    `Startup: ${cli} session start records this session and prints the binding, checkpoint and counts; it refuses a held role.`,
-    `Inbox: ${cli} inbox --include-body; run it at startup, on every wake and at each safe boundary.`,
-    `Send: ${cli} msg send --to ROLE --body-file FILE is the only payload path between roles; native messages and channel notifications are wakes only.`,
-    `Close: ${cli} msg done ID, or ${cli} msg retain ID --reason TEXT --next-boundary TEXT.`,
-    `Work: from the repository checkout, ${work} work start|block|ready|finish|show|history ID and ${work} work evidence ID --stage STAGE --sha SHA; only the item owner writes, and work ready is a handoff, not completion.`,
-    `Questions and holds: ${cli} question open|answer|cancel and ${cli} hold set|release|list; record each pending user prompt with question open, and answer, cancel or release only your own records.`,
-    `Requests: ${cli} request close --id ID --reason TEXT closes an imported request you own.`,
-    `Handoffs: ${handoff}.`,
-    `Status: ${cli} status --scope SCOPE is read-only.`,
-    `References: ${catalog.references.map((reference) => `${reference.label}: ${resolve(context.root, reference.path)}`).join("; ")}.`,
-    `Catalog: ${catalogHash(catalog)}`,
+    "`CK session start` records this session and refuses a held role; `CK status --scope SCOPE` is read-only.",
+    "`CK inbox --include-body`; `CK msg send --to ROLE --body-file FILE`; close with `CK msg done ID` or `CK msg retain ID --reason TEXT --next-boundary TEXT`.",
+    "Only the item owner writes work, and ready is a handoff: `CK work start|block|ready|finish|show|history ID`; `CK work evidence ID --stage STAGE --sha SHA`.",
+    "Record each pending user prompt; answer, cancel or release only your own: `CK question open|answer|cancel`; `CK hold set|release|list`.",
+    `\`CK request close --id ID --reason TEXT\` closes an imported request you own; ${handoff}.`,
+    `References under COORDINATION_KIT_ROOT: ${catalog.references
+      .map((reference, index) => {
+        const [file] = reference.path.split("#");
+        const previous = catalog.references[index - 1]?.path.split("#")[0];
+        return `${reference.label} ${file === previous ? reference.path.slice(file.length) : reference.path}`;
+      })
+      .join("; ")}.`,
+    `Catalog: ${catalogHash(catalog).slice(0, 16)}`,
     "",
   ].join("\n");
 }
@@ -256,11 +261,11 @@ export function commandVerbs(markdown) {
   return verbs;
 }
 
-/** Verbs a rendered brief invokes through the coordination-kit CLI, expanding "group a|b". */
+/** Verbs a rendered brief invokes as `CK ...`, expanding "group a|b". */
 export function briefVerbs(brief) {
   const verbs = new Set();
   for (const [, group, alternatives] of brief.matchAll(
-    /coordination-kit\/dist\/cli\.js'(?: --root '(?:[^']|'\\'')*')? ([a-z][a-z-]*)(?: ([a-z][a-z-]*(?:\|[a-z][a-z-]*)*))?(?=[\s.,;:]|$)/g,
+    /`CK ([a-z][a-z-]*)(?: ([a-z][a-z-]*(?:\|[a-z][a-z-]*)*))?(?=[\s`])/g,
   )) {
     if (alternatives === undefined) verbs.add(group);
     else

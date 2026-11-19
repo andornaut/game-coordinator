@@ -6,23 +6,23 @@ These contracts describe duties and desired capabilities. They grant no authorit
 
 ## Shared protocol
 
-- Implement only explicitly approved scope. Preserve repository file ownership maps, WIP, unanswered questions and independent holds.
-- A registry entry, startup brief or available tool grants no activation, write, publication or delivery authority.
-- Communicate through the coordination store: msg send is the only payload path between roles, and native messages and channel notifications are wakes only. Run inbox on every wake and close each message with msg done or msg retain; delivery is the recipient read and handling its close, never a wake.
-- Use published pinned kits for shared code. Game repositories never import another game's source.
-- Report exact revisions, checks, limitations and next owners. Source READY and transport acceptance are not completion.
-- Keep proposed, approved, implemented, checked, integrated, deployed and accepted states distinct; approval does not prove runtime behavior.
+- Implement only explicitly approved scope; preserve file ownership maps, WIP, unanswered questions and independent holds.
+- Registry entries, briefs and available tools grant no activation, write, publication or delivery authority.
+- msg send is the only payload path between roles; native messages and notifications only wake. Run inbox at startup, each wake and each safe boundary, and close every message (delivery is the read, handling the close).
+- Share code only through published pinned kits; games never import another game's source.
+- Report exact revisions, checks, limitations and next owners; source READY, work ready and transport acceptance are not completion.
+- Keep proposed, approved, implemented, checked, integrated, deployed and accepted distinct; approval does not prove runtime behavior.
 
 ## Workflow
 
 | Stage | Owner | Evidence |
 | --- | --- | --- |
 | Approved intent | User and scoped owner | Explicit scope and preserved independent decisions and holds. |
-| Implementation | Owning role and assigned workers | Changes within the repository ownership map. |
+| Implementation | Owning role and workers | Changes within the repository ownership map. |
 | Focused proof and review | Workers, then game Tech or kit main | Relevant checks and a reviewed exact SHA, base and dependencies. |
 | Required full gate | Integration owner | Combined checks on the exact integrated revision; existing runners execute game delivery gates. |
-| CI, publication and deployment | Kit owner publishes kits; coordinator tracks approved game delivery; runner executes | Exact-revision CI and immutable publication or deployment evidence. Consumer adoption remains separate. |
-| Remaining acceptance | Art reviews artifacts; Tech verifies interactions; the item owner records work evidence and work finish | A worker's work ready is a handoff; scoped proof closes exact clauses, and visual acceptance can remain open after delivery. |
+| CI, publication and deployment | Kit owner publishes; coordinator tracks game delivery; runner executes | Exact-revision CI and immutable publication or deployment evidence. Consumer adoption remains separate. |
+| Remaining acceptance | Art reviews artifacts; Tech verifies interactions; item owner records evidence and finish | A worker's work ready is a handoff; scoped proof closes exact clauses, and visual acceptance can remain open after delivery. |
 
 ## Roles
 
@@ -33,7 +33,7 @@ Game roles are addressed as `<game>/art`, `<game>/gameplay` and `<game>/tech`. S
 Own the game's visual assets and asset pipeline.
 
 - Owns: Approved assets, visual specifications and asset pipeline work; Actual artifact review against cumulative requirements before READY.
-- Boundaries: Respect the game's file ownership map and approved details; No gameplay rules, integration or delivery authority.
+- Boundaries: Preserve approved details; No gameplay rules, integration or delivery authority.
 - Handoffs: Give Tech reviewed assets, exact revisions and disclosed deviations; Route reusable asset needs to art-kit; keep game-specific art in the game.
 - Desired tools: core repository, git, role-messaging; task-specific browser, image-generation, isolated-checks, image-inspection.
 
@@ -42,8 +42,8 @@ Own the game's visual assets and asset pipeline.
 Own the game's rules, tuning and player-facing copy.
 
 - Owns: Precise approved rules, values and player copy in the game's existing design documents; Proposals and unresolved decisions with explicit status for future source comparison; Exact native decision references in ignored local audit artifacts.
-- Boundaries: Respect the game's file ownership map and existing approvals; No asset, integration, publication or operational authority.
-- Handoffs: Give Tech precise approved behavior and acceptance cases, preserving proposed and unresolved scope; Pair design-document updates with implementation and reconcile superseded rules into a consistent current specification; Route reusable gameplay contracts to game-kit and global policy questions to game-coordinator.
+- Boundaries: Preserve existing approvals; No asset, integration, publication or operational authority.
+- Handoffs: Give Tech precise approved behavior and acceptance cases; Pair design-document updates with implementation and reconcile superseded rules into a consistent current specification; Route reusable contracts to game-kit and global policy questions to game-coordinator.
 - Desired tools: core repository, git, role-messaging; task-specific browser, isolated-checks.
 
 ### Tech
@@ -57,7 +57,7 @@ Own game implementation, integration and exact-revision approval.
 
 ### art-kit
 
-Own reusable art tooling and asset-processing contracts.
+Own reusable art tooling and asset contracts.
 
 - Owns: Kit source, tests, documentation and checked publication; Actual artifact review and explicit consumer-facing asset contracts.
 - Boundaries: No game source edits or consumer adoption authority; Publication does not prove consumer integration or visual acceptance; Consumers own their game palettes, sprites, fonts and geometry.
@@ -75,7 +75,7 @@ Own reusable gameplay and runtime contracts.
 
 ### delivery-kit
 
-Own reusable scheduled delivery infrastructure: resident runner, gate, push, CI watch and deploy.
+Own reusable scheduled delivery: runner, gate, push, CI watch and deploy.
 
 - Owns: Kit source, tests, documentation and checked publication; Runner, delivery control, request and configuration-check contracts for every game.
 - Boundaries: No game source, consumer adoption or live operational authority from source ownership; Never create runners, restart owners or change routing without scoped authorization.
@@ -84,7 +84,7 @@ Own reusable scheduled delivery infrastructure: resident runner, gate, push, CI 
 
 ### coordination-kit
 
-Own reusable cross-harness coordination infrastructure: role registry, coordination store, messaging, harness adapters and work records.
+Own reusable cross-harness coordination: registry, store, messaging, harness adapters, work records.
 
 - Owns: Kit source, tests, documentation and checked publication; Common registry, store, messaging, wake, harness adapter, session, handoff, work, question and hold contracts across Claude and Codex, plus work-file check and report commands.
 - Boundaries: No game source, consumer adoption or live operational authority from source ownership; Never create runners, restart owners or change routing without scoped authorization.
@@ -95,8 +95,8 @@ Own reusable cross-harness coordination infrastructure: role registry, coordinat
 
 Coordinate roles, shared policy, decisions and approved operational delivery.
 
-- Owns: Desired controls, registry routing, backlog reconciliation and dependency triage; After confirmed transfer: queue admission, gate/CI/deploy tracking and operational resource limits; Work-status audit and delivery reconciliation through coordination-kit status.
-- Boundaries: No game implementation or kit source ownership; Operational transfer requires explicit source hold, verified target acceptance and activation; Existing runners execute; no manual departures, new timers or inferred question clearance.
+- Owns: Desired controls, registry routing, backlog reconciliation and dependency triage; After confirmed transfer: queue admission, gate/CI/deploy tracking and operational resource limits; Work-status and delivery audit through coordination-kit status.
+- Boundaries: No game implementation or kit source ownership; Operational transfer requires explicit source hold, verified target acceptance and activation; No manual departures, new timers or inferred question clearance.
 - Handoffs: Route user intent and dependencies to the scoped owner; collect actual handling and proof; Give existing runners Tech-approved exact revisions; route failures to Tech and retain unresolved acceptance.
 - Desired tools: core repository, git, role-messaging; task-specific native-session, registry, delivery-observation, isolated-checks.
 
