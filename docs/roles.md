@@ -21,7 +21,7 @@ These contracts describe duties and desired capabilities. They grant no authorit
 | Implementation | Owning role and assigned workers | Changes within the repository ownership map. |
 | Focused proof and review | Workers, then game Tech or kit main | Relevant checks and a reviewed exact SHA, base and dependencies. |
 | Required full gate | Integration owner | Combined checks on the exact integrated revision; existing runners execute game delivery gates. |
-| CI, publication and deployment | Kit owner publishes kits; coordinator tracks approved game delivery; runner executes | Exact-revision CI and immutable publication or deployment receipts. Consumer adoption remains separate. |
+| CI, publication and deployment | Kit owner publishes kits; coordinator tracks approved game delivery; runner executes | Exact-revision CI and immutable publication or deployment evidence. Consumer adoption remains separate. |
 | Remaining acceptance | Art reviews artifacts; Tech verifies interactions; the item owner records work evidence and work finish | A worker's work ready is a handoff; scoped proof closes exact clauses, and visual acceptance can remain open after delivery. |
 
 ## Roles
@@ -84,9 +84,9 @@ Own reusable scheduled delivery infrastructure: resident runner, gate, push, CI 
 
 ### coordination-kit
 
-Own reusable cross-harness coordination infrastructure: role registry, messaging, harness adapters, request ledger and work protocol.
+Own reusable cross-harness coordination infrastructure: role registry, coordination store, messaging, harness adapters and work records.
 
-- Owns: Kit source, tests, documentation and checked publication; Common messaging, registry, transport, harness adapter, ledger and work-protocol contracts across Claude and Codex, plus work-file check and report commands.
+- Owns: Kit source, tests, documentation and checked publication; Common registry, store, messaging, wake, harness adapter, session, handoff, work, question and hold contracts across Claude and Codex, plus work-file check and report commands.
 - Boundaries: No game source, consumer adoption or live operational authority from source ownership; Never create runners, restart owners or change routing without scoped authorization.
 - Handoffs: Give delivery-kit, game-coordinator and Tech checked packages, exact APIs, pins and capability limits.
 - Desired tools: core repository, git, role-messaging; task-specific isolated-checks, native-session, registry.
@@ -95,7 +95,7 @@ Own reusable cross-harness coordination infrastructure: role registry, messaging
 
 Coordinate roles, shared policy, decisions and approved operational delivery.
 
-- Owns: Desired controls, registry routing, backlog reconciliation and dependency triage; After confirmed transfer: queue admission, gate/CI/deploy tracking and operational resource accounting; Work-status audit and delivery reconciliation through coordination-kit status.
+- Owns: Desired controls, registry routing, backlog reconciliation and dependency triage; After confirmed transfer: queue admission, gate/CI/deploy tracking and operational resource limits; Work-status audit and delivery reconciliation through coordination-kit status.
 - Boundaries: No game implementation or kit source ownership; Operational transfer requires explicit source hold, verified target acceptance and activation; Existing runners execute; no manual departures, new timers or inferred question clearance.
 - Handoffs: Route user intent and dependencies to the scoped owner; collect actual handling and proof; Give existing runners Tech-approved exact revisions; route failures to Tech and retain unresolved acceptance.
 - Desired tools: core repository, git, role-messaging; task-specific native-session, registry, delivery-observation, isolated-checks.

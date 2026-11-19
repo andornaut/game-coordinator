@@ -175,16 +175,21 @@ export function renderBrief(catalog, context) {
   )
     throw new Error("Invalid tool observations");
   const quote = (value) => "'" + value.replaceAll("'", "'\\''") + "'";
-  const cli =
+  const node =
     "node " +
     quote(
       resolve(
         context.root,
         "node_modules/@andornaut/coordination-kit/dist/cli.js",
       ),
-    ) +
-    " --root " +
-    quote(context.root);
+    );
+  const cli = `${node} --root ${quote(context.root)}`;
+  // The work verbs read --root as the repository and the coordinator only from the environment.
+  const work = `COORDINATION_KIT_ROOT=${quote(context.root)} ${node}`;
+  const handoff =
+    contract.type === "game-coordinator"
+      ? `${cli} handoff open|state|ready|active|show`
+      : `${cli} handoff ready|active|show; game-coordinator alone opens handoffs and sets their state`;
   const peers = [
     "game-coordinator",
     "art-kit",
@@ -214,13 +219,54 @@ export function renderBrief(catalog, context) {
       (tool) =>
         `Observed tool ${tool.id}: ${tool.status}${tool.version ? " (" + tool.version + ")" : ""}${tool.reason ? "; " + tool.reason : ""}; ${tool.required ? "required by startup check" : "task-specific"}.`,
     ),
+    `Startup: ${cli} session start records this session and prints the binding, checkpoint and counts; it refuses a held role.`,
     `Inbox: ${cli} inbox --include-body; run it at startup, on every wake and at each safe boundary.`,
     `Send: ${cli} msg send --to ROLE --body-file FILE is the only payload path between roles; native messages and channel notifications are wakes only.`,
     `Close: ${cli} msg done ID, or ${cli} msg retain ID --reason TEXT --next-boundary TEXT.`,
+    `Work: from the repository checkout, ${work} work start|block|ready|finish|show|history ID and ${work} work evidence ID --stage STAGE --sha SHA; only the item owner writes, and work ready is a handoff, not completion.`,
+    `Questions and holds: ${cli} question open|answer|cancel and ${cli} hold set|release|list; record each pending user prompt with question open, and answer, cancel or release only your own records.`,
+    `Requests: ${cli} request close --id ID --reason TEXT closes an imported request you own.`,
+    `Handoffs: ${handoff}.`,
+    `Status: ${cli} status --scope SCOPE is read-only.`,
     `References: ${catalog.references.map((reference) => `${reference.label}: ${resolve(context.root, reference.path)}`).join("; ")}.`,
     `Catalog: ${catalogHash(catalog)}`,
     "",
   ].join("\n");
+}
+
+const word = /^[a-z][a-z-]*$/;
+
+/** Verbs ("group verb" or a bare command) in the command forms table of coordination-kit docs/commands.md. */
+export function commandVerbs(markdown) {
+  const section = markdown
+    .split(/^## /m)
+    .find((part) => part.startsWith("Command forms"));
+  if (!section) throw new Error("commands.md has no Command forms section");
+  const verbs = new Set();
+  for (const line of section.split("\n")) {
+    if (!line.startsWith("|")) continue;
+    const first = line.split(/(?<!\\)\|/)[1] ?? "";
+    for (const [, form] of first.matchAll(/`([^`]+)`/g)) {
+      const [group, verb] = form.replaceAll("\\|", "|").trim().split(/\s+/);
+      if (word.test(group))
+        verbs.add(word.test(verb ?? "") ? `${group} ${verb}` : group);
+    }
+  }
+  if (verbs.size === 0) throw new Error("commands.md lists no command forms");
+  return verbs;
+}
+
+/** Verbs a rendered brief invokes through the coordination-kit CLI, expanding "group a|b". */
+export function briefVerbs(brief) {
+  const verbs = new Set();
+  for (const [, group, alternatives] of brief.matchAll(
+    /coordination-kit\/dist\/cli\.js'(?: --root '(?:[^']|'\\'')*')? ([a-z][a-z-]*)(?: ([a-z][a-z-]*(?:\|[a-z][a-z-]*)*))?(?=[\s.,;:]|$)/g,
+  )) {
+    if (alternatives === undefined) verbs.add(group);
+    else
+      for (const verb of alternatives.split("|")) verbs.add(`${group} ${verb}`);
+  }
+  return verbs;
 }
 
 const cell = (value) => value.replaceAll("|", "\\|");

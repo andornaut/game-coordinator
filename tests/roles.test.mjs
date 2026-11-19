@@ -11,7 +11,9 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import {
+  briefVerbs,
   catalogHash,
+  commandVerbs,
   loadCatalog,
   main,
   renderBrief,
@@ -140,6 +142,7 @@ test("both harness briefs retain exact caller identity and holds without grantin
       ),
     );
     for (const verb of [
+      "--root '/coordinator' session start",
       "--root '/coordinator' inbox --include-body",
       "--root '/coordinator' msg send --to ROLE --body-file FILE",
       "--root '/coordinator' msg done ID",
@@ -233,6 +236,101 @@ test("generated docs retain workflow boundaries, canonical references and actual
   assert.doesNotMatch(
     docs + renderBrief(catalog, context),
     /AGENTS\.md|CLAUDE\.md|GEMINI\.md|\u2014/,
+  );
+});
+
+const roles = [
+  "example/art",
+  "example/gameplay",
+  "example/tech",
+  "art-kit",
+  "game-kit",
+  "delivery-kit",
+  "coordination-kit",
+  "game-coordinator",
+];
+const retired =
+  /\bepochs?\b|enrol|receipt|\bledger\b|accounting|\bmessage (?:send|dispatch|status|reconcile|retire-spool)\b|\binbox (?:snapshot|ack)\b|\bprotocol (?:boundary|claim|work)|\bnpx\b/i;
+
+test("docs/roles.md and every role brief match what roles.json produces", () => {
+  const onDisk = loadCatalog(root);
+  assert.equal(
+    readFileSync(join(root, "docs/roles.md"), "utf8"),
+    renderRoleDocs(onDisk),
+    "docs/roles.md is stale; run node scripts/role-catalog.mjs",
+  );
+  assert.doesNotMatch(renderRoleDocs(onDisk), retired);
+  for (const role of roles) {
+    const contract = roleContract(onDisk, role);
+    const brief = renderBrief(onDisk, { ...context, role });
+    for (const value of [
+      contract.purpose,
+      ...contract.owns,
+      ...contract.boundaries,
+      ...contract.handoffs,
+      ...onDisk.protocol,
+      ...onDisk.workflow.map((step) => `${step.stage} (${step.owner})`),
+      `core ${contract.tools.required.join(", ")};`,
+      `Catalog: ${catalogHash(onDisk)}`,
+    ])
+      assert.ok(brief.includes(value), `${role}: ${value}`);
+    assert.doesNotMatch(brief, retired, role);
+  }
+});
+
+test("role briefs name only coordination-kit verbs the installed commands.md lists", () => {
+  const known = commandVerbs(
+    readFileSync(
+      join(root, "node_modules/@andornaut/coordination-kit/docs/commands.md"),
+      "utf8",
+    ),
+  );
+  const common = [
+    "session start",
+    "inbox",
+    "msg send",
+    "msg done",
+    "msg retain",
+    "work start",
+    "work evidence",
+    "work block",
+    "work ready",
+    "work finish",
+    "work show",
+    "work history",
+    "question open",
+    "question answer",
+    "question cancel",
+    "hold set",
+    "hold release",
+    "hold list",
+    "request close",
+    "handoff ready",
+    "handoff active",
+    "handoff show",
+    "status",
+  ];
+  for (const role of roles) {
+    const verbs = briefVerbs(renderBrief(catalog, { ...context, role }));
+    const expected =
+      role === "game-coordinator"
+        ? [...common, "handoff open", "handoff state"]
+        : common;
+    assert.deepEqual([...verbs].sort(), [...expected].sort(), role);
+    for (const verb of verbs) assert.ok(known.has(verb), `${role}: ${verb}`);
+  }
+  assert.deepEqual(
+    [
+      ...commandVerbs(
+        "## Command forms\n\n| `a b X`, `c [--d]` | x \\| y |\n| `--help` | z |\n",
+      ),
+    ],
+    ["a b", "c"],
+  );
+  assert.ok(!known.has("message send") && !known.has("protocol boundary"));
+  assert.deepEqual(
+    [...briefVerbs("x/coordination-kit/dist/cli.js' --root '/r' message send")],
+    ["message send"],
   );
 });
 

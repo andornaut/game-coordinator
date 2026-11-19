@@ -6,15 +6,15 @@ Coordination home for three games and four shared kits. Each game and each kit i
 
 ## Projects
 
-| Project           | Repository                                                          | Purpose                                                      |
-| ----------------- | ------------------------------------------------------------------- | ------------------------------------------------------------ |
-| Archie            | [archies-dog-walks](https://github.com/andornaut/archies-dog-walks) | Game                                                         |
-| Chibi             | [chibis-way-home](https://github.com/andornaut/chibis-way-home)     | Game                                                         |
-| Ada the Navigator | [ada-the-navigator](https://github.com/andornaut/ada-the-navigator) | Game                                                         |
-| art-kit           | [art-kit](https://github.com/andornaut/art-kit)                     | Raster, frame, font and Aseprite export primitives           |
-| game-kit          | [game-kit](https://github.com/andornaut/game-kit)                   | Shared TypeScript runtime, input, layout and Phaser adapters |
-| delivery-kit      | [delivery-kit](https://github.com/andornaut/delivery-kit)           | Scheduled gate, push, CI watch, deploy and reviews           |
-| coordination-kit  | [coordination-kit](https://github.com/andornaut/coordination-kit)   | Role registry, messaging, harness adapters, ledger, protocol |
+| Project           | Repository                                                          | Purpose                                                        |
+| ----------------- | ------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Archie            | [archies-dog-walks](https://github.com/andornaut/archies-dog-walks) | Game                                                           |
+| Chibi             | [chibis-way-home](https://github.com/andornaut/chibis-way-home)     | Game                                                           |
+| Ada the Navigator | [ada-the-navigator](https://github.com/andornaut/ada-the-navigator) | Game                                                           |
+| art-kit           | [art-kit](https://github.com/andornaut/art-kit)                     | Raster, frame, font and Aseprite export primitives             |
+| game-kit          | [game-kit](https://github.com/andornaut/game-kit)                   | Shared TypeScript runtime, input, layout and Phaser adapters   |
+| delivery-kit      | [delivery-kit](https://github.com/andornaut/delivery-kit)           | Scheduled gate, push, CI watch, deploy and reviews             |
+| coordination-kit  | [coordination-kit](https://github.com/andornaut/coordination-kit)   | Role registry, coordination store, messaging, harness adapters |
 
 Games consume kits as dev dependencies pinned to GitHub release tarballs.
 
@@ -55,11 +55,11 @@ Every registered game's `delivery-kit.json` sets `resources.memoryMiB`, an integ
 
 All roles, in Claude and Codex, use the coordinator-installed coordination-kit CLI with its absolute root, including from a game or kit worktree. Invoke it as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> ...`, never through `npx`. Follow the [communication and recipient guards](docs/game-policies.md#communication).
 
-SDK imports use `@andornaut/coordination-kit/build/registry` and `@andornaut/coordination-kit/build/transport`; `@andornaut/delivery-kit/build/source-identity` stays in delivery-kit. Each kit's CLI is its `dist/cli.js`.
+SDK imports use `@andornaut/coordination-kit/build/registry`; `@andornaut/delivery-kit/build/source-identity` stays in delivery-kit. Each kit's CLI is its `dist/cli.js`.
 
-Every message is stored in the coordination store (`coordination.db` in the protocol state root) before anything native happens. `msg send` is the only payload path for role-to-role coordination. Native session messages and channel notifications are wakes only: their fixed text, `N new messages for ROLE: run coordination-kit inbox`, never carries content, and a payload sent natively without a stored original is a policy violation.
+Every message is stored in the coordination store (`coordination.db` in the state root) before anything native happens. `msg send` is the only payload path for role-to-role coordination. Native session messages and channel notifications are wakes only: their fixed text, `N new messages for ROLE: run coordination-kit inbox`, never carries content, and a payload sent natively without a stored original is a policy violation.
 
-The writing verbs (`msg send`, `inbox`, `msg done`, `msg retain`) identify the caller by the registry fence: the role whose effective harness binding equals the caller's native conversation ID (`CLAUDE_CODE_SESSION_ID` or `CODEX_THREAD_ID`, or `--native-id ID`). There are no epochs, claims or enrollment for messages, and `harness select` rotates the binding. Workers write under their parent's binding; `--worker NAME` is an unverified attribution.
+The writing verbs (`msg send`, `inbox`, `msg done`, `msg retain`) identify the caller by the registry fence: the role whose effective harness binding equals the caller's native conversation ID (`CLAUDE_CODE_SESSION_ID` or `CODEX_THREAD_ID`, or `--native-id ID`). `harness select` rotates the binding. Workers write under their parent's binding; `--worker NAME` is an unverified attribution.
 
 Use the shared CLI and root prefix shown below, followed by these arguments:
 
@@ -73,7 +73,7 @@ Use the shared CLI and root prefix shown below, followed by these arguments:
 | History   | `msg history [--role ROLE] [--since ISO_TIMESTAMP] [--limit N]`                                  | Read message events in order, without bodies. The store's append-only event chain is the durable record.                                             |
 | Diagnose  | `harness doctor --role ROLE`                                                                     | Inspect the selected role's harness capabilities, including the Claude channel command and loaded version.                                           |
 
-States are `sent`, `delivered` (the recipient's own `inbox` read), then `handled`, `superseded` or `retained`. Only the recipient delivers, closes or retains its messages; a wake outcome never changes message state. The legacy `message send`, `dispatch`, `reconcile` and `retire-spool` writes are refused with `store-cutover` once the store is selected; `message status` reads the frozen legacy records.
+States are `sent`, `delivered` (the recipient's own `inbox` read), then `handled`, `superseded` or `retained`. Only the recipient delivers, closes or retains its messages; a wake outcome never changes message state.
 
 For example, send a note to game-coordinator, then, as the recipient, read and close it:
 
@@ -88,7 +88,7 @@ node "$CK" --root "$COORDINATOR_ROOT" msg done ID --work ck-0017
 
 ## Monitoring
 
-delivery-kit delivers game-coordinator's review once per hour at :30 in America/Toronto and bus events as they happen. In store mode the review brief is a stored message from `delivery-kit`, at most one page, with `review show` for detail. At every review, game-coordinator works with owners to drain the whole message backlog, including independent work:
+delivery-kit delivers game-coordinator's review once per hour at :30 in America/Toronto and bus events as they happen. The review brief is a stored message from `delivery-kit`, at most one page, with `review show` for detail. At every review, game-coordinator works with owners to drain the whole message backlog, including independent work:
 
 1. Inventory the store's open messages for every registered role, including game Art, Gameplay and Tech, shared coordinators and kits, plus ready handoffs, from the brief, `review show` and `msg history`. Report unavailable question visibility; never infer an empty backlog from an idle session.
 2. Ask each recipient to run `inbox` and close every open message with `msg done` or `msg retain`. Only the recipient closes its own messages; a wake proves nothing about delivery or handling. Retained items name an owner, reason and next boundary. Do not skip ordinary independent work after prioritizing user replies and dependency unblockers.
@@ -115,9 +115,9 @@ node scripts/sessions.mjs brief --role game-coordinator
 ```
 
 - `plan` reports sorted exact-ID slots, catalog/tool checks and local blockers; `check` also exits nonzero for blockers. Optional role tools are reported separately from launch requirements.
-- By default, `brief` writes the generated orientation artifact without delivery. Include it once in a new role's initial HOLD request after verified registry enrollment, or in an existing handoff activation packet.
+- By default, `brief` writes the generated orientation artifact without delivery. Include it once in a new role's initial HOLD request after its registry entry is verified, or in an existing handoff activation packet.
 - `brief --dispatch --role ROLE` completes previously unsent startup orientation after exact native identity verification for the live effective owner. It sends the brief with `msg send` under the caller's registry binding, which stores it and wakes the recipient; `--held` remains artifact-only. Do not use it for initial HOLD or handoff activation packets.
-- `resume` preserves live panes and resumes only eligible missing/dead slots. A fresh resume sends one idempotent orientation with `msg send` after local identity readback; a wake is not handling or activation. `--held` suppresses standalone orientation for held preparation, including newly enrolled roles; include the artifact once in the HOLD or activation packet. Another harness also needs `--harness TARGET`, asserting caller-verified source HOLD.
+- `resume` preserves live panes and resumes only eligible missing/dead slots. A fresh resume sends one idempotent orientation with `msg send` after local identity readback; a wake is not handling or activation. `--held` suppresses standalone orientation for held preparation, including newly registered roles; include the artifact once in the HOLD or activation packet. Another harness also needs `--harness TARGET`, asserting caller-verified source HOLD.
 - Repeat `--runner-pid PID` to inspect resident socket configuration. `--handoff-marker TEXT` preserves the original marker separately from the bounded role marker.
 
 Local inspection does not prove native project identity, pending-question state, quota or an effective Remote Control connection. The helper never selects ownership, activates work, stops frontends or changes a runner/daemon.

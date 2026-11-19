@@ -59,7 +59,7 @@ export function installedMessaging(root) {
       status: "missing",
       cli,
       reason:
-        "Coordinator coordination-kit 2.x CLI/canonical build exports missing or incompatible",
+        "Coordinator coordination-kit 3.x CLI or registry build export missing or incompatible",
     };
   }
 }

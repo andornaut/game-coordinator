@@ -32,7 +32,7 @@
     {
       "stage": "CI, publication and deployment",
       "owner": "Kit owner publishes kits; coordinator tracks approved game delivery; runner executes",
-      "evidence": "Exact-revision CI and immutable publication or deployment receipts. Consumer adoption remains separate."
+      "evidence": "Exact-revision CI and immutable publication or deployment evidence. Consumer adoption remains separate."
     },
     {
       "stage": "Remaining acceptance",
@@ -228,10 +228,10 @@
     "coordination-kit": {
       "name": "coordination-kit",
       "scope": "shared",
-      "purpose": "Own reusable cross-harness coordination infrastructure: role registry, messaging, harness adapters, request ledger and work protocol.",
+      "purpose": "Own reusable cross-harness coordination infrastructure: role registry, coordination store, messaging, harness adapters and work records.",
       "owns": [
         "Kit source, tests, documentation and checked publication",
-        "Common messaging, registry, transport, harness adapter, ledger and work-protocol contracts across Claude and Codex, plus work-file check and report commands"
+        "Common registry, store, messaging, wake, harness adapter, session, handoff, work, question and hold contracts across Claude and Codex, plus work-file check and report commands"
       ],
       "boundaries": [
         "No game source, consumer adoption or live operational authority from source ownership",
@@ -251,7 +251,7 @@
       "purpose": "Coordinate roles, shared policy, decisions and approved operational delivery.",
       "owns": [
         "Desired controls, registry routing, backlog reconciliation and dependency triage",
-        "After confirmed transfer: queue admission, gate/CI/deploy tracking and operational resource accounting",
+        "After confirmed transfer: queue admission, gate/CI/deploy tracking and operational resource limits",
         "Work-status audit and delivery reconciliation through coordination-kit status"
       ],
       "boundaries": [
