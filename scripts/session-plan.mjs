@@ -35,8 +35,6 @@ export function launchArgs(slot, socket) {
         "--dangerously-bypass-approvals-and-sandbox",
         "-C",
         slot.cwd,
-        "--add-dir",
-        slot.worktree,
         slot.id,
       ]
     : [
@@ -138,6 +136,16 @@ export function plan(root, registry, options, panes, processes) {
     if (relevant.length > 1 || owners.length > 1) {
       state = "blocked";
       reason = "Multiple candidate panes or frontend processes";
+    } else if (
+      live.length &&
+      live[0].shell &&
+      !live[0].frontends.length &&
+      live[0].role === role &&
+      live[0].harness === harness &&
+      live[0].id === id
+    ) {
+      // An exact slot whose frontend exited back to its shell is relaunchable.
+      state = "dead";
     } else if (live.length) {
       const p = live[0];
       const matching = p.frontends.filter(
@@ -186,6 +194,7 @@ export function plan(root, registry, options, panes, processes) {
         ? { missingMarkers: !live[0].role || !live[0].harness || !live[0].id }
         : {}),
       ...(relevant[0] ? { pane: relevant[0].pane } : {}),
+      ...(state === "dead" && !relevant[0].dead ? { shell: true } : {}),
       marker: marker(registry.revision, role, harness, id),
     };
   });

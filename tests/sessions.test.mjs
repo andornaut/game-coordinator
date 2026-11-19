@@ -570,6 +570,43 @@ test("dead exact slots require all identity markers", () => {
   );
 });
 
+test("exact marked pane back at its shell is dead; other live mismatches stay blocked", () => {
+  const shell = { ...pane, shell: true, frontends: [] };
+  const exact = plan("/repo", registry, options, [shell], [])[0];
+  assert.equal(exact.state, "dead");
+  assert.equal(exact.shell, true);
+  for (const variant of [
+    { ...shell, shell: false },
+    { ...shell, role: "" },
+    { ...shell, harness: "claude" },
+    { ...shell, id: target },
+    { ...shell, frontends: [{ ...frontend, id: target }] },
+  ])
+    assert.equal(
+      plan("/repo", registry, options, [variant], [])[0].state,
+      "blocked",
+    );
+  const deadPane = plan(
+    "/repo",
+    registry,
+    options,
+    [{ ...pane, dead: true, frontends: [] }],
+    [],
+  )[0];
+  assert.equal(deadPane.shell, undefined);
+  const calls = [];
+  for (const current of [exact, deadPane])
+    resumeSlot(current, "/managed/socket", null, (args) => {
+      calls.push(args);
+      return "";
+    });
+  const respawns = calls.filter((args) => args[0] === "respawn-pane");
+  assert.deepEqual(
+    respawns.map((args) => args.includes("-k")),
+    [true, false],
+  );
+});
+
 test("safe marker is deterministic, revision-sensitive and bounded for slash/plus inputs", () => {
   const value = marker(14, "game/art+copy", "codex", id);
   assert.match(value, /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/);
@@ -602,8 +639,6 @@ test("resume argv contains exact ID and no new-session flag or appended prompt",
     "unix:///managed/socket",
     "--dangerously-bypass-approvals-and-sandbox",
     "-C",
-    "/repo",
-    "--add-dir",
     "/repo",
     id,
   ]);
@@ -640,9 +675,13 @@ test("Bash wrapper descendants are inspected without pane_start_command or termi
   const panes = inspectPanes(all, (args) => {
     assert.equal(args.includes("capture-pane"), false);
     assert.equal(args.join(" ").includes("pane_start_command"), false);
-    return "%1\tcodex-game\tgame-coordinator\t0\t40\t\t\t";
+    return "%1\tcodex-game\tgame-coordinator\t0\t40\t\t\t\tcodex\n%2\tcodex-game\tshell\t0\t50\t\t\t\tbash";
   });
   assert.deepEqual(panes[0].frontends, [frontend]);
+  assert.deepEqual(
+    panes.map((p) => p.shell),
+    [false, true],
+  );
   assert.equal(
     plan("/repo", registry, options, panes, [frontend])[0].state,
     "live",

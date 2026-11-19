@@ -375,6 +375,8 @@ export function processes(proc = "/proc", socket = controlSocket()) {
   return all;
 }
 
+const SHELLS = new Set(["bash", "dash", "fish", "sh", "zsh"]);
+
 export function inspectPanes(all, tmux = run) {
   let output;
   try {
@@ -382,7 +384,7 @@ export function inspectPanes(all, tmux = run) {
       "list-panes",
       "-a",
       "-F",
-      "#{pane_id}\t#{session_name}\t#{window_name}\t#{pane_dead}\t#{pane_pid}\t#{@game-session-role}\t#{@game-session-harness}\t#{@agent-thread-id}",
+      "#{pane_id}\t#{session_name}\t#{window_name}\t#{pane_dead}\t#{pane_pid}\t#{@game-session-role}\t#{@game-session-harness}\t#{@agent-thread-id}\t#{pane_current_command}",
     ]);
   } catch (error) {
     if (/no server running|no sessions/.test(String(error.stderr))) return [];
@@ -392,7 +394,7 @@ export function inspectPanes(all, tmux = run) {
     .split("\n")
     .filter(Boolean)
     .map((line) => {
-      const [pane, session, name, dead, pid, role, harness, id] =
+      const [pane, session, name, dead, pid, role, harness, id, command] =
         line.split("\t");
       const descendants = new Set([Number(pid)]);
       for (let size = -1; size !== descendants.size;) {
@@ -406,6 +408,7 @@ export function inspectPanes(all, tmux = run) {
         session,
         name,
         dead: dead === "1",
+        shell: SHELLS.has(command),
         role,
         harness,
         id,
@@ -473,7 +476,16 @@ export function resumeSlot(slot, socket, handoffMarker, tmux = run) {
   const command = `tmux set-option -p -t "$TMUX_PANE" remain-on-exit on && exec ${launch}`;
   let pane = slot.pane;
   if (slot.state === "dead") {
-    tmux(["respawn-pane", "-t", pane, "-c", slot.cwd, command]);
+    // -k replaces only an idle shell left in an exact slot.
+    tmux([
+      "respawn-pane",
+      ...(slot.shell ? ["-k"] : []),
+      "-t",
+      pane,
+      "-c",
+      slot.cwd,
+      command,
+    ]);
   } else {
     let sessions;
     try {
