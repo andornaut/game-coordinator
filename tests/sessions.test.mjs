@@ -71,7 +71,7 @@ const frontend = {
 };
 const pane = {
   pane: "%1",
-  session: "codex-game",
+  session: "codex-games",
   name: "game-coordinator",
   dead: false,
   role: "game-coordinator",
@@ -97,8 +97,8 @@ test("selection is explicit, sorted and uses each effective harness", () => {
   assert.deepEqual(
     slots.map((s) => [s.role, s.harness, s.session, s.name, s.cwd]),
     [
-      ["game-coordinator", "codex", "codex-game", "game-coordinator", "/repo"],
-      ["game/art", "claude", "claude-game", "game-art", "/game"],
+      ["game-coordinator", "codex", "codex-games", "game-coordinator", "/repo"],
+      ["game/art", "claude", "claude-games", "game-art", "/game"],
     ],
   );
 });
@@ -133,7 +133,7 @@ test("canonical native roots differ from role worktrees for games and kits", () 
         {
           ...pane,
           name: "art",
-          session: "claude-game",
+          session: "claude-games",
           role: "game/art",
           harness: "claude",
           id: target,
@@ -168,10 +168,10 @@ test("coordinator windows omit harness prefixes while sessions retain them", () 
     assert.deepEqual(
       slots.map((s) => [s.role, s.session, s.name, s.cwd]),
       [
-        ["art-kit", `${harness}-game`, "art-kit", "/game-coordinator"],
+        ["art-kit", `${harness}-games`, "art-kit", "/game-coordinator"],
         [
           "game-coordinator",
-          `${harness}-game`,
+          `${harness}-games`,
           "game-coordinator",
           "/game-coordinator",
         ],
@@ -675,7 +675,7 @@ test("Bash wrapper descendants are inspected without pane_start_command or termi
   const panes = inspectPanes(all, (args) => {
     assert.equal(args.includes("capture-pane"), false);
     assert.equal(args.join(" ").includes("pane_start_command"), false);
-    return "%1\tcodex-game\tgame-coordinator\t0\t40\t\t\t\tcodex\n%2\tcodex-game\tshell\t0\t50\t\t\t\tbash";
+    return "%1\tcodex-games\tgame-coordinator\t0\t40\t\t\t\tcodex\n%2\tcodex-games\tshell\t0\t50\t\t\t\tbash";
   });
   assert.deepEqual(panes[0].frontends, [frontend]);
   assert.deepEqual(
@@ -786,14 +786,14 @@ test("missing shared slot joins canonical session and repeated live observation 
   const result = resumeSlot(slot(), "/managed/socket", null, (args) => {
     calls.push(args);
     return args[0] === "list-sessions"
-      ? "codex-game"
+      ? "codex-games"
       : args[0] === "new-window"
         ? "%2"
         : "";
   });
   assert.equal(result.action, "resume-requested");
   const created = calls.find((args) => args[0] === "new-window");
-  assert.equal(created.includes("codex-game:"), true);
+  assert.equal(created.includes("codex-games:"), true);
   assert.equal(created[created.indexOf("-n") + 1], "game-coordinator");
   const before = calls.length;
   resumeSlot({ ...result, state: "live" }, "/socket", null, (args) =>

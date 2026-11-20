@@ -8,7 +8,7 @@ import {
 export const verification =
   "Native project, pending questions, quota, HOLD and Remote Control connection require supported native verification by the caller.";
 
-// Every registered role is in the game workspace: session `<harness>-game`, window named after the role.
+// Every registered role is in the game workspace: session `<harness>-games`, window named after the role.
 export function windowName(harness, role) {
   return role.replace("/", "-");
 }
@@ -115,7 +115,7 @@ export function plan(root, registry, options, panes, processes) {
     const worktree = resolve(root, record.worktree);
     const game = options.config.games[role.split("/")[0]];
     const cwd = game ? resolve(root, game.path) : hostRoot;
-    const session = `${harness}-game`;
+    const session = `${harness}-games`;
     const name = windowName(harness, role);
     const relevant = panes.filter(
       (p) =>

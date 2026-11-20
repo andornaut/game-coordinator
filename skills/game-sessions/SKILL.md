@@ -12,7 +12,7 @@ Same-harness recovery only. Recovery never changes ownership or harness; a harne
 ## Identity and scope
 
 - IDs, worktrees and effective harnesses come from `var/registry.json`. Keep `~/.local/state/game-sessions/libraries.json` consistent with it, preserving unknown fields. Ask only about unresolved identity or scope.
-- Recover only the selected roles; preserve every other owner. Coordinator and kit windows live in `claude-game` or `codex-game`; game windows in their game's session.
+- Recover only the selected roles; preserve every other owner. Coordinator and kit windows live in `claude-games` or `codex-games`; game windows in their game's session.
 - Native cwd is the game root (game roles) or the game-coordinator root (kits, game-coordinator). Edit scope is `.worktrees/art|gameplay|tech` (games) or `.worktrees/coordinator` (kits). Keep their branches and WIP.
 
 ## Resume existing sessions
