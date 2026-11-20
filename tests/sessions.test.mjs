@@ -95,10 +95,10 @@ test("selection is explicit, sorted and uses each effective harness", () => {
     [],
   );
   assert.deepEqual(
-    slots.map((s) => [s.role, s.harness, s.session, s.cwd]),
+    slots.map((s) => [s.role, s.harness, s.session, s.name, s.cwd]),
     [
-      ["game-coordinator", "codex", "codex-game", "/repo"],
-      ["game/art", "claude", "claude-game", "/game"],
+      ["game-coordinator", "codex", "codex-game", "game-coordinator", "/repo"],
+      ["game/art", "claude", "claude-game", "game-art", "/game"],
     ],
   );
 });
