@@ -306,7 +306,7 @@ export function markPane(slot, handoffMarker, tmux = run) {
   }
 }
 
-export function sortWindows(registry, slot, tmux = run) {
+export function sortWindows(registry, config, slot, tmux = run) {
   const rows = tmux([
     "list-panes",
     "-s",
@@ -320,7 +320,7 @@ export function sortWindows(registry, slot, tmux = run) {
     const [id, index, name, role, harness] = line.split("\t");
     const known =
       Object.hasOwn(registry.roles, role ?? "") &&
-      windowName(harness, role) === name &&
+      windowName(config.games, role) === name &&
       harness === slot.harness;
     const item = groups.get(id) ?? {
       id,
@@ -697,7 +697,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
           ports.tmux ?? run,
         );
         if (fresh.state === "missing")
-          sortWindows(registry, fresh, ports.tmux ?? run);
+          sortWindows(registry, layout.config, fresh, ports.tmux ?? run);
         const observed = snapshot().find((s) => s.role === slot.role);
         const orientation =
           result.action === "resume-requested" &&

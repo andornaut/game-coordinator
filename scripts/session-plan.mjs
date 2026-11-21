@@ -8,9 +8,13 @@ import {
 export const verification =
   "Native project, pending questions, quota, HOLD and Remote Control connection require supported native verification by the caller.";
 
-// Every registered role is in the game workspace: session `<harness>-games`, window named after the role.
-export function windowName(harness, role) {
-  return role.replace("/", "-");
+// Session `<harness>-games`; a game window is the first word of the game's name plus the role (`ada-tech`), any other window is the role.
+export function windowName(games, role) {
+  const [game, type] = role.split("/");
+  if (!type) return role;
+  const short = games?.[game]?.name?.split(" ")[0]?.toLowerCase();
+  if (!short) throw new Error(`Game ${game} has no configured name`);
+  return `${short}-${type}`;
 }
 
 export function marker(revision, role, harness, id) {
@@ -116,7 +120,7 @@ export function plan(root, registry, options, panes, processes) {
     const game = options.config.games[role.split("/")[0]];
     const cwd = game ? resolve(root, game.path) : hostRoot;
     const session = `${harness}-games`;
-    const name = windowName(harness, role);
+    const name = windowName(options.config.games, role);
     const relevant = panes.filter(
       (p) =>
         (p.role === role && p.harness === harness) ||

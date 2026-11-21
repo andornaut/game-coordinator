@@ -101,7 +101,7 @@ Use the existing hourly :30 reviews; add no timers or teams. Preserve handoff an
 
 ## Sessions and handoffs
 
-Each role keeps its exact conversation IDs and one shared edit worktree. Native cwd stays at the game root, or game-coordinator for kits and game-coordinator. Every role's window belongs in `codex-games` or `claude-games` and is named after the role, with `/` as `-` (`ada-the-navigator-art`, `art-kit`, `game-coordinator`). Windows are alphabetical. Moving windows preserves processes and does not activate a role.
+Each role keeps its exact conversation IDs and one shared edit worktree. Native cwd stays at the game root, or game-coordinator for kits and game-coordinator. Every role's window belongs in `codex-games` or `claude-games`. A game role's window is the first word of the game's `config.json` name plus the role (`ada-tech`, `archie-art`, `chibi-gameplay`); any other window is the role (`art-kit`, `game-coordinator`). Windows are alphabetical. Moving windows preserves processes and does not activate a role.
 
 The coordination-kit registry resolves each role through its optional harness override, otherwise the registry default. Handoffs select explicit games and any included kit/game-coordinator roles; unselected owners remain unchanged.
 

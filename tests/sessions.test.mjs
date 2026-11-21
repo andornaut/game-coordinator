@@ -43,7 +43,9 @@ import {
 
 const id = "12345678-1234-1234-1234-123456789abc";
 const target = "abcdefab-1234-1234-1234-123456789abc";
-const config = { games: { game: { path: "../game" } } };
+const config = {
+  games: { game: { name: "Gizmo the Fixture", path: "../game" } },
+};
 const registry = {
   revision: 14,
   harness: "codex",
@@ -98,7 +100,7 @@ test("selection is explicit, sorted and uses each effective harness", () => {
     slots.map((s) => [s.role, s.harness, s.session, s.name, s.cwd]),
     [
       ["game-coordinator", "codex", "codex-games", "game-coordinator", "/repo"],
-      ["game/art", "claude", "claude-games", "game-art", "/game"],
+      ["game/art", "claude", "claude-games", "gizmo-art", "/game"],
     ],
   );
 });
@@ -450,7 +452,7 @@ test("alphabetical insertion swaps only known windows and leaves unknown windows
   const calls = [];
   const value = structuredClone(registry);
   value.roles["art-kit"] = {};
-  sortWindows(value, slot(), (args) => {
+  sortWindows(value, config, slot(), (args) => {
     calls.push(args);
     return args[0] === "list-panes"
       ? "@1\t1\tgame-coordinator\tgame-coordinator\tcodex\n@2\t2\tscratch\t\t\n@3\t3\tart-kit\tart-kit\tcodex"
