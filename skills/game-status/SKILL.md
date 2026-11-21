@@ -5,38 +5,25 @@ description: Report what is done, in progress, new, outstanding and waiting on t
 
 # Game status
 
-Answer from the shared bookkeeping, never from memory or session history. The single source is the read-only `coordination-kit status` command run against the game-coordinator root, which derives each item's status from the work files in every registered repository, live protocol state, the commit on `main` that set `status: done` and the delivery record.
+Use the coordinator-installed Coordination Kit CLI. Resolve the coordinator checkout from the registry. Run `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root>` followed by the commands below.
 
-## Run it
+## Read
 
-`C` is `node <game-coordinator root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <game-coordinator root>` (not npx, which adds a process per call), run from that root. Resolve the root from the registry's coordinator checkout, not from the current directory.
+- For general status, run `status --format json` without a date filter. Include all open work. Use `latestEvidenceAt` to select recent activity and completions, defaulting to the last 24 hours.
+- For a game, kit or role, add `--scope <registry name>`. For a history-only request with an explicit time window, add `--since <ISO timestamp>` using America/Toronto to resolve local dates.
+- For an audit, add `--audit`. Follow the user's scope and time window and list every matching item.
+- For a delivery verification check, `--state unverified` selects done items without qualifying delivery evidence.
+- For a current status report, read `question list --state pending` and `hold list --state active`. Use registered roles, and the hold's scope where relevant, to match the requested game, kit or role.
 
-Map the prompt to filters, and combine them as needed:
-
-| Prompt                                                   | Arguments                                             |
-| -------------------------------------------------------- | ----------------------------------------------------- |
-| No qualifier ("status")                                  | `--since <24 hours ago, ISO>`                         |
-| A game, kit or role ("status Archie", "game-kit status") | `--scope <registry name>`                             |
-| A time ("since Monday", "today", "this week")            | `--since <ISO, America/Toronto>`                      |
-| "outstanding", "what's left", "backlog"                  | `--state approved --state requested --state proposed` |
-| "in progress", "what's being worked on"                  | `--state in-progress --state landed`                  |
-| "done", "what shipped"                                   | `--state done --state deployed`                       |
-| "audit", "did my requests get done", a named request     | `--audit` (with `--since` when a period is given)     |
-| "unverified"                                             | `--state unverified`                                  |
-
-Read `--format json` for anything you filter or count yourself; use `--format markdown` only as a starting digest. The schema is in the installed `node_modules/@andornaut/coordination-kit/docs/commands.md#status`.
+The installed [command reference](../../node_modules/@andornaut/coordination-kit/docs/commands.md#status) defines the status JSON fields and evidence rules.
 
 ## Report
 
-- Group per game and kit, in this order: Waiting on you, Outstanding, In progress, New, Done. Omit empty groups and repositories with nothing in the window.
-- One line per item: ID, title, status, and the one fact that matters (owner or blocker for open items; deployed time for done; replacement ID for superseded).
-- Mark `deliveryEvidence: assumed` as "done (delivery assumed)" and `deliveryVerified: false` as "done (unverified)".
-- Lead with counts per group. For large windows, list Waiting on you and Outstanding in full and summarize Done by count with the most recent few.
-- For `--audit`, list every user-originated item with its status and evidence: work file, landing commit, deployed SHA and time, or the replacement or cancellation. Call out anything requested but not yet a work file.
-- Waiting on you also checks role panes for open structured prompts (the command reports pending questions it knows of). Name the owner, the question and where to answer.
-- State limits plainly: a repository or protocol source the command reports as unavailable is unknown, never clear.
+- Lead with decisions, active holds, and counts of current open work by game or kit. Include pending questions' owners, exact wording, options and where to answer. Distinguish recorded pending questions, proposals awaiting approval and confirmed visible structured prompts. Check role panes read-only for prompt visibility and say when it is unknown.
+- Count open work files with status `proposed`, `approved`, `in-progress`, `landed` or `deployed`. A deployed item can still need acceptance or work closure. Name the owner or blocker and preserve the exact delivery evidence.
+- Count unmatched imported requests separately. They have `status: requested` and `workFile: null`. Include their owners and evidence limits. A linked import stays with its work item.
+- Summarize recent milestones and name what shipped. Mark `deliveryEvidence: assumed` as "done (delivery assumed)" and `deliveryVerified: false` as "done (delivery unverified)".
+- For an audit, include each item's ID, title, status and evidence: work file, landing commit, deployed SHA and time where available, or replacement or cancellation. Call out requests without work files.
+- Report unavailable sources as unknown. An unavailable read gives no clearance.
 
-## Rules
-
-- Read-only. Never edit work files, reconcile, publish or message roles from this skill. If the report exposes a gap (a request with no work file, a stale item, a red delivery), say so and offer the follow-up separately.
-- Never infer a status the command did not derive.
+This skill is read-only. Report discrepancies without editing work files, reconciling messages, publishing or contacting roles.
