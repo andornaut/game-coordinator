@@ -11,7 +11,7 @@ Same-harness recovery only. Recovery never changes ownership or harness; a harne
 
 ## Identity and scope
 
-- IDs, worktrees and effective harnesses come from `var/registry.json`. Keep `~/.local/state/game-sessions/libraries.json` consistent with it, preserving unknown fields. Ask only about unresolved identity or scope.
+- For exact-ID resume, use `var/registry.json` as the sole source of role IDs, worktrees and effective harnesses. Ask only about unresolved identity or scope.
 - Recover only the selected roles; preserve every other owner. Every role's window lives in `claude-games` or `codex-games`: a game role is the first word of the game's name plus the role (`ada-tech`, `archie-art`), any other role is its name (`art-kit`, `game-coordinator`).
 - Native cwd is the game root (game roles) or the game-coordinator root (kits, game-coordinator). Edit scope is `.worktrees/art|gameplay|tech` (games) or `.worktrees/coordinator` (kits). Keep their branches and WIP.
 
@@ -29,7 +29,7 @@ An explicit same-harness replacement request authorizes changing the ID, nothing
 
 1. Verify the old ID natively. A closed conversation does not prove its frontend or jobs stopped; the old turn must be terminal or quiescent. Preserve its checkpoint, inbox and unanswered questions.
 2. Verify the user-selected replacement's native identity, then attach it to the `game-coordinator` window and verify pane markers. If the old slot is still occupied, use a separate window and do not declare two active owners.
-3. Update only this role's ID for the current harness through the revision-checked registry API, and the compatibility mapping under its lock. Preserve unknown fields.
+3. Update only this role's ID for the current harness through the revision-checked registry API, and update the replacement's compatibility mapping in `~/.local/state/game-sessions/libraries.json` under its lock. Preserve unknown fields.
 4. The replacement runs `ck session start`, reconciles the old inbox with exact IDs and outcomes, and never copies old decisions as answers to new questions.
 5. Check `dk G status --game G` for each game. Recovery may complete while scheduled coverage stays pending until the next genuine :30 review.
 
