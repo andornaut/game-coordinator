@@ -1,6 +1,6 @@
 # game-coordinator
 
-Coordination home for three games and four shared kits. Each game and each kit is worked on by long-running AI coding agent sessions, one per role. This repository holds the coordination layout and documents how the pieces fit together. Machine-local state lives in an ignored directory.
+Coordination home for three games and four shared kits. Each game and each kit is worked on by long-running AI coding agent sessions, one per role. This repository holds shared configuration, the role catalog and operating documentation.
 
 [Architecture](docs/architecture.md) explains how the roles, coordination-kit and delivery-kit fit together. [Cross-game policies](docs/game-policies.md) define shared product and development rules and how the game-coordinator communicates changes.
 
@@ -53,7 +53,7 @@ Every registered game's `delivery-kit.json` sets `resources.memoryMiB`, an integ
 
 ## Role messaging
 
-All roles, in Claude and Codex, use the coordinator-installed coordination-kit CLI with its absolute root, including from a game or kit worktree. Invoke it as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> ...`, never through `npx`. Follow the [communication and recipient guards](docs/game-policies.md#communication).
+All roles, in Claude and Codex, use the coordination-kit CLI installed in the primary game-coordinator checkout and pass that checkout's absolute root, including from a game or kit worktree. Invoke it as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> ...`, never through `npx`. Follow the [communication and recipient guards](docs/game-policies.md#communication).
 
 SDK imports use `@andornaut/coordination-kit/build/registry`; `@andornaut/delivery-kit/build/source-identity` stays in delivery-kit. Each kit's CLI is its `dist/cli.js`.
 
@@ -153,6 +153,8 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 | `.worktrees/`                       | no        | Worktrees for changes to this repository                                                                                                         |
 | `var/`                              | no        | Registry (`registry.json`), review route (`route.json`), channel config, per-role checkpoints and each game's runner state (`games/<game>/bus/`) |
 | `.claude/`                          | no        | Harness-local files                                                                                                                              |
+
+The live coordination store uses the configured external state root until the verified cutover to ignored `var/coordination/` in the primary coordinator checkout. Keep backups outside the checkout. See [where state lives](docs/architecture.md#where-state-lives) for the full layout.
 
 ### Source checks
 
