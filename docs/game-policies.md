@@ -24,7 +24,7 @@ Route dependencies to the role that can clear them. Never answer, cancel or clea
 Every game, coordinator and kit role, in Claude and Codex, uses one coordination-kit store and the same verbs, with identical output in both harnesses. All roles run the coordinator-installed CLI as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> ...`, never through `npx`; game-local delivery-runner package pins remain separate. The [role messaging](../README.md#role-messaging) table lists the verbs.
 
 - **Send.** `msg send --to ROLE --body-file FILE` is the only payload path for role-to-role coordination. It stores the message before anything native happens, then attempts at most one wake. Use `--intent unblock` for a confirmed unblocker, `--link work=ID` for related work, and a fixed `--id UUID` when a retry must not duplicate.
-- **Wake only.** Native session messages and channel notifications only wake a recipient. They never carry content; their text names the message count and tells the recipient to run `inbox`. Never paste a payload into another role's session, pane or queue, and never resend a stored message natively.
+- **Wake only.** Native session messages, channel notifications and tmux reminders only ask the recipient to run `inbox`. They may identify the count or exact original IDs. Keep message bodies in the store.
 - **Read and close.** Recipients run `coordination-kit inbox` (with `--include-body` for bodies) at startup, on every wake and at each safe boundary, then close each message with `msg done ID` (with `--superseded-by ID` for a superseded one) or `msg retain ID --reason TEXT --next-boundary TEXT`. Only the recipient closes its own messages, in one write.
 - **History.** `msg history` lists the store's append-only message events and is the durable record of what was sent, delivered and closed.
 - **Fence.** Each writing verb identifies its caller as the registry role whose effective harness binding equals the caller's native conversation ID. `harness select` rotates the binding. A worker writes under its parent's binding, with `--worker NAME` as an unverified label.
@@ -36,6 +36,10 @@ The store sends no wake to an unregistered, unbound or held recipient, and a Cod
 The coordinator owns communication health and escalation; it is not a relay. Frontend bridge and authentication repair remain separate integration-owner responsibilities.
 
 Use the existing hourly :30 America/Toronto reviews to drain the whole backlog and escalate messages open across two slots. Follow the [review procedure](../README.md#monitoring); add no daemon or timer.
+
+At that review, the coordinator may use tmux after a confirmed wake failure or refusal leaves an exact unblocker unread. Verify the pane belongs to the current registered, active recipient and the composer is idle and empty. Verify question, hold and draft clearance before sending. When any check fails or is unavailable, retain the original and report the blocker and next boundary. Keep ambiguous wakes pending reconciliation.
+
+Batch eligible originals in one inbox reminder per recipient per review. Record the exact originals, pane and outcome, and use that record to avoid repeating the reminder across reviews. A reminder leaves delivery and handling to the recipient's own inbox. Preserve questions, holds and drafts, and leave running turns uninterrupted.
 
 ## Session startup
 
