@@ -15,3 +15,4 @@ Shared product and development rules that apply to every game. The canonical tex
 | gc-0011 | Dim and isolate the full game background behind the top modal | [gc-0011.md](../work/gc-0011.md) |
 | gc-0016 | Return one step on Back and reserve Resume for play           | [gc-0016.md](../work/gc-0016.md) |
 | gc-0017 | Use game-styled keyboard focus indicators                     | [gc-0017.md](../work/gc-0017.md) |
+| gc-0018 | Render standard game buttons through Game Kit                 | [gc-0018.md](../work/gc-0018.md) |
