@@ -88,7 +88,7 @@ Prefer simple, explicit designs and consistent behavior across games. Treat like
 
 - Disable text selection in noneditable UI, including mobile long-press selection of counters. Preserve normal editable inputs and game interactions.
 - Use consistent typography, a standard height and consistent text padding for labeled rectangular action buttons within each game. Stretch buttons in a vertical stack to a shared width. Size each button in a horizontal row to its own content plus the standard padding, including in wrapped rows. Round icon controls retain their own geometry.
-- Center the button in every action row with one visible button, including Close, Back, Retry or a primary action. Hidden buttons do not count; native wrappers do not change the count. Keep bottom dismissal footers.
+- Center the button in every action row with one visible button, including Close, Back, Retry or a primary action. Hidden buttons do not count; native wrappers do not change the count. Keep bottom dismissal footers unless they duplicate a decision dialog's cancellation action.
 - In every action layout or group, place the existing primary action last at the bottom in vertical layouts and rightmost in horizontal layouts. For example, Resume goes below Back to title. Preserve existing primary and safety roles, secondary actions' relative order, callbacks, hidden-control identities, readiness, dismissal semantics, labels, navigation, controls, story and choice guards.
 - Size modal windows by width family with a 16 logical px screen margin; height follows content and fonts stay full size. Widths: Ada and Chibi Large 688, Medium 500, Small 400; Archie Large 328, Medium 264.
 - Place existing version/build metadata above the bottom Close or dismissal footer wherever both already appear. Keep that dismissal footer last, preserving existing typography, spacing, targets and centered sole-action rows. In rows-only scrolling layouts, keep metadata and dismissal fixed.
@@ -132,7 +132,8 @@ Pause and Menu are one modal. On Start/title the entry control is Menu and the b
 - **Back** returns one step to the view that opened the current page. Help, Logbook, Settings and other pages opened from Menu or Pause return to that same Menu or Pause. Preserve its state and actual pause status. Back to title is an explicitly named destination with its existing guards.
 - **Close** dismisses one standalone dialog and restores the view underneath. Close on the title Menu returns to the title. A dialog opened directly from a HUD control returns to the underlying gameplay view. A dialog opened from another dialog returns to its immediate parent.
 - **Resume** explicitly leaves Pause and returns to active play. Leaving a page opened from Pause keeps the game paused until Resume.
-- When dismissal is allowed, route existing X, Escape and backdrop controls to the same one-layer destination as the visible dismissal action. Preserve Cancel semantics, confirmation and mandatory-choice guards. Restore focus to the invoking control when available or to a logical target in the restored view.
+- When the decision actions in a modal each close it, as with Buy and Cancel, use the existing cancellation as the sole visible dismissal control. Label it Cancel, Close or Back according to its purpose and destination. Omit any extra Close, Back or X that performs the same dismissal.
+- When dismissal is allowed, route existing X, Escape and backdrop controls to the same one-layer destination as the visible dismissal action. Preserve cancellation semantics, confirmation and mandatory-choice guards. Restore focus to the invoking control when available or to a logical target in the restored view.
 
 ### Settings
 
