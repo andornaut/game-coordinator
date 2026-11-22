@@ -187,8 +187,9 @@ Determine compatibility requirements from the current game/runtime release versi
 
 - Before game version 1.0, backward compatibility and migrations are not required; incompatible saves may reset safely. This does not authorize deleting current progress or automatically resetting existing cloud saves.
 - From game version 1.0 onward, published save-schema changes require compatibility or a migration preserving player progress.
-- Cheats are available in browser tabs and unavailable in installed PWA windows. Detect this at runtime, both when opening cheats and when running an action.
-- Settings is the only entry point: where cheats are available, Settings shows an Open Cheats button next to its Back button. It opens a Cheats modal sized to the game's content, whose body scrolls rather than pages, with Close as its bottom primary button.
+- Offer Cheats in browser tabs and installed apps. Preserve each action's gameplay eligibility and guards across display modes.
+- Put one Cheats entry directly in the Menu or Pause modal, whichever applies in the current context. Use a shared modal structure with a title, a top-right X and a bottom primary Close button. Both dismissal controls return one layer to the invoking Menu or Pause and restore focus to the Cheats entry.
+- Group Cheats actions logically and size the modal to fit the game's controls. Ada uses two logical columns and fits its controls without scrolling.
 - Cheats never touch the save. Using any cheat starts a cheat session: from that moment nothing is saved, earned or banked (progress, unlocks, currency, achievements, statistics), and returning to Start/title from play, reloading or closing the game ends the session; the session itself is never stored. Continue then loads the save as it was before the first cheat. Cheats work on Start/title too: they apply to the session that the next Play or Continue starts.
 - Grants that add an amount (currency, resources) are buttons that add a fixed amount on every press.
 - The modal also holds three actions that are not cheats and start no cheat session: Show tips again (in every game with first-time tips or hints; it clears the seen record in the save), the FPS counter toggle, and Reset save.
