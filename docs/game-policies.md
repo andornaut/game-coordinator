@@ -132,8 +132,9 @@ Pause and Menu are one modal. On Start/title the entry control is Menu and the b
 - **Back** returns one step to the view that opened the current page. Help, Logbook, Settings and other pages opened from Menu or Pause return to that same Menu or Pause. Preserve its state and actual pause status. Back to title is an explicitly named destination with its existing guards.
 - **Close** dismisses one standalone dialog and restores the view underneath. Close on the title Menu returns to the title. A dialog opened directly from a HUD control returns to the underlying gameplay view. A dialog opened from another dialog returns to its immediate parent.
 - **Resume** explicitly leaves Pause and returns to active play. Leaving a page opened from Pause keeps the game paused until Resume.
-- When the decision actions in a modal each close it, as with Buy and Cancel, use the existing cancellation as the sole visible dismissal control. Label it Cancel, Close or Back according to its purpose and destination. Omit any extra Close, Back or X that performs the same dismissal.
-- When dismissal is allowed, route existing X, Escape and backdrop controls to the same one-layer destination as the visible dismissal action. Preserve cancellation semantics, confirmation and mandatory-choice guards. Restore focus to the invoking control when available or to a logical target in the restored view.
+- When the decision actions in a modal each close it, as with Buy and Cancel, use the existing cancellation as the sole dismissal button in the action area. Label it Cancel, Close or Back according to its purpose and destination. The top-right X is separate from the action area.
+- Provide a top-right X on every modal and route it to the same cancellation action exactly once. When dismissal is allowed, Escape and the backdrop use that same one-layer dismissal. Restore focus to the invoking control when available or to a logical target in the restored view. Preserve confirmation guards and the existing cancellation semantics.
+- If a modal has no valid cancellation action, flag it for an explicit user decision and preserve its existing behaviour until resolved. Keep mandatory choices nondismissible until the user approves a valid cancellation path. The X must never accept a decision or advance a story choice.
 
 ### Settings
 
