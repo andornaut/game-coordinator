@@ -14,3 +14,4 @@ The role catalog, startup orientation, shared tooling adoption and the work prot
 | gc-0013 | Improve collaboration status, reconciliation and delivery reporting    | [gc-0013.md](../work/gc-0013.md) |
 | gc-0014 | Store coordination in role-owned filesystem directories                | [gc-0014.md](../work/gc-0014.md) |
 | gc-0015 | Bound closed coordination message history by activity                  | [gc-0015.md](../work/gc-0015.md) |
+| gc-0020 | Act on blocked inbox delivery at safe boundaries                       | [gc-0020.md](../work/gc-0020.md) |
