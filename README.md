@@ -154,7 +154,7 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 | `var/`                              | no        | Registry (`registry.json`), review route (`route.json`), channel config, per-role checkpoints and each game's runner state (`games/<game>/bus/`) |
 | `.claude/`                          | no        | Harness-local files                                                                                                                              |
 
-The live coordination store uses the configured external state root until the verified cutover to ignored `var/coordination/` in the primary coordinator checkout. Keep backups outside the checkout. See [where state lives](docs/architecture.md#where-state-lives) for the full layout.
+The live coordination store is ignored `var/coordination/` in the primary coordinator checkout. Keep backups outside the checkout. See [where state lives](docs/architecture.md#where-state-lives) for the full layout.
 
 ### Source checks
 

@@ -41,7 +41,7 @@ The [role catalog](roles.md), generated from `roles.json`, is the authoritative 
 [coordination-kit](https://github.com/andornaut/coordination-kit) is the common contract every role uses through one CLI installed in the primary game-coordinator checkout, invoked as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root>`. Every caller passes that checkout as the explicit root from any working directory.
 
 - **Registry.** `var/registry.json` maps each role name to its current conversation per harness and its worktree. Senders always address roles by name. Every send resolves the recipient's current conversation, so a relaunched or transferred session keeps receiving messages without changes elsewhere. The registry binding is also the writer fence: a writing command is accepted only from the role whose effective binding equals the caller's native conversation ID.
-- **Current coordination store.** `coordination.db`, a SQLite file in the configured external state root, holds an append-only, hash-chained event log and the message, work, question, hold, session and handoff projections built from it. Review briefs and ingested runner events are stored there too, as messages from `delivery-kit`.
+- **Current coordination store.** The file journal and its committed records in `var/coordination/` are authoritative. Coordination Kit rebuilds the query index from the journal. The store contains messages, work, decisions, holds, sessions, handoffs, review briefs and ingested runner events.
 - **Messages.** Store first, wake second, pull third:
   1. `msg send` commits the message to the store. Nothing native happens before that commit.
   2. The store attempts at most one outstanding wake per recipient, skipping unregistered, unbound and held recipients. A wake carries no content, only `N new messages for ROLE: run coordination-kit inbox`. Claude wakes through a per-conversation wake file that the channel server announces; Codex wakes through one guarded control-socket queue add. A wake outcome is logged apart from message state.
@@ -106,9 +106,9 @@ At each :30 review, game-coordinator:
 | Coordinator `var/handoffs/`                                                 | Role checkpoints and handoff evidence.                                     |
 | Coordinator `var/reviews/`                                                  | Local review artifacts and operational evidence.                           |
 | Coordinator `var/scratch/`                                                  | Temporary local output, created as needed.                                 |
-| Configured external state root                                              | Current live SQLite coordination store and wake files.                     |
-| Coordinator `var/coordination/`                                             | Approved target for the canonical live file store in the primary checkout. |
+| Configured external state root                                              | Wake files and the frozen legacy SQLite source.                            |
+| Coordinator `var/coordination/`                                             | Canonical live file store in the primary checkout.                         |
 | Outside the coordinator checkout                                            | Independent backups and restore verification.                              |
 | GitHub releases                                                             | Pinned kit archives consumed by the games and game-coordinator.            |
 
-Commit the shared, reviewable configuration, role catalog, schemas, policies and work specifications. The coordinator's `var/` paths are ignored. The configured external store remains authoritative until the verified cutover described in [the approved layout work](work/gc-0014.md).
+Commit the shared, reviewable configuration, role catalog, schemas, policies and work specifications. The coordinator's `var/` paths are ignored. See the [filesystem layout work](work/gc-0014.md) for migration verification.
