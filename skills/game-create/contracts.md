@@ -1,10 +1,15 @@
 # Creation contracts
 
-Read the installed published delivery-kit definitions before mutation. The compatibility transaction below uses schema-1 configuration, registry and control, and schema-2 route; verify these against the installed release. Package major and JSON schema numbers differ. Resolve each role through its optional harness override, otherwise the global default. Use scoped `harness select` only after all affected readers support that contract. Never invent fields, switch unselected owners or infer activation from registration. Shared-role transfers require explicit authority; game-handoff owns that procedure.
+Read the installed Coordination Kit registry and Delivery Kit configuration definitions before mutation. The compatibility transaction below uses schema-1 configuration, registry and control, and schema-2 route; verify these against the installed release. Package major and JSON schema numbers differ. Resolve each role through its optional harness override, otherwise the global default. Use scoped `harness select` only after all affected readers support that contract. Never invent fields, switch unselected owners or infer activation from registration. Shared-role transfers require explicit authority; game-handoff owns that procedure.
 
-## Work-state capability gate
+## Coordination store
 
-Apply game-sessions' work-state lifecycle. These identity/configuration compatibility records do not select a managed state root or enroll work. Detect installed public capability. Without qualified public readers and explicit coordinator-approved prepared root, generation and owner bindings, retain Phase 0 intake only. Once those are verified, use supported prepared SDK records and artifact promotion before activation; backup, verified restore and the fenced switch remain separate live-cutover requirements. Preserve registry and compatibility responsibilities without copying the work schema here.
+Check the selected authority with the installed `coordination-kit store migration-status`. Game
+registration uses the existing authority. After scope and activation are verified, each owner runs
+`session start` in its bound conversation and records approved work using the installed store
+commands. Preserve questions, holds and unresolved worker lineage under their owning role. Use
+the [workspace setup runbook](../../docs/setup.md#select-the-store-authority) for fresh authority
+setup.
 
 ## Native identity transaction
 

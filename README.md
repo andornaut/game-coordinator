@@ -2,7 +2,7 @@
 
 Coordination home for three games and four shared kits. Each game and each kit is worked on by long-running AI coding agent sessions, one per role. This repository holds shared configuration, the role catalog and operating documentation.
 
-[Architecture](docs/architecture.md) explains how the roles, coordination-kit and delivery-kit fit together. [Cross-game policies](docs/game-policies.md) define shared product and development rules and how the game-coordinator communicates changes.
+[Workspace setup](docs/setup.md) covers a new coordinator checkout and adding a game. [Architecture](docs/architecture.md) explains role boundaries and [where state lives](docs/architecture.md#where-state-lives). [Cross-game policies](docs/game-policies.md) define shared product, development and communication rules.
 
 ## Projects
 
@@ -38,9 +38,11 @@ The [development and delivery policy](docs/game-policies.md#development-and-deli
 game-coordinator sets the desired state using the configured game `ID`, a `STATE` of `enabled` or `paused`, and a non-empty reason:
 
 ```bash
-npx --no-install delivery-kit control --game ID --state STATE \
+COORDINATOR_ROOT="$(pwd -P)"
+DK="$COORDINATOR_ROOT/node_modules/@andornaut/delivery-kit/dist/cli.js"
+node "$DK" --root "$COORDINATOR_ROOT" control --game ID --state STATE \
   --reason 'TEXT' --requester game-coordinator
-npx --no-install delivery-kit status --game ID
+node "$DK" --root "$COORDINATOR_ROOT" status --game ID
 ```
 
 `var/games/<g>/bus/delivery-control.json` persists desired state separately from the runner's observed state. Tech readiness and blockers remain separate from desired control; enabling delivery does not establish readiness. Status reports desired and observed control, runner identity, drain state and blockers.
@@ -57,7 +59,7 @@ All roles, in Claude and Codex, use the coordination-kit CLI installed in the pr
 
 SDK imports use `@andornaut/coordination-kit/build/registry`; `@andornaut/delivery-kit/build/source-identity` stays in delivery-kit. Each kit's CLI is its `dist/cli.js`.
 
-Every message is stored in the coordination store (`coordination.db` in the state root) before anything native happens. `msg send` is the only payload path for role-to-role coordination. Native session messages and channel notifications are wakes only: their fixed text, `N new messages for ROLE: run coordination-kit inbox`, never carries content, and a payload sent natively without a stored original is a policy violation.
+Every message is committed to the selected coordination store before any native wake. This workspace uses the file authority under `var/coordination/`. `msg send` is the only payload path for role-to-role coordination. Native session messages and channel notifications carry only the wake `N new messages for ROLE: run coordination-kit inbox`.
 
 The writing verbs (`msg send`, `inbox`, `msg done`, `msg retain`) identify the caller by the registry fence: the role whose effective harness binding equals the caller's native conversation ID (`CLAUDE_CODE_SESSION_ID` or `CODEX_THREAD_ID`, or `--native-id ID`). `harness select` rotates the binding. Workers write under their parent's binding; `--worker NAME` is an unverified attribution.
 
@@ -143,7 +145,7 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 | `README.md`                         | yes       | This overview                                                                                                                                    |
 | `config.json`                       | yes       | Kit configuration: games, kits, role names and the review schedule                                                                               |
 | `roles.json`                        | yes       | Role catalog source for the generated `docs/roles.md`                                                                                            |
-| `docs/`                             | yes       | Architecture overview, cross-game policies and the generated role catalog                                                                        |
+| `docs/`                             | yes       | Setup, architecture, cross-game policies and the generated role catalog                                                                          |
 | `scripts/`                          | yes       | The role catalog generator (`role-catalog.mjs`) and the session helper (`sessions.mjs` and its modules)                                          |
 | `skills/`                           | yes       | Coordinator-local skills for game creation, handoff, session recovery and status                                                                 |
 | `tests/`                            | yes       | Role catalog and session tests; `container/` holds the isolated check wrappers                                                                   |

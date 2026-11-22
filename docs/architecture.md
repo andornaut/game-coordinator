@@ -1,6 +1,6 @@
 # Architecture
 
-How the games, the shared kits and the agent sessions fit together. This page is an overview; each linked document owns the details.
+How the games, shared kits and agent sessions fit together. For checkout and registration steps, see [Workspace setup](setup.md).
 
 ```text
                           game-coordinator role
@@ -28,7 +28,7 @@ How the games, the shared kits and the agent sessions fit together. This page is
 Every game has three permanent roles, Art, Gameplay and Tech. Each kit has one role, and game-coordinator is one more. Each role is a long-running agent session (Claude or Codex) with its own Git worktree in the owning repository's ignored `.worktrees/` directory.
 
 - Art and Gameplay design and build within their scope on their own branches.
-- Tech owns the game's `main`: it integrates reviewed work, runs the checks and owns the game's kit pins and runner.
+- Tech owns the game's `main`, integrates reviewed work and supplies checked source and pins. After a verified transfer, game-coordinator owns approved bus operations and the resident runner executes delivery.
 - Kit roles own their kit's source, interfaces, checks and releases.
 - game-coordinator owns shared policy, routing, the registry, the scheduled reviews and the status audit. It coordinates; it does not implement game or kit work.
 
@@ -41,7 +41,7 @@ The [role catalog](roles.md), generated from `roles.json`, is the authoritative 
 [coordination-kit](https://github.com/andornaut/coordination-kit) is the common contract every role uses through one CLI installed in the primary game-coordinator checkout, invoked as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root>`. Every caller passes that checkout as the explicit root from any working directory.
 
 - **Registry.** `var/registry.json` maps each role name to its current conversation per harness and its worktree. Senders always address roles by name. Every send resolves the recipient's current conversation, so a relaunched or transferred session keeps receiving messages without changes elsewhere. The registry binding is also the writer fence: a writing command is accepted only from the role whose effective binding equals the caller's native conversation ID.
-- **Current coordination store.** The file journal and its committed records in `var/coordination/` are authoritative. Coordination Kit rebuilds the query index from the journal. The store contains messages, work, decisions, holds, sessions, handoffs, review briefs and ingested runner events.
+- **Current coordination store.** The file journal and its committed records in `var/coordination/` are authoritative. Coordination Kit rebuilds the query index from the journal. The store contains messages, work, decisions, holds, sessions, handoffs, review briefs and ingested runner events. See the [Coordination Kit filesystem layout](https://github.com/andornaut/coordination-kit/blob/main/docs/store.md#filesystem-layout) for record examples.
 - **Messages.** Store first, wake second, pull third:
   1. `msg send` commits the message to the store. Nothing native happens before that commit.
   2. The store attempts at most one outstanding wake per recipient, skipping unregistered, unbound and held recipients. A wake carries no content, only `N new messages for ROLE: run coordination-kit inbox`. Claude wakes through a per-conversation wake file that the channel server announces; Codex wakes through one guarded control-socket queue add. A wake outcome is logged apart from message state.
@@ -97,18 +97,48 @@ At each :30 review, game-coordinator:
 
 ## Where state lives
 
-| Location                                                                    | Contents                                                                   |
-| --------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Each repository, tracked source                                             | Shared configuration, role definitions, design and work files, and checks. |
-| Each repository, ignored `.worktrees/`                                      | Role and task checkouts.                                                   |
-| Coordinator `var/registry.json`, `var/route.json` and channel configuration | Live role bindings, review routing and channel setup.                      |
-| Coordinator `var/games/`                                                    | Each game's runner state and event logs.                                   |
-| Coordinator `var/handoffs/`                                                 | Role checkpoints and handoff evidence.                                     |
-| Coordinator `var/reviews/`                                                  | Local review artifacts and operational evidence.                           |
-| Coordinator `var/scratch/`                                                  | Temporary local output, created as needed.                                 |
-| Configured external state root                                              | Wake files and the frozen legacy SQLite source.                            |
-| Coordinator `var/coordination/`                                             | Canonical live file store in the primary checkout.                         |
-| Outside the coordinator checkout                                            | Independent backups and restore verification.                              |
-| GitHub releases                                                             | Pinned kit archives consumed by the games and game-coordinator.            |
+A workspace with Archie as an example. Game and kit paths come from the coordinator's
+`config.json`.
 
-Commit the shared, reviewable configuration, role catalog, schemas, policies and work specifications. The coordinator's `var/` paths are ignored. See the [filesystem layout work](work/gc-0014.md) for migration verification.
+```text
+workspace/
+  game-coordinator/
+    config.json, roles.json           tracked workspace and role definitions
+    package.json, package-lock.json   tracked kit pins
+    docs/, scripts/, skills/, tests/  tracked policy, tooling and checks
+    .worktrees/                      ignored task checkouts
+    node_modules/                    local installation
+    var/                             ignored runtime state
+      registry.json, route.json
+      coordination-authority.json
+      coordination/
+      games/archies-dog-walks/bus/
+      handoffs/games/archies-dog-walks/tech/current.md
+      session-frontends/
+  archies-dog-walks/
+    delivery-kit.json                tracked game delivery configuration
+    docs/design/, docs/work/         tracked design and work specifications
+    .worktrees/art/
+    .worktrees/gameplay/
+    .worktrees/tech/
+  coordination-kit/
+    .worktrees/coordinator/
+```
+
+| Location                                                              | Contents                                                                                                         |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Each repository, tracked source                                       | Source, tests, checked configuration, lockfiles, design, approved work specifications and public decision lines. |
+| Each repository, ignored `.worktrees/`                                | Role and task checkouts. Commits belong to the owning repository.                                                |
+| Coordinator `var/registry.json` and `var/route.json`                  | Native role bindings, ownership and scheduled review routing.                                                    |
+| Coordinator `var/coordination/` and `var/coordination-authority.json` | The canonical journal, committed role records and verified authority selection.                                  |
+| Coordinator `var/games/<game>/bus/`                                   | Delivery control, resident state, logs and ingest cursors.                                                       |
+| Coordinator `var/handoffs/` and `var/session-frontends/`              | Live checkpoints and evidence links, and generated per-conversation Claude channel configuration.                |
+| Configured external state root, or `var/` when unset                  | Wake and channel state, and the SQLite source retained after cutover.                                            |
+| Coordinator `var/reviews/` and `var/scratch/`                         | Local review evidence and temporary output as needed.                                                            |
+| Outside the coordinator checkout                                      | Independent backups and restore evidence.                                                                        |
+| GitHub releases                                                       | Immutable kit archives pinned in consumer lockfiles.                                                             |
+
+Commit reviewable inputs. Keep live messages, questions, holds, private evidence, native IDs,
+locks, generated runtime files and secret values out of Git. Keep credential references in an
+approved configuration where required. See the [filesystem layout work](work/gc-0014.md) for
+verified migration evidence.

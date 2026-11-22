@@ -9,8 +9,8 @@ Create only the requested infrastructure under the supplied display name. Do not
 
 ## Scope
 
-- Read `config.json`, `var/registry.json`, `var/route.json`, the pinned delivery-kit README and [contracts.md](contracts.md) before creating or registering identities. Derive schemas from installed releases. Apply game-sessions' work-state lifecycle and version gate; do not treat candidate protocol commands as installed capability.
-- Create the three roles on the explicitly authorized harness, or the verified current one. Existing games, kits, game-coordinator, holds, questions and cadences stay unchanged. Never switch harnesses or duplicate shared roles. Mixed harnesses use installed `delivery-kit harness select`.
+- Read `config.json`, `var/registry.json`, `var/route.json`, the pinned kit docs and [contracts.md](contracts.md) before creating or registering identities. Use schemas and commands from the coordinator-installed releases.
+- Create the three roles on the explicitly authorized harness, or the verified current one. Existing games, kits, game-coordinator, holds, questions and cadences stay unchanged. Preserve the existing harness bindings and reuse shared roles. For a different authorized harness, use the installed `coordination-kit harness select` scoped to the new roles.
 
 ## Repository
 
@@ -25,7 +25,7 @@ Create only the requested infrastructure under the supplied display name. Do not
 
 - Verify the installed native creation API, managed daemon and effective Remote Control capability first. Create one project and three root conversations with explicit project/cwd; persist each returned ID before naming or launch. Reconcile ambiguous results against the creation journal before retrying. Never invent an ID or start a daemon without approval.
 - Register verified IDs as held under `contracts.md` before helper launch; use `resume --held` to avoid a separate orientation message. Use game-sessions for canonical grouping, exact-ID recovery, trust handling and Remote Control verification; do not duplicate its launch procedure.
-- After verified registry enrollment, represent the new owners and verified workers in the work protocol only through the qualified published lifecycle. Record exact infrastructure approval, identities, parent/binding references and retained UNKNOWNs; enrollment is not activation. After managed cutover, publish each owner's own current receipt before its applicable work or worker-start boundary. Then run `node scripts/sessions.mjs brief --role ROLE --held` from game-coordinator for each new role. Include the reported generated artifact once in the initial HOLD request, alongside exact identity, worktree and blockers. The catalog supplies shared role, policy, Art-review and ledger guidance; do not copy it into another startup template. Only actual replies confirm HOLD. Journal and send infrastructure activation once; reuse matching acceptance on continuation instead of repeating it. Preserve independent questions and limits.
+- Record the exact infrastructure approval, verified owner bindings and any unresolved worker lineage. After authorized activation, each role runs its own `session start` and records approved work by ID. For initial held orientation, run `node scripts/sessions.mjs brief --role ROLE --held` from game-coordinator for each new role. Include the reported generated artifact once in the initial HOLD request, alongside exact identity, worktree and blockers. The catalog supplies shared role, policy, Art-review and ledger guidance; do not copy it into another startup template. Only actual replies confirm HOLD. Journal and send infrastructure activation once; reuse matching acceptance on continuation instead of repeating it. Preserve independent questions and limits.
 
 ## Register and verify
 
