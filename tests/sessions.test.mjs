@@ -411,20 +411,18 @@ test("Claude channel refuses a symlink config without changing its target", (t) 
   assert.equal(readFileSync(original, "utf8"), "private fixture");
 });
 
-test("resume lock excludes concurrent helpers and releases on descriptor close", (t) => {
+test("resume lock excludes concurrent helpers across an await and releases on descriptor close", async (t) => {
   const root = mkdtempSync(join(tmpdir(), "sessions-lock-"));
   t.after(() => rmSync(root, { recursive: true }));
   const path = join(root, "lock");
-  resumeLock(path, () =>
-    assert.throws(
+  await resumeLock(path, async () => {
+    await Promise.resolve();
+    await assert.rejects(
       () => resumeLock(path, () => assert.fail("duplicate lock")),
       /lock unavailable/,
-    ),
-  );
-  assert.equal(
-    resumeLock(path, () => "released"),
-    "released",
-  );
+    );
+  });
+  assert.equal(await resumeLock(path, () => "released"), "released");
 });
 
 test("marker repair changes metadata only on exact live child and is retry-idempotent", () => {
@@ -1032,6 +1030,10 @@ test("orientation is one root-qualified store send that wakes itself, with a sta
   });
   assert.equal(failure.id, first.id);
   assert.equal(failure.state, "unavailable");
+  assert.equal(
+    failure.nextAction,
+    `Check coordination-kit msg status ${first.id} with the canonical coordinator root before any retry`,
+  );
   assert.equal(JSON.stringify(failure).includes("private output"), false);
 });
 
@@ -1056,11 +1058,21 @@ test("brief CLI writes orientation only and never launches or messages", async (
   assert.match(readFileSync(output.slots[0].brief.path, "utf8"), /HOLD/);
 });
 
-for (const mode of ["normal", "held", "live", "unverified", "missing-core"]) {
+for (const mode of [
+  "normal",
+  "delayed",
+  "held",
+  "live",
+  "unverified",
+  "wrong-pane",
+  "changed-during-wait",
+  "missing-core",
+]) {
   test(`resume startup boundary: ${mode}`, async (t) => {
     const { root } = startupFixture(t);
     let launched = mode === "live";
     let output;
+    let waits = 0;
     const calls = [];
     const currentFrontend = { ...frontend, cwd: root };
     const ports = {
@@ -1070,12 +1082,34 @@ for (const mode of ["normal", "held", "live", "unverified", "missing-core"]) {
       }),
       processes: () => (launched ? [currentFrontend] : []),
       panes: () =>
-        launched ? [{ ...pane, frontends: [currentFrontend] }] : [],
+        launched
+          ? [
+              {
+                ...pane,
+                pane: mode === "wrong-pane" ? "%2" : pane.pane,
+                frontends: [currentFrontend],
+              },
+            ]
+          : [],
       socketAvailable: async () => true,
+      startupWait: async (ms) => {
+        assert.equal(ms, 250);
+        waits++;
+        if (mode === "delayed" && waits === 2) launched = true;
+        if (mode === "changed-during-wait") {
+          const path = join(root, "var/registry.json");
+          const value = JSON.parse(readFileSync(path, "utf8"));
+          writeFileSync(
+            path,
+            JSON.stringify({ ...value, revision: value.revision + 1 }),
+          );
+        }
+      },
       tmux: (args) => {
         calls.push(args);
         if (args[0] === "new-window" || args[0] === "new-session") {
-          if (mode !== "unverified") launched = true;
+          if (!["unverified", "delayed", "changed-during-wait"].includes(mode))
+            launched = true;
           return "%1";
         }
         return "";
@@ -1103,10 +1137,15 @@ for (const mode of ["normal", "held", "live", "unverified", "missing-core"]) {
     }
     await main(ports, args);
     const sent = calls.filter((args) => args.includes("msg"));
-    assert.equal(sent.length, mode === "normal" ? 1 : 0);
+    const shouldSend = mode === "normal" || mode === "delayed";
+    assert.equal(sent.length, shouldSend ? 1 : 0);
     assert.equal(
       output.slots[0].orientation.state,
-      mode === "normal" ? "sent" : "not-sent",
+      shouldSend ? "sent" : "not-sent",
+    );
+    assert.equal(
+      waits,
+      { delayed: 2, unverified: 8, "changed-during-wait": 1 }[mode] ?? 0,
     );
     if (mode === "live") assert.deepEqual(calls, []);
     const launch = calls.find((args) => args.includes("new-session"));
@@ -1206,6 +1245,7 @@ test("delayed frontend visibility requires explicit guarded orientation completi
     panes: () =>
       visible ? [{ ...pane, frontends: [{ ...frontend, cwd: root }] }] : [],
     socketAvailable: async () => true,
+    startupWait: async () => {},
     tmux: (args) => (args[0] === "new-session" ? "%1" : ""),
     message: (args) => {
       messages.push(args);
@@ -1233,6 +1273,10 @@ test("delayed frontend visibility requires explicit guarded orientation completi
   const selection = ["--root", root, "--role", "game-coordinator"];
   await main(ports, ["resume", ...selection]);
   assert.equal(output.slots[0].orientation.state, "not-sent");
+  assert.match(
+    output.slots[0].orientation.nextAction,
+    /brief --dispatch --role game-coordinator/,
+  );
   assert.deepEqual(messages, []);
   visible = true;
   ports.tmux = () => assert.fail("live completion mutated tmux");

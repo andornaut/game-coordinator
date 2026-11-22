@@ -16,6 +16,7 @@ import {
 import { isAbsolute, resolve } from "node:path";
 import { homedir } from "node:os";
 import { createConnection } from "node:net";
+import { setTimeout as delay } from "node:timers/promises";
 import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
 import {
@@ -191,8 +192,7 @@ export function queueOrientation(
     root,
   ];
   try {
-    // msg send stores the brief, then attempts one guarded wake itself; the
-    // sender is the caller's registry binding, and a repeated ID retries only the wake.
+    // msg send stores the brief before attempting the guarded wake.
     const sent = invoke([
       ...prefix,
       "msg",
@@ -215,8 +215,8 @@ export function queueOrientation(
       id,
       state: "unavailable",
       handling: "unverified",
-      reason:
-        "Store message command unavailable or refused; resend with the same ID, which stores nothing new",
+      reason: "The store send outcome is unverified",
+      nextAction: `Check coordination-kit msg status ${id} with the canonical coordinator root before any retry`,
     };
   }
 }
@@ -226,7 +226,7 @@ const run = (args) =>
     stdio: ["ignore", "pipe", "pipe"],
   }).trim();
 
-export function resumeLock(path, action) {
+export async function resumeLock(path, action) {
   const fd = openSync(path, "a", 0o600);
   try {
     // flock's duplicated descriptor shares this open-file description until close/exit.
@@ -239,10 +239,29 @@ export function resumeLock(path, action) {
         "Resume lock unavailable: another helper is active, or flock is unavailable",
       );
     }
-    return action();
+    return await action();
   } finally {
     closeSync(fd);
   }
+}
+
+// Launch readback is bounded to eight local checks after the first snapshot.
+// No native requests or writes occur while waiting for the launched pane.
+async function observeStartup(launched, observe, wait = delay) {
+  let observed = observe();
+  for (
+    let checks = 0;
+    checks < 8 &&
+    observed &&
+    observed.state !== "live" &&
+    (observed.state !== "dead" || observed.shell) &&
+    (!observed.pane || observed.pane === launched.pane);
+    checks++
+  ) {
+    await wait(250);
+    observed = observe();
+  }
+  return observed;
 }
 
 export function roleChannel(root, write, slot) {
@@ -672,7 +691,10 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
   }
   if (command === "resume") {
     if (issues.length) throw new Error(issues.join("; "));
-    resumeLock(resolve(root, "var/session-resume.lock"), () => {
+    const currentBindings = () =>
+      readRegistry(layout).revision === registry.revision &&
+      catalogHash(loadCatalog(root)) === catalogHash(catalog);
+    await resumeLock(resolve(root, "var/session-resume.lock"), async () => {
       for (const slot of slots) {
         if (readRegistry(layout).revision !== registry.revision)
           throw new Error("Registry changed; re-plan");
@@ -698,20 +720,37 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
         );
         if (fresh.state === "missing")
           sortWindows(registry, layout.config, fresh, ports.tmux ?? run);
-        const observed = snapshot().find((s) => s.role === slot.role);
+        const observe = () =>
+          currentBindings()
+            ? snapshot().find((s) => s.role === slot.role)
+            : undefined;
+        const started = result.action === "resume-requested" && !values.held;
+        const observed = started
+          ? await observeStartup(result, observe, ports.startupWait)
+          : observe();
         const orientation =
-          result.action === "resume-requested" &&
-          !values.held &&
-          readRegistry(layout).revision === registry.revision &&
-          fresh.harness === fresh.effectiveHarness &&
-          observed.state === "live" &&
-          observed.remoteRequested
-            ? queueOrientation(root, fresh, brief, ports.message)
+          started &&
+          observed?.state === "live" &&
+          observed.pane === result.pane &&
+          observed.id === fresh.id &&
+          observed.harness === fresh.harness &&
+          observed.harness === observed.effectiveHarness &&
+          observed.remoteRequested &&
+          currentBindings()
+            ? queueOrientation(root, observed, brief, ports.message)
             : {
+                id: orientationId(fresh, brief),
                 state: "not-sent",
                 reason: values.held
                   ? "HOLD preparation is artifact-only"
-                  : "Existing owner preserved or new frontend identity unverified",
+                  : started
+                    ? "Fresh frontend or unchanged binding could not be verified"
+                    : "Existing owner preserved",
+                ...(started
+                  ? {
+                      nextAction: `Verify the exact live binding, then run node scripts/sessions.mjs brief --dispatch --role ${slot.role} from the coordinator checkout`,
+                    }
+                  : {}),
               };
         slots = slots.map((s) =>
           s.role === slot.role
@@ -720,7 +759,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
                 tools: toolReports.get(slot.role),
                 brief,
                 orientation,
-                observedState: observed.state,
+                observedState: observed?.state ?? "unverified",
               }
             : s,
         );
