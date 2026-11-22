@@ -87,7 +87,7 @@ Each game audits all current control bindings and migrates bypasses to that shar
 
 Keep all game content outside the top modal window painted and laid out, visibly dimmed and inactive, including top controls, HUD and lower cards. Only the top modal is interactive; do not exempt a live topbar or substitute hiding, removing or reparenting background content.
 
-A click anywhere in the background invokes the existing Cancel or Back action once when the modal is closeable. Mandatory choices remain nondismissible: add no cancellation or progress skip. Preserve existing callbacks, labels, choices, save behavior, foreground and readiness guards, pointer and drag cancellation, disposal and focus. Use canonical published kit ports when available; do not fork a local controller or assume an unpublished API. Policy approval alone does not establish consumer implementation or acceptance.
+A click anywhere in the background invokes the top modal's one-layer dismissal action once when dismissal is allowed. Mandatory choices remain nondismissible: add no cancellation or progress skip. Preserve existing callbacks, choices, save behavior, foreground and readiness guards, pointer and drag cancellation, disposal and focus. Use canonical published kit ports when available; do not fork a local controller or assume an unpublished API. Policy approval alone does not establish consumer implementation or acceptance.
 
 ### Analytics
 
@@ -102,6 +102,13 @@ Every Pause/Menu outside Start/title includes Back to title immediately above it
 Start/title shows the Menu control and an Exit button. Show Exit only where exiting actually closes the app in the current runtime, such as the installed Chrome app (PWA) on Android, and hide it everywhere else, including plain browser tabs. Exit never navigates elsewhere. Detect this at runtime; do not decide it per game or per build.
 
 Pause and Menu are one modal. On Start/title the entry control is Menu and the bottom button is Close; in game the entry control is Pause and the bottom button is Resume. The bottom button is the modal's primary action and uses the primary style. In game, Back to title sits directly above it. All other buttons in the modal are ordered alphabetically by label.
+
+### Back, Close and Resume
+
+- **Back** returns one step to the view that opened the current page. Help, Logbook, Settings and other pages opened from Menu or Pause return to that same Menu or Pause. Preserve its state and actual pause status. Back to title is an explicitly named destination with its existing guards.
+- **Close** dismisses one standalone dialog and restores the view underneath. Close on the title Menu returns to the title. A dialog opened directly from a HUD control returns to the underlying gameplay view. A dialog opened from another dialog returns to its immediate parent.
+- **Resume** explicitly leaves Pause and returns to active play. Leaving a page opened from Pause keeps the game paused until Resume.
+- When dismissal is allowed, route existing X, Escape and backdrop controls to the same one-layer destination as the visible dismissal action. Preserve Cancel semantics, confirmation and mandatory-choice guards. Restore focus to the invoking control when available or to a logical target in the restored view.
 
 ### Settings
 
