@@ -83,7 +83,7 @@ Prefer simple, explicit designs and consistent behavior across games. Treat like
 
 Use Game Kit to render standard text and icon buttons in menus, modals, HUDs and standalone game controls. Game Kit owns rendering, control states and discrete input. Each game supplies its skin, labels, placement and callbacks. Use the shared loading-safe Retry presentation where applicable. Preserve the existing semantics of continuous steering, dragging, sliders and native editing.
 
-In game UI, remove the generic HTML-style focus ring from buttons and controls, including modal actions. Keep keyboard focus visible through the game's own control styling and preserve visibility in forced-colors modes. Preserve native focus, tab order, keyboard activation and focus restoration. Keep ordinary graphic borders and distinct pressed, selected and disabled states. In static mocks, draw focus only when illustrating the keyboard-focus state.
+Game buttons in HTML, canvas and mocks have no added outlines, border rings or ring-shaped shadows for focused, active (pressed) or selected states. Keep ordinary borders that are present in every state. Use a clearly visible change in face fill, text color or icon color, including in forced-colors mode. Existing pressed movement can supplement that treatment. Preserve native focus, tab order, keyboard activation, focus restoration and a distinct disabled state. Other game controls keep their authored visible focus treatment in place of the generic HTML ring. Verify the shared Game Kit defaults and each game against both source and rendered states.
 
 Every discrete click/tap control defaults to the same action on hold unless a different hold action is explicitly bound. A hold fires once and suppresses the release click.
 
