@@ -95,7 +95,7 @@ Prefer simple, explicit designs and consistent behavior across games. Treat like
 
 ### Controls and input
 
-Use Game Kit to render standard text and icon buttons in menus, modals, HUDs and standalone game controls. Game Kit owns rendering, control states and discrete input. Each game supplies its skin, labels, placement and callbacks. Use the shared loading-safe Retry presentation where applicable. Preserve the existing semantics of continuous steering, dragging, sliders and native editing.
+Use Game Kit to render standard text and icon buttons in menus, modals, HUDs and standalone game controls. Game Kit owns rendering, control states and discrete input. Each game supplies its skin, labels, placement and callbacks. Use the shared loading-safe Retry presentation where applicable and size the button to its label plus the game's standard horizontal padding. Preserve its existing height and recovery behaviour. Preserve the existing semantics of continuous steering, dragging, sliders and native editing.
 
 Use smooth SVG for simple control glyphs and CSS or shared kit skins for simple surfaces. Reuse common controls through published kits. Keep characters, scenery, gear and badge illustrations, illustrated effects and pixel detail in raster at their authored resolution. Preserve each game's silhouettes, bevels and lips, persistent borders, state cues, hit targets and accessibility. When optimizing [download size](#download-size), compare transferred compressed bytes and requests in like-for-like builds and verify which dependencies are no longer downloaded.
 
@@ -134,7 +134,7 @@ Pause and Menu are one modal. On Start/title the entry control is Menu and the b
 - **Resume** explicitly leaves Pause and returns to active play. Leaving a page opened from Pause keeps the game paused until Resume.
 - When the decision actions in a modal each close it, as with Buy and Cancel, use the existing cancellation as the sole dismissal button in the action area. Label it Cancel, Close or Back according to its purpose and destination. The top-right X is separate from the action area.
 - Provide a top-right X on every modal and route it to the same cancellation action exactly once. When dismissal is allowed, Escape and the backdrop use that same one-layer dismissal. Restore focus to the invoking control when available or to a logical target in the restored view. Preserve confirmation guards and the existing cancellation semantics.
-- If a modal has no valid cancellation action, flag it for an explicit user decision and preserve its existing behaviour until resolved. Keep mandatory choices nondismissible until the user approves a valid cancellation path. The X must never accept a decision or advance a story choice.
+- Review modals without a valid cancellation action case by case. Preserve each modal's existing blocking behaviour until the user approves a specific safe cancellation path for it. The X must never accept a decision or advance a story choice.
 
 ### Settings
 
