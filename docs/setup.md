@@ -8,7 +8,7 @@ registry, authority and backups when recovering an existing workspace. Use
 
 1. Use a primary Git checkout of game-coordinator and sibling checkouts for the repositories
    selected in [config.json](../config.json). Check each relative path, game display name and
-   role list. The committed example describes this workspace. An independent workspace
+   role list. The committed file describes the existing games workspace. An independent workspace
    supplies its own config. Keep game defaults and conventions in the
    [role catalog](roles.md) and [game policies](game-policies.md).
 2. Install the pinned packages from the coordinator checkout. Both kits require Node 24.21.0
@@ -17,7 +17,8 @@ registry, authority and backups when recovering an existing workspace. Use
    the configured gate image and existing GitHub authentication. Keep credential values
    in their designated stores.
 3. Through the approved harness's native interface, create or select the coordinator project
-   and root conversations. Record the exact returned project and conversation IDs, verify
+   and the required root conversations for the selected roles. Record the exact returned project
+   and conversation IDs, verify
    their project, working directory and parentage, and reconcile an ambiguous create before
    retrying. The session helper plans and resumes existing IDs. Provision the managed Codex
    control socket or verify effective Claude Remote Control separately.
@@ -27,7 +28,9 @@ registry, authority and backups when recovering an existing workspace. Use
    `roles`, `operations` and `transfers`. Use the verified native coordinator project ID for
    `host.nativeProjectId`. Each role has its verified per-harness conversation binding,
    relative worktree and scoped ownership. Use `held` ownership and phase for roles awaiting
-   activation. Give each game operation a registered bus owner. For an empty history use
+   activation. Give each game operation a registered bus owner. See the
+   [minimal registry seed](https://github.com/andornaut/coordination-kit/blob/main/docs/configuration.md#registry-seed-example).
+   For an empty history use
    `transfers: []`. Keep the draft in private, ignored state. The SDK creates the registry at
    revision 1 under its lock and refuses to replace an existing registry.
 
@@ -133,6 +136,17 @@ location, pins, roles and approvals.
    generate each role's held brief. Its reported artifact belongs in the corresponding initial
    HOLD request. Verify actual replies and effective harness capability. Initialize desired
    delivery control as paused and inspect status before requesting runner startup.
+
+For example, add this object as `games.example-game` in the coordinator's `config.json`.
+The sibling checkout uses the same game ID in registration and Delivery Kit commands.
+
+```json
+{
+  "name": "Example Game",
+  "path": "../example-game",
+  "roles": ["art", "gameplay", "tech"]
+}
+```
 
 ```bash
 # GAME_ID is the newly configured game slug.
