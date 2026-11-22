@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { test } from "node:test";
 
-import { runInboxReminders } from "../scripts/inbox-reminders.mjs";
+import { kitCommand, runInboxReminders } from "../scripts/inbox-reminders.mjs";
 
 const ROLE = "chibis-way-home/gameplay";
 const ID = "00000000-0000-4000-8000-0000000000a1";
@@ -21,6 +23,22 @@ const RECEIPT = {
   revision: 3,
 };
 const IN_FLIGHT = { id: RECEIPT.id, role: ROLE, originals: [ORIGINAL, SECOND] };
+
+test("accepts the schema 2 reminder plan through the CLI adapter", async (t) => {
+  const root = mkdtempSync(resolve(tmpdir(), "inbox-reminders-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const dist = resolve(root, "node_modules/@andornaut/coordination-kit/dist");
+  mkdirSync(dist, { recursive: true });
+  writeFileSync(
+    resolve(dist, "cli.js"),
+    "console.log(JSON.stringify({ schema: 2, candidates: [], inFlight: [] }));\n",
+  );
+
+  assert.deepEqual(
+    await runInboxReminders({ kit: (args) => kitCommand(root, args) }),
+    { schema: 1, outcomes: [] },
+  );
+});
 
 function fixture(options = {}) {
   const calls = [];

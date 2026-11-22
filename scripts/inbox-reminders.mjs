@@ -46,7 +46,7 @@ function tmux(args) {
   });
 }
 
-function kitCommand(root, args) {
+export function kitCommand(root, args) {
   let output;
   try {
     output = execFileSync(
@@ -71,9 +71,7 @@ function kitCommand(root, args) {
     if (reason) throw new Refusal(reason);
     throw error;
   }
-  const document = JSON.parse(output);
-  requireState(document?.schema === 1, "store-response-unavailable");
-  return document;
+  return JSON.parse(output);
 }
 
 function slotFor(context, role) {
