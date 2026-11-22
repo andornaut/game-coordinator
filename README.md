@@ -79,7 +79,7 @@ States are `sent`, `delivered` (the recipient's own `inbox` read), then `handled
 
 Pull your inbox at startup, on a wake and at each safe work boundary. After an ambiguous send, look up the original ID before retrying. A guarded wake leaves the original for the recipient’s next safe pull. Escalate repeated delays by original ID and owner.
 
-Use `harness doctor --role ROLE` to check the route and managed endpoint without sending. In Coordination Kit 3.2.0, `codex ready` requires the control socket explicitly even where doctor and normal sends resolve it automatically. A readiness probe does not establish native question clearance.
+Use `harness doctor --role ROLE` to check the route and managed endpoint without sending. Session startup, `codex ready`, diagnostics and wakes use the same managed socket when no override is set. Invalid overrides fail closed. A readiness probe does not establish native question clearance.
 
 For example, send a note to game-coordinator, then, as the recipient, read and close it:
 
