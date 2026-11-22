@@ -16,3 +16,4 @@ Shared product and development rules that apply to every game. The canonical tex
 | gc-0016 | Return one step on Back and reserve Resume for play           | [gc-0016.md](../work/gc-0016.md) |
 | gc-0017 | Use game-styled keyboard focus indicators                     | [gc-0017.md](../work/gc-0017.md) |
 | gc-0018 | Render standard game buttons through Game Kit                 | [gc-0018.md](../work/gc-0018.md) |
+| gc-0019 | Use a 4 GiB container memory ceiling across the workspace     | [gc-0019.md](../work/gc-0019.md) |

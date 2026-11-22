@@ -51,7 +51,7 @@ Pausing blocks new scheduled and requested departures. Already admitted gates, C
 
 The current operational owner defined in the [role catalog](docs/roles.md) performs authorized runner adoption only while the affected residents and the shared route host are idle and drained. Validate the complete layout with `check-config` before startup, check status before and after replacement, preserve controls, routes, singleton ownership and schedules, and observe the next normal scheduled slot without a manual departure.
 
-Every registered game's `delivery-kit.json` sets `resources.memoryMiB`, an integer from 6 through 8192.
+The games workspace sets `resources.memoryMiB` to `4096` in each game's `delivery-kit.json`. Local container launchers use the same 4 GiB ceiling. See [resource admission](docs/game-policies.md#resource-admission).
 
 ## Role messaging
 

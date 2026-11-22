@@ -55,7 +55,7 @@ Run tests and harnesses in isolated containers with only the project checkout an
 
 ### Resource admission
 
-Use only the one-minute load average for admission: ordinary containers start below 20; scheduled delivery starts below 30, rechecking every minute for up to 15 minutes after the slot before skipping it. Keep at most four CPUs and four test workers per container, plus applicable memory caps. These execution caps add no admission conditions.
+Use only the one-minute load average for admission: ordinary containers start below 20; scheduled delivery starts below 30, rechecking every minute for up to 15 minutes after the slot before skipping it. Keep at most four CPUs and four test workers per container. Set the memory ceiling to 4 GiB for containers launched for the games workspace, including gates, checks, browser tools and previews. Apply the ceiling at the next clean launch, or at an idle, drained boundary for a resident that needs replacement. These execution caps add no admission conditions.
 
 ## Testing
 
