@@ -17,7 +17,7 @@ import { controlSocket, inspectPanes, processes } from "./sessions.mjs";
 
 const UUID = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 const ROLE = /^[a-z0-9][a-z0-9-]{0,63}(\/[a-z0-9][a-z0-9-]{0,63})?$/;
-const RECEIPT = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+const ORIGINAL = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$/;
 const PANE = /^%\d+$/;
 const EMPTY = "Ask Codex to do anything";
 const SHORTCUTS =
@@ -30,7 +30,6 @@ const SNAPSHOT_LINES = 12;
 const QUIET_MS = 120;
 const PASTE_MS = 220;
 const SUBMIT_MS = 220;
-const MAX_ORIGINALS = 50;
 
 class Refusal extends Error {}
 
@@ -252,69 +251,75 @@ function unchanged(previous, next) {
 }
 
 function reminderPlan(context) {
-  const { candidates, inFlight = [] } = context.kit(["reminder", "list"]);
+  const plan = context.kit(["reminder", "list"]);
+  requireState(plan?.schema === 2, "store-plan-schema-unverified");
+  const { candidates, inFlight } = plan;
   requireState(Array.isArray(candidates), "store-candidates-unavailable");
   requireState(Array.isArray(inFlight), "store-reconciliation-unavailable");
-  const previous = inFlight.map(({ id, originals, role }) => {
+  const roles = new Set();
+  const messages = new Set();
+  const receipts = new Set();
+  const registerRole = (role, reason) => {
     requireState(
-      typeof role === "string" &&
-        ROLE.test(role) &&
-        typeof id === "string" &&
-        RECEIPT.test(id) &&
-        Array.isArray(originals) &&
-        originals.length > 0 &&
-        originals.length <= MAX_ORIGINALS &&
-        originals.every(
-          (original) => typeof original === "string" && UUID.test(original),
-        ),
+      typeof role === "string" && ROLE.test(role) && !roles.has(role),
+      reason,
+    );
+    roles.add(role);
+  };
+  const registerMessages = (ids, reason, allowEmpty = false) => {
+    requireState(Array.isArray(ids) && (allowEmpty || ids.length > 0), reason);
+    for (const id of ids) {
+      requireState(
+        typeof id === "string" && ORIGINAL.test(id) && !messages.has(id),
+        reason,
+      );
+      messages.add(id);
+    }
+  };
+  const previous = inFlight.map((receipt) => {
+    requireState(
+      typeof receipt?.id === "string" &&
+        UUID.test(receipt.id) &&
+        !receipts.has(receipt.id),
       "store-reconciliation-unavailable",
     );
+    const { id, originals, role } = receipt;
+    receipts.add(id);
+    registerRole(role, "store-reconciliation-unavailable");
+    registerMessages(originals, "store-reconciliation-unavailable");
     return { originals, receipt: id, role };
   });
-  const seen = new Set(previous.map(({ role }) => role));
-  const fresh = candidates.map(({ originals, role }) => {
-    requireState(
-      typeof role === "string" && ROLE.test(role) && !seen.has(role),
-      "store-candidate-invalid",
-    );
-    seen.add(role);
-    requireState(
-      Array.isArray(originals) && originals.length > 0,
-      "store-originals-unavailable",
-    );
-    const ids = originals.map(({ id }) => id);
-    requireState(
-      ids.every((id) => typeof id === "string" && UUID.test(id)) &&
-        new Set(ids).size === ids.length,
+  for (const candidate of candidates) {
+    registerRole(candidate?.role, "store-candidate-invalid");
+    registerMessages(candidate.originals, "store-original-invalid");
+    registerMessages(
+      candidate.deferredOriginals,
       "store-original-invalid",
+      true,
     );
-    return {
-      originals: ids.slice(0, MAX_ORIGINALS),
-      deferredOriginals: ids.slice(MAX_ORIGINALS),
-      role,
-    };
-  });
-  return { fresh, previous };
+  }
+  return { candidates, previous };
 }
 
 function confirmReceipt(receipt, slot, originals) {
   requireState(
     typeof receipt?.id === "string" &&
-      RECEIPT.test(receipt.id) &&
+      UUID.test(receipt.id) &&
       receipt.role === slot.role &&
       receipt.harness === "codex" &&
       receipt.nativeId === slot.id &&
+      UUID.test(receipt.nativeId) &&
       receipt.revision === slot.revision &&
       Array.isArray(receipt.originals) &&
       receipt.originals.length === originals.length &&
-      new Set(receipt.originals).size === originals.length &&
-      originals.every((id) => receipt.originals.includes(id)),
+      originals.every((id, index) => receipt.originals[index] === id),
     "store-receipt-mismatch",
   );
 }
 
 function checkReceipt(context, original, slot) {
   const checked = context.kit(["reminder", "check", "--id", original.id]);
+  requireState(checked?.schema === 1, "store-recheck-unavailable");
   confirmReceipt(checked.receipt, slot, original.originals);
   requireState(
     checked.receipt.id === original.id && checked.nativeIdle === true,
@@ -406,15 +411,14 @@ async function attempt(context, candidate) {
       role,
       ...originals.flatMap((id) => ["--original", id]),
     ]);
+    requireState(claimed?.schema === 1, "store-claim-unavailable");
     confirmReceipt(claimed.receipt, slot, originals);
     receipt = claimed.receipt;
-    if (claimed.notice !== undefined) {
-      requireState(
-        UUID.test(receipt.id) && claimed.notice === `${wake} [${receipt.id}]`,
-        "store-notice-mismatch",
-      );
-      wake = claimed.notice;
-    }
+    requireState(
+      claimed.notice === `${wake} [${receipt.id}]`,
+      "store-notice-mismatch",
+    );
+    wake = claimed.notice;
 
     stage = "check";
     checkReceipt(context, receipt, slot);
@@ -468,7 +472,7 @@ async function attempt(context, candidate) {
       : "not-claimed";
   if (receipt) {
     try {
-      context.kit([
+      const settled = context.kit([
         "reminder",
         "settle",
         "--id",
@@ -478,7 +482,14 @@ async function attempt(context, candidate) {
         "--reason",
         reason,
       ]);
-      settlement = "recorded";
+      if (
+        settled?.schema === 1 &&
+        settled.settlement?.id === receipt.id &&
+        settled.settlement.outcome === outcome &&
+        settled.settlement.reason === reason
+      ) {
+        settlement = "recorded";
+      }
     } catch {
       settlement = "unavailable";
     }
@@ -496,9 +507,9 @@ async function attempt(context, candidate) {
 }
 
 export async function runInboxReminders(context) {
-  const { fresh, previous } = reminderPlan(context);
+  const { candidates, previous } = reminderPlan(context);
   const outcomes = [];
-  for (const candidate of fresh) {
+  for (const candidate of candidates) {
     // Each pane's claim, input and settlement form one bounded attempt.
     outcomes.push(await attempt(context, candidate));
   }

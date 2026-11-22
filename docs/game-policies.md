@@ -46,9 +46,10 @@ inserting the wake and verifies the exact sole draft before submitting it. The c
 use the existing manual reminder path for another frontend when it can verify those same
 conditions directly. When verification is unavailable, the owner pulls at a safe boundary.
 
-Batch eligible originals in one inbox reminder per recipient. Record the exact originals, pane
-and outcome. Preserve ambiguous wakes and uncertain reminders for reconciliation. When a guard
-is unavailable or an original remains unread, record the owner, blocker and next boundary.
+Use the Coordination Kit's planned batch for one inbox reminder per recipient. Record the
+exact originals, pane and outcome. Preserve ambiguous wakes and uncertain reminders for
+reconciliation. When a guard is unavailable or an original remains unread, record the owner,
+blocker and next boundary.
 Escalate an item still open after two scheduled reviews with its exact ID and the action its
 owner or the user can take to resolve it.
 A reminder leaves delivery and handling to the recipient's own inbox. Preserve questions, holds

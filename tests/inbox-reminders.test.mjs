@@ -13,24 +13,25 @@ const CWD = resolve(ROOT, "../chibis-way-home");
 const EMPTY = "Ask Codex to do anything";
 const WAKE = `2 new messages for ${ROLE}: run coordination-kit inbox`;
 const RECEIPT = {
-  id: "reminder-fixture",
+  id: "00000000-0000-4000-8000-0000000000a4",
   role: ROLE,
   harness: "codex",
   nativeId: ID,
   originals: [ORIGINAL, SECOND],
   revision: 3,
 };
+const IN_FLIGHT = { id: RECEIPT.id, role: ROLE, originals: [ORIGINAL, SECOND] };
 
 function fixture(options = {}) {
   const calls = [];
-  const listed = options.originals ?? [ORIGINAL, SECOND];
-  const originals = listed.slice(0, 50);
+  const originals = options.originals ?? [ORIGINAL, SECOND];
+  const deferredOriginals = options.deferredOriginals ?? [];
   const receipt = {
     ...RECEIPT,
     id: options.receiptId ?? RECEIPT.id,
     originals,
   };
-  const defaultWake = `${originals.length} new messages for ${ROLE}: run coordination-kit inbox`;
+  const defaultWake = `${originals.length} new messages for ${ROLE}: run coordination-kit inbox [${receipt.id}]`;
   const wake = options.notice ?? defaultWake;
   const registry = {
     harness: options.harness ?? "codex",
@@ -78,17 +79,13 @@ function fixture(options = {}) {
       switch (args[1]) {
         case "list":
           return {
-            schema: 1,
+            schema: options.listSchema ?? 2,
             inFlight: options.inFlight ?? [],
             candidates:
-              settled || options.collected || options.inFlight
+              options.candidates ??
+              (settled || options.collected || options.inFlight
                 ? []
-                : [
-                    {
-                      role: ROLE,
-                      originals: listed.map((id) => ({ id })),
-                    },
-                  ],
+                : [{ role: ROLE, originals, deferredOriginals }]),
           };
         case "claim":
           claims += 1;
@@ -100,8 +97,8 @@ function fixture(options = {}) {
             ...originals.flatMap((id) => ["--original", id]),
           ]);
           return {
-            schema: 1,
-            notice: options.notice,
+            schema: options.claimSchema ?? 1,
+            ...(options.omitNotice ? {} : { notice: wake }),
             receipt: { ...receipt, ...options.claim },
           };
         case "check":
@@ -111,7 +108,7 @@ function fixture(options = {}) {
             throw new Error("original changed");
           if (options.changeBinding === checks) registry.revision += 1;
           return {
-            schema: 1,
+            schema: options.checkSchema ?? 1,
             receipt,
             nativeIdle: options.idle !== false,
           };
@@ -125,7 +122,10 @@ function fixture(options = {}) {
           if (options.settlementLost)
             throw new Error("receipt write unavailable");
           settled = true;
-          return { schema: 1 };
+          return {
+            schema: options.settleSchema ?? 1,
+            settlement: { id: receipt.id, outcome: args[5], reason: args[7] },
+          };
         default:
           assert.fail(`Unexpected store command ${args[1]}`);
       }
@@ -248,7 +248,7 @@ test("batches exact originals, rechecks the sole draft, and records one submitte
       "list",
       "claim",
       "check",
-      `send-keys -t %8 -l '${WAKE}'`,
+      `send-keys -t %8 -l '${WAKE} [${RECEIPT.id}]'`,
       "check",
       "send-keys -t %8 Enter",
       "settle",
@@ -269,12 +269,17 @@ test("submits the fixed notice with its exact claim ID", async () => {
   assert.equal(writes()[0][5], `send-keys -t %8 -l '${notice}'`);
 });
 
-for (const [name, notice, width, reason] of [
-  ["a changed claim ID", `${WAKE} [${SECOND}]`, 160, "store-notice-mismatch"],
-  ["a narrow pane", `${WAKE} [${ID}]`, 80, "composer-width-unverified"],
+for (const [name, options, reason] of [
+  ["a missing claim notice", { omitNotice: true }, "store-notice-mismatch"],
+  [
+    "a changed claim ID",
+    { notice: `${WAKE} [${SECOND}]` },
+    "store-notice-mismatch",
+  ],
+  ["a narrow pane", { width: 80 }, "composer-width-unverified"],
 ]) {
   test(`settles without typing for ${name}`, async () => {
-    const { context, writes } = fixture({ notice, receiptId: ID, width });
+    const { context, writes } = fixture(options);
     const { outcomes } = await runInboxReminders(context);
     assert.equal(outcomes[0].outcome, "refused");
     assert.equal(outcomes[0].reason, reason);
@@ -314,7 +319,7 @@ test("leaves an already collected original outside the executor", async () => {
 });
 
 test("reports an interrupted claim for reconciliation without typing", async () => {
-  const { context, calls } = fixture({ inFlight: [RECEIPT] });
+  const { context, calls } = fixture({ inFlight: [IN_FLIGHT] });
   assert.deepEqual(await runInboxReminders(context), {
     schema: 1,
     inFlight: [
@@ -325,22 +330,95 @@ test("reports an interrupted claim for reconciliation without typing", async () 
   assert.deepEqual(calls, [["reminder", "list"]]);
 });
 
-test("keeps a burst in one counted wake and reports IDs beyond one claim", async () => {
-  const originals = Array.from(
-    { length: 54 },
-    (_, n) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`,
-  );
-  const { context, writes } = fixture({ originals });
+test("forwards the kit's entire ordered batch and reports separate deferred IDs", async () => {
+  const originals = [SECOND, "legacy-message:7", ORIGINAL];
+  const deferredOriginals = ["legacy-message:8", "legacy-message:9"];
+  const { context, writes } = fixture({ originals, deferredOriginals });
   const { outcomes } = await runInboxReminders(context);
   assert.equal(outcomes[0].outcome, "submitted");
-  assert.deepEqual(outcomes[0].originals, originals.slice(0, 50));
-  assert.deepEqual(outcomes[0].deferredOriginals, originals.slice(50));
+  assert.deepEqual(outcomes[0].originals, originals);
+  assert.deepEqual(outcomes[0].deferredOriginals, deferredOriginals);
   assert.equal(writes().length, 2);
-  assert.match(writes()[0][5], /50 new messages/);
+  assert.match(writes()[0][5], /3 new messages/);
+});
+
+test("rejects a receipt that reorders the kit's originals before typing", async () => {
+  const { context, writes } = fixture({
+    claim: { originals: [SECOND, ORIGINAL] },
+  });
+  const { outcomes } = await runInboxReminders(context);
+  assert.equal(outcomes[0].reason, "store-receipt-mismatch");
+  assert.equal(outcomes[0].settlement, "claim-unverified");
+  assert.equal(writes().length, 0);
+});
+
+const CANDIDATE = { role: ROLE, originals: [ORIGINAL], deferredOriginals: [] };
+for (const [name, options, reason] of [
+  [
+    "duplicate recipient",
+    { candidates: [CANDIDATE, CANDIDATE] },
+    "store-candidate-invalid",
+  ],
+  [
+    "claimed and deferred overlap",
+    { candidates: [{ ...CANDIDATE, deferredOriginals: [ORIGINAL] }] },
+    "store-original-invalid",
+  ],
+  [
+    "original assigned to different recipients",
+    { candidates: [CANDIDATE, { ...CANDIDATE, role: "chibis-way-home/tech" }] },
+    "store-original-invalid",
+  ],
+  [
+    "fresh original already in flight",
+    {
+      inFlight: [IN_FLIGHT],
+      candidates: [{ ...CANDIDATE, role: "chibis-way-home/tech" }],
+    },
+    "store-original-invalid",
+  ],
+  [
+    "invalid in-flight receipt ID",
+    { inFlight: [{ ...IN_FLIGHT, id: "not-a-uuid" }] },
+    "store-reconciliation-unavailable",
+  ],
+  ["old list schema", { listSchema: 1 }, "store-plan-schema-unverified"],
+  [
+    "old list shape",
+    { candidates: [{ role: ROLE, originals: [{ id: ORIGINAL }] }] },
+    "store-original-invalid",
+  ],
+]) {
+  test(`rejects a kit plan with ${name} before claiming or typing`, async () => {
+    const { calls, context } = fixture(options);
+    await assert.rejects(runInboxReminders(context), { message: reason });
+    assert.deepEqual(calls, [["reminder", "list"]]);
+  });
+}
+
+test("leaves an unsupported claim response unverified without typing", async () => {
+  const { context, writes } = fixture({ claimSchema: 2 });
+  const { outcomes } = await runInboxReminders(context);
+  assert.equal(outcomes[0].reason, "store-claim-unavailable");
+  assert.equal(outcomes[0].settlement, "claim-unverified");
+  assert.equal(writes().length, 0);
+});
+
+test("reports an unsupported settlement response as unavailable", async () => {
+  const { context, writes } = fixture({ settleSchema: 2 });
+  const { outcomes } = await runInboxReminders(context);
+  assert.equal(outcomes[0].outcome, "submitted");
+  assert.equal(outcomes[0].settlement, "unavailable");
+  assert.equal(writes().length, 2);
 });
 
 for (const [name, options, reason] of [
   ["changed exact originals", { checkFails: 1 }, "store-recheck-unavailable"],
+  [
+    "an unsupported check response",
+    { checkSchema: 2 },
+    "store-recheck-unavailable",
+  ],
   ["unavailable idle evidence", { idle: false }, "native-idle-unverified"],
   ["a rotated registry revision", { changeBinding: 1 }, "pane-binding-changed"],
   ["the final pane interlock", { interlock: true }, "pane-input-unverified"],

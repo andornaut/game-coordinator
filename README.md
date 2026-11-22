@@ -116,9 +116,9 @@ node "$COORDINATOR_ROOT/scripts/inbox-reminders.mjs" \
   --root "$COORDINATOR_ROOT"
 ```
 
-The executor claims up to 50 originals per recipient and reports any remainder by exact ID.
-It reports the pane, outcome and claim settlement. A submitted
-reminder is evidence of input only. The recipient's own inbox records delivery. An uncertain
+Coordination Kit plans the exact batch for each recipient. The executor claims that batch and
+types only the notice that matches the claim ID. It reports the pane, outcome, settlement and
+any deferred original IDs. A submitted reminder is evidence of input only. The recipient's own inbox records delivery. An uncertain
 submission or settlement stays reserved for reconciliation. Use `review show` and message status
 to record the owner, blocker and next boundary for ineligible or unread originals, including
 Claude and unavailable composer or question state.
