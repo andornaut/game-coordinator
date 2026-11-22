@@ -200,7 +200,9 @@ function fixture(options = {}) {
               "  ~/fixture/chibis-way-home · main · GPT-6.2-Sol medium · weekly 100% left",
               options.warningOnlyFooter ||
               (options.warningOnlyAfterInsert && input !== EMPTY)
-                ? " ".repeat(136) + "\u26a0 1 warning · f2 to view"
+                ? "\u26a0 1 warning · f2 to view".padStart(
+                    (options.width ?? 160) - 1 + (options.footerOffset ?? 0),
+                  )
                 : "  ← for agents · ? for shortcuts             \u26a0 1 warning · f2 to view",
               ...(input === EMPTY ? [""] : []),
               "",
@@ -266,6 +268,17 @@ test("preserves unexpected draft text when the footer shows only warnings", asyn
   });
   const { outcomes } = await runInboxReminders(context);
   assert.equal(outcomes[0].outcome, "uncertain");
+  assert.equal(writes().length, 1);
+});
+
+test("preserves the exact draft when the warning footer is misaligned", async () => {
+  const { context, writes } = fixture({
+    warningOnlyAfterInsert: true,
+    footerOffset: -1,
+  });
+  const { outcomes } = await runInboxReminders(context);
+  assert.equal(outcomes[0].outcome, "uncertain");
+  assert.equal(outcomes[0].reason, "composer-layout-unverified");
   assert.equal(writes().length, 1);
 });
 

@@ -193,11 +193,18 @@ function capture(context, pane, info) {
     .map((line) => line.trimEnd());
 }
 
-function composer(lines, expectedDraft) {
+function composer(width, lines, expectedDraft) {
   const footer = lines.findLastIndex((line) => line !== "");
   if (footer < 0) return null;
   const shortcuts = SHORTCUTS.test(lines[footer]);
-  if (!shortcuts && !(expectedDraft && WARNINGS_ONLY.test(lines[footer])))
+  if (
+    !shortcuts &&
+    !(
+      expectedDraft &&
+      lines[footer].length === width - 1 &&
+      WARNINGS_ONLY.test(lines[footer])
+    )
+  )
     return null;
   const model = lines.findLastIndex(
     (line, index) => index < footer && MODEL.test(line),
@@ -217,7 +224,7 @@ function observe(context, slot, text, verifyDraft = false) {
   requireState(text.length + 4 < info.width, "composer-width-unverified");
   const lines = capture(context, slot.pane, info);
   requireState(lines.length === SNAPSHOT_LINES, "composer-layout-unverified");
-  const frame = composer(lines, verifyDraft ? text : undefined);
+  const frame = composer(info.width, lines, verifyDraft ? text : undefined);
   requireState(frame, "composer-layout-unverified");
   return { ...frame, info, lines };
 }
