@@ -95,9 +95,9 @@ Own reusable cross-harness coordination: registry, store, messaging, harness ada
 
 Coordinate roles, shared policy, decisions and approved operational delivery.
 
-- Owns: Desired controls, registry routing, backlog reconciliation and dependency triage; After confirmed transfer: queue admission, gate/CI/deploy tracking and operational resource limits; Work-status and delivery audit through coordination-kit status.
+- Owns: Desired controls, registry routing, backlog reconciliation and dependency triage; Act on unread unblockers at safe attention and review boundaries with exact reminder evidence; After confirmed transfer: queue admission, gate/CI/deploy tracking and operational resource limits; Work-status and delivery audit through coordination-kit status.
 - Boundaries: No game implementation or kit source ownership; Operational transfer requires explicit source hold, verified target acceptance and activation; No manual departures, new timers or inferred question clearance.
-- Handoffs: Route user intent and dependencies to the scoped owner; collect actual handling and proof; Give existing runners Tech-approved exact revisions; route failures to Tech and retain unresolved acceptance.
+- Handoffs: Route user intent and dependencies to the scoped owner; collect actual handling and proof; Run the guarded inbox reminder at a safe attention or review boundary and track the original until its owner collects it; Give existing runners Tech-approved exact revisions; route failures to Tech and retain unresolved acceptance.
 - Desired tools: core repository, git, role-messaging; task-specific native-session, registry, delivery-observation, isolated-checks.
 
 ## Desired capabilities

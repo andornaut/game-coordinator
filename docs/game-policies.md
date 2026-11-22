@@ -37,9 +37,22 @@ The coordinator owns communication health and escalation; it is not a relay. Fro
 
 Use the existing hourly :30 America/Toronto reviews to drain the whole backlog and escalate messages open across two slots. Follow the [review procedure](../README.md#monitoring); add no daemon or timer.
 
-At that review, the coordinator may use tmux after a confirmed wake failure or refusal leaves an exact unblocker unread. Verify the pane belongs to the current registered, active recipient and the composer is idle and empty. Verify question, hold and draft clearance before sending. When any check fails or is unavailable, retain the original and report the blocker and next boundary. Keep ambiguous wakes pending reconciliation.
+At the existing review or a safe boundary after a direct coordinator attention notice, the
+[guarded reminder executor](../README.md#guarded-inbox-reminder) may use tmux after a confirmed
+wake failure or refusal leaves an exact unblocker unread. The Coordination Kit ledger verifies
+the original, registered binding, question and hold clearance, and exact native idle state.
+The executor also verifies the matching Codex pane and its empty composer. It rechecks before
+inserting the wake and verifies the exact sole draft before submitting it. The coordinator may
+use the existing manual reminder path for another frontend when it can verify those same
+conditions directly. When verification is unavailable, the owner pulls at a safe boundary.
 
-Batch eligible originals in one inbox reminder per recipient per review. Record the exact originals, pane and outcome, and use that record to avoid repeating the reminder across reviews. A reminder leaves delivery and handling to the recipient's own inbox. Preserve questions, holds and drafts, and leave running turns uninterrupted.
+Batch eligible originals in one inbox reminder per recipient. Record the exact originals, pane
+and outcome. Preserve ambiguous wakes and uncertain reminders for reconciliation. When a guard
+is unavailable or an original remains unread, record the owner, blocker and next boundary.
+Escalate an item still open after two scheduled reviews with its exact ID and the action its
+owner or the user can take to resolve it.
+A reminder leaves delivery and handling to the recipient's own inbox. Preserve questions, holds
+and drafts, and leave running turns uninterrupted.
 
 ## Session startup
 

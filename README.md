@@ -98,12 +98,30 @@ delivery-kit delivers game-coordinator's review once per hour at :30 in America/
 
 1. Inventory the store's open messages for every registered role, including game Art, Gameplay and Tech, shared coordinators and kits, plus ready handoffs, from the brief, `review show` and `msg history`. Report unavailable question visibility; never infer an empty backlog from an idle session.
 2. Work from exact originals and owner dispositions. Prioritize user replies and dependency unblockers, then process independent work. Verify each retained item’s reason, owner and next boundary.
-3. Use the existing owner pull or handoff for unread, unconfirmed or ambiguous cases. Send new confirmed unblockers with `msg send --intent unblock`. Sweep for confirmed failed or refused wakes with unread unblockers and apply the [tmux reminder checks](docs/game-policies.md#communication). Reconcile ambiguity before any retry and preserve guarded originals.
+3. Use the existing owner pull or handoff for unread, unconfirmed or ambiguous cases. Send new confirmed unblockers with `msg send --intent unblock`. Sweep for confirmed failed or refused wakes with unread unblockers using the [guarded inbox reminder](#guarded-inbox-reminder). Reconcile ambiguity before any retry and preserve guarded originals.
 4. Surface pending user decisions through their owning session's structured prompt. Preserve unanswered questions, source holds and independent work. Never answer or cancel another owner's question, interrupt or restart its turn, or treat silence as a decision. Route release failures and cross-role dependencies to the role that can resolve them.
 5. Escalate any item unhandled or repeatedly deferred across two scheduled slots with its exact ID, owner, blocker and next action. Ask owners to close finished or stalled jobs after preserving diagnostics; retain protected live resources and unresolved ownership.
 6. Finish each pass with exact counts of messages inspected, handled, superseded and retained, plus unavailable scopes. Identify each remaining item's owner, reason and next boundary; record new arrivals at safe boundaries so they are included or explicitly retained for the next pass. Claim a fully drained backlog only when no open messages remain and visibility is complete.
 
 Use the existing hourly :30 reviews; add no timers or teams. Preserve handoff and activation guards when communicating with held owners.
+
+### Guarded inbox reminder
+
+Run this from the game-coordinator binding at the existing review, or after a direct coordinator
+attention notice at a safe event boundary. It uses the installed Coordination Kit's reminder
+ledger and sends only the wake to a verified idle Codex pane.
+
+```sh
+node "$COORDINATOR_ROOT/scripts/inbox-reminders.mjs" \
+  --root "$COORDINATOR_ROOT"
+```
+
+The executor claims up to 50 originals per recipient and reports any remainder by exact ID.
+It reports the pane, outcome and claim settlement. A submitted
+reminder is evidence of input only. The recipient's own inbox records delivery. An uncertain
+submission or settlement stays reserved for reconciliation. Use `review show` and message status
+to record the owner, blocker and next boundary for ineligible or unread originals, including
+Claude and unavailable composer or question state.
 
 ## Sessions and handoffs
 
