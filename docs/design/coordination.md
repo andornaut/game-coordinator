@@ -12,3 +12,4 @@ The role catalog, startup orientation, shared tooling adoption and the work prot
 | gc-0006 | Adopt the filesystem work protocol with an external state root         | [gc-0006.md](../work/gc-0006.md) |
 | gc-0012 | Adopt the coordination store for work, questions and holds             | [gc-0012.md](../work/gc-0012.md) |
 | gc-0013 | Improve collaboration status, reconciliation and delivery reporting    | [gc-0013.md](../work/gc-0013.md) |
+| gc-0014 | Store coordination in role-owned filesystem directories                | [gc-0014.md](../work/gc-0014.md) |
