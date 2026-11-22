@@ -28,7 +28,7 @@ The shared [communication contract](docs/game-policies.md#communication) defines
 
 The [development and delivery policy](docs/game-policies.md#development-and-delivery) defines integration and release eligibility; the [work lifecycle](docs/game-policies.md#work-lifecycle) records progress, evidence and acceptance.
 
-1. Art and Gameplay hand Tech an exact branch and commit. Tech reviews it, merges it into the game's local `main` once its tests pass, and deletes the branch. Kits merge their own approved work the same way.
+1. Art and Gameplay hand Tech an exact branch and commit. Tech reviews it and merges it into the game's local `main` once its tests pass. Kit owners integrate their approved work the same way. The integrating owner handles [task branch cleanup](#task-branch-cleanup) as part of landing.
 2. Each game uses at most one resident delivery-kit runner. Hourly departures are alphabetical in America/Toronto: Ada the Navigator at :00, Archie at :10 and Chibi at :20. Each game's delivery control enables or pauses its departures.
 3. A departure runs the full gate on local `main` HEAD in an isolated container, pushes that exact commit by fast-forward, watches CI for it, and deploys the gated build when CI passes. There is no queue: whatever is on `main` at departure time ships.
 4. Failures are fixed forward with a new change on `main`. Failed trees are never retried unchanged, and nothing is reverted.
@@ -140,7 +140,14 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 
 - Test suites and harnesses run in isolated containers, with only the project checkout and scratch writable. Preserve per-job CPU, memory and worker caps.
 - Tooling runs through a CLI or an imported Node module. Shell is limited to thin build wrappers, and there is no Python.
-- Each repository keeps role worktrees in an ignored `.worktrees/` directory. Merged branches and their worktrees are deleted when they land.
+- Each repository keeps role worktrees in an ignored `.worktrees/` directory.
+
+### Task branch cleanup
+
+- Delete a local task branch after verifying its current tip is an ancestor of local `main`. Preserve `main` and permanent role branches.
+- For rebased or squashed work, use the recorded integration and verify that no unique changes would be lost before deleting the task branch.
+- Before removing an attached task worktree, verify that it is clean, its essential evidence has a durable reference, its owner has released it, and no consumer still uses it. Record an owner and reason for any deferred cleanup.
+- Apply the same integration check against published `main` before deleting a GitHub task branch. Preserve protected branches and any branch used by an open pull request.
 
 ## This repository
 
