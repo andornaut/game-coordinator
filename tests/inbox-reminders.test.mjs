@@ -25,8 +25,13 @@ function fixture(options = {}) {
   const calls = [];
   const listed = options.originals ?? [ORIGINAL, SECOND];
   const originals = listed.slice(0, 50);
-  const receipt = { ...RECEIPT, originals };
-  const wake = `${originals.length} new messages for ${ROLE}: run coordination-kit inbox`;
+  const receipt = {
+    ...RECEIPT,
+    id: options.receiptId ?? RECEIPT.id,
+    originals,
+  };
+  const defaultWake = `${originals.length} new messages for ${ROLE}: run coordination-kit inbox`;
+  const wake = options.notice ?? defaultWake;
   const registry = {
     harness: options.harness ?? "codex",
     host: { root: "." },
@@ -94,10 +99,14 @@ function fixture(options = {}) {
             ROLE,
             ...originals.flatMap((id) => ["--original", id]),
           ]);
-          return { schema: 1, receipt: { ...receipt, ...options.claim } };
+          return {
+            schema: 1,
+            notice: options.notice,
+            receipt: { ...receipt, ...options.claim },
+          };
         case "check":
           checks += 1;
-          assert.deepEqual(args, ["reminder", "check", "--id", RECEIPT.id]);
+          assert.deepEqual(args, ["reminder", "check", "--id", receipt.id]);
           if (options.checkFails === checks)
             throw new Error("original changed");
           if (options.changeBinding === checks) registry.revision += 1;
@@ -111,7 +120,7 @@ function fixture(options = {}) {
             "reminder",
             "settle",
             "--id",
-            RECEIPT.id,
+            receipt.id,
           ]);
           if (options.settlementLost)
             throw new Error("receipt write unavailable");
@@ -142,7 +151,7 @@ function fixture(options = {}) {
               "0",
               "1",
               options.synchronized ? "1" : "0",
-              "160",
+              String(options.width ?? 160),
               "30",
               String(
                 (input === EMPTY ? 2 : input.length + 2) +
@@ -251,6 +260,28 @@ test("batches exact originals, rechecks the sole draft, and records one submitte
   });
   assert.equal(writes().length, 2);
 });
+
+test("submits the fixed notice with its exact claim ID", async () => {
+  const notice = `${WAKE} [${ID}]`;
+  const { context, writes } = fixture({ notice, receiptId: ID });
+  const { outcomes } = await runInboxReminders(context);
+  assert.equal(outcomes[0].outcome, "submitted");
+  assert.equal(writes()[0][5], `send-keys -t %8 -l '${notice}'`);
+});
+
+for (const [name, notice, width, reason] of [
+  ["a changed claim ID", `${WAKE} [${SECOND}]`, 160, "store-notice-mismatch"],
+  ["a narrow pane", `${WAKE} [${ID}]`, 80, "composer-width-unverified"],
+]) {
+  test(`settles without typing for ${name}`, async () => {
+    const { context, writes } = fixture({ notice, receiptId: ID, width });
+    const { outcomes } = await runInboxReminders(context);
+    assert.equal(outcomes[0].outcome, "refused");
+    assert.equal(outcomes[0].reason, reason);
+    assert.equal(outcomes[0].settlement, "recorded");
+    assert.equal(writes().length, 0);
+  });
+}
 
 for (const [name, options] of [
   ["a nonempty draft", { initial: "Unrelated draft" }],

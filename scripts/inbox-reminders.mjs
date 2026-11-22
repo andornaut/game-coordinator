@@ -380,7 +380,7 @@ function submitted(context, slot, text, draft) {
 
 async function attempt(context, candidate) {
   const { deferredOriginals, originals, role } = candidate;
-  const wake = `${originals.length} new messages for ${role}: run coordination-kit inbox`;
+  let wake = `${originals.length} new messages for ${role}: run coordination-kit inbox`;
   let receipt;
   let slot;
   let outcome = "refused";
@@ -408,6 +408,13 @@ async function attempt(context, candidate) {
     ]);
     confirmReceipt(claimed.receipt, slot, originals);
     receipt = claimed.receipt;
+    if (claimed.notice !== undefined) {
+      requireState(
+        UUID.test(receipt.id) && claimed.notice === `${wake} [${receipt.id}]`,
+        "store-notice-mismatch",
+      );
+      wake = claimed.notice;
+    }
 
     stage = "check";
     checkReceipt(context, receipt, slot);
