@@ -198,7 +198,10 @@ function fixture(options = {}) {
               "",
               ...(input === EMPTY ? [] : [""]),
               "  ~/fixture/chibis-way-home · main · GPT-6.2-Sol medium · weekly 100% left",
-              "  ← for agents · ? for shortcuts             \u26a0 1 warning · f2 to view",
+              options.warningOnlyFooter ||
+              (options.warningOnlyAfterInsert && input !== EMPTY)
+                ? " ".repeat(136) + "\u26a0 1 warning · f2 to view"
+                : "  ← for agents · ? for shortcuts             \u26a0 1 warning · f2 to view",
               ...(input === EMPTY ? [""] : []),
               "",
             ].join("\n") + "\n"
@@ -240,6 +243,31 @@ function fixture(options = {}) {
     claimCount: () => claims,
   };
 }
+
+test("verifies its exact inserted reminder with a warning-only footer", async () => {
+  const { context, writes } = fixture({ warningOnlyAfterInsert: true });
+  const { outcomes } = await runInboxReminders(context);
+  assert.equal(outcomes[0].outcome, "submitted");
+  assert.equal(writes().length, 2);
+});
+
+test("does not use a warning-only footer to claim an empty composer", async () => {
+  const { context, writes, claimCount } = fixture({ warningOnlyFooter: true });
+  const { outcomes } = await runInboxReminders(context);
+  assert.equal(outcomes[0].reason, "composer-layout-unverified");
+  assert.equal(claimCount(), 0);
+  assert.equal(writes().length, 0);
+});
+
+test("preserves unexpected draft text when the footer shows only warnings", async () => {
+  const { context, writes } = fixture({
+    warningOnlyAfterInsert: true,
+    insertChanged: true,
+  });
+  const { outcomes } = await runInboxReminders(context);
+  assert.equal(outcomes[0].outcome, "uncertain");
+  assert.equal(writes().length, 1);
+});
 
 test("batches exact originals, rechecks the sole draft, and records one submitted wake", async () => {
   const { context, calls, writes, claimCount } = fixture();

@@ -22,6 +22,7 @@ const PANE = /^%\d+$/;
 const EMPTY = "Ask Codex to do anything";
 const SHORTCUTS =
   /^ {2}← for agents · \? for shortcuts(?: +\u26a0 \d+ warnings? · f2 to view)?$/;
+const WARNINGS_ONLY = /^ {2,}\u26a0 \d+ warnings? · f2 to view$/;
 const MODEL = /^ {2}\S.* · GPT-[\w.-]+(?: [\w-]+)? · /;
 const BLOCKER =
   /esc to (?:interrupt|cancel|back)|\b(?:waiting for (?:input|approval)|decision required|select model and effort|approve this)\b/i;
@@ -192,9 +193,12 @@ function capture(context, pane, info) {
     .map((line) => line.trimEnd());
 }
 
-function composer(lines) {
+function composer(lines, expectedDraft) {
   const footer = lines.findLastIndex((line) => line !== "");
-  if (footer < 0 || !SHORTCUTS.test(lines[footer])) return null;
+  if (footer < 0) return null;
+  const shortcuts = SHORTCUTS.test(lines[footer]);
+  if (!shortcuts && !(expectedDraft && WARNINGS_ONLY.test(lines[footer])))
+    return null;
   const model = lines.findLastIndex(
     (line, index) => index < footer && MODEL.test(line),
   );
@@ -204,15 +208,16 @@ function composer(lines) {
   const row = lines[model - 2] === "" ? model - 3 : model - 2;
   const prompt = row < 0 ? null : /^› (.+)$/.exec(lines[row]);
   if (!prompt || CLIPPED.test(prompt[1])) return null;
+  if (!shortcuts && prompt[1] !== expectedDraft) return null;
   return { input: prompt[1], preceding: lines.slice(0, row), row };
 }
 
-function observe(context, slot, text) {
+function observe(context, slot, text, verifyDraft = false) {
   const info = paneInfo(context, slot.pane);
   requireState(text.length + 4 < info.width, "composer-width-unverified");
   const lines = capture(context, slot.pane, info);
   requireState(lines.length === SNAPSHOT_LINES, "composer-layout-unverified");
-  const frame = composer(lines);
+  const frame = composer(lines, verifyDraft ? text : undefined);
   requireState(frame, "composer-layout-unverified");
   return { ...frame, info, lines };
 }
@@ -431,12 +436,12 @@ async function attempt(context, candidate) {
       throw new Refusal("pane-input-unverified");
     }
     await context.wait(PASTE_MS);
-    const draft = observe(context, currentSlot(context, slot), wake);
+    const draft = observe(context, currentSlot(context, slot), wake, true);
     quiet(draft, wake);
     requireState(samePane(before, draft), "pane-binding-changed");
     stage = "check";
     checkReceipt(context, receipt, slot);
-    const latest = observe(context, currentSlot(context, slot), wake);
+    const latest = observe(context, currentSlot(context, slot), wake, true);
     quiet(latest, wake);
     requireState(unchanged(draft, latest), "composer-changed");
 
