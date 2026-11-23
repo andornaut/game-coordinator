@@ -141,7 +141,7 @@ Pause and Menu are one modal. On Start/title the entry control is Menu and the b
 
 Use consistent settings structure, labels, state text and help across games. Labels name the setting; state text uses On/Off or Shown/Hidden as appropriate. Help is stable, declarative text describing the actual effect, rather than changing instructions for the next click. Include only settings the game supports; consistency does not authorize inventing toggles.
 
-Put the **FPS counter** toggle in Settings. It is Off by default and operates independently of cheat sessions. When enabled, it shows frames per second in the top-right corner of the device viewport, inset from the safe area and drawn above all layers, including letterbox bars.
+Put the **FPS counter** toggle at the top of the right column in Settings, inline and aligned with the other settings. In a two-column layout, use the existing top-right position, swapping settings if needed. Keep it as a device preference that defaults to Off and operates independently of the save and cheat sessions. The FPS readout stays in its existing bottom-right position, with its existing parent, rotation, safe-area inset and layering over the game and letterbox bars.
 
 ### Installs
 
