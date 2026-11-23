@@ -112,7 +112,7 @@ Each game audits all current control bindings and migrates bypasses to that shar
 
 Keep all game content outside the top modal window painted and laid out, visibly dimmed and inactive, including top controls, HUD and lower cards. Only the top modal is interactive; do not exempt a live topbar or substitute hiding, removing or reparenting background content.
 
-A click anywhere in the background invokes the top modal's one-layer dismissal action once when dismissal is allowed. Mandatory choices remain nondismissible: add no cancellation or progress skip. Preserve existing callbacks, choices, save behavior, foreground and readiness guards, pointer and drag cancellation, disposal and focus. Use canonical published kit ports when available; do not fork a local controller or assume an unpublished API. Policy approval alone does not establish consumer implementation or acceptance.
+A click anywhere in the background, including any black letterbox bar outside the game area, invokes the same one-layer dismissal action as the top modal's X exactly once when dismissal is allowed. Consume the click so it cannot activate the restored view. Mandatory choices stay nondismissible. Preserve existing callbacks, choices, save behavior, foreground and readiness guards, pointer and drag cancellation, disposal and focus. Use canonical published kit ports when available; do not fork a local controller or assume an unpublished API. Policy approval alone does not establish consumer implementation or acceptance.
 
 ### Analytics
 
