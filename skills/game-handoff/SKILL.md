@@ -35,7 +35,7 @@ Status: `ck handoff show [--id ID]`, `dk G status --game G`.
 ## complete (target)
 
 1. game-coordinator: read the revision, then `ck harness select --harness TARGET --expected-revision N --role R|--game G` for the scope. This comes first: it fences the source out and lets the wake guard skip the handoff hold for the bound target.
-2. `ck msg send` each target role its complete checklist, which also wakes it. The checklist: read `current.md`; `ck session start` (binding, checkpoint, questions, holds, inbox counts); verify `main` equals `origin/main` and kit tags and candidates against stored artifacts; re-ask recorded questions as structured prompts; resume in-flight work; tell dependants who owns it now; `ck handoff active`, which releases its handoff hold. Other holds stay with their owners.
+2. `ck msg send` each target role its complete checklist, which also wakes it. The checklist: read `current.md`; `ck session start` (binding, checkpoint, questions, holds, inbox counts); verify `main` equals `origin/main` and kit tags and candidates against stored artifacts; reconcile pending questions as in [game-sessions](../game-sessions/SKILL.md#resume-existing-sessions); resume independent approved work; tell dependants who owns it now; `ck handoff active`, which releases its handoff hold. Other holds stay with their owners.
 3. `dk G runner start --game G` for each game; check `status` shows one lock holder and a supported coordinator CLI. The next :30 review confirms coverage.
 4. `ck msg send` COMPLETE to the source game-coordinator. Source sessions `/exit`; verify each frontend ended. `ck handoff state completed --id ID`.
 
