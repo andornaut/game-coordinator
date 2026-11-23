@@ -147,6 +147,8 @@ Put the **FPS counter** toggle at the top of the right column in Settings, inlin
 
 ### Installs
 
+Present one visible, accessible **Install** button in Settings when the existing eligibility rules allow it. Keep its placement and use the existing down-arrow-to-tray icon as decoration. Omit duplicate captions and standing help. Preserve the current input behavior and focus return. On activation, open the existing native install prompt or show the browser-specific steps.
+
 Every game follows one install model through the shared game-kit loader:
 
 - The first install downloads the complete build up front, with determinate progress, and verifies it before play. After install the game is fully playable offline.
