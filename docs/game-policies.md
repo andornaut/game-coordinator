@@ -171,12 +171,13 @@ Retry is explicit, with at most one load attempt in flight. Use the single top l
 
 ### Updates
 
-Download updates in the background, fetching only files that changed from the active build and reusing unchanged cached files. Stage the new build apart from the active build until it is complete. Switching to a staged build needs no further download.
+Request an update check when the app launches, when the player starts play or returns to Start/Home, and when the game regains foreground focus after switching away. Coalesce overlapping launch, focus and visibility signals for the same transition. Use the shared updater and preserve its offline and retry handling.
 
-- **At launch:** when a complete staged build exists, activate it silently before gameplay and save initialization, with no prompt.
-- **During a session:** when staging completes, show an **Update now** prompt wherever the player is, pausing play while it is shown. Update now saves, then switches. Dismissing it continues play on the active build, and the next launch activates the staged build silently.
+Download updates silently in the background. Fetch only changed files and reuse unchanged cached files. Verify and stage the complete build separately from the active build before offering it. Switching to a staged build needs no further download.
 
-Serve the active build's assets from cache first; fetch only missing files matching that build. Never activate an update without the player's Update now choice while a session is running, including during play, a title return or a visibility resume. Reject incomplete staging and mixed-build assets, pages or manifests.
+Show the existing **Update now** modal wherever the player is when a complete update is ready, including at launch or during play. Pause gameplay for the modal and preserve any pause already in effect. **Update now** saves current progress as applicable, activates the staged build and reloads the game. **Cancel**, including equivalent dismissal controls, closes only the update modal and restores the preceding view, focus and pause state. Keep playing the active build after cancellation. A staged update carried into a new launch still requires **Update now**.
+
+Serve the active build's assets from cache first and fetch only missing files matching that build. Reject incomplete staging and mixed-build assets, pages or manifests.
 
 An explicitly approved newer-save recovery path may activate automatically when saved progress, statistics or achievements require a newer game. Block gameplay start, incompatible save loading and all save writes throughout recovery. Switch only to a complete, hash-verified build; resume only after the new document proves compatibility. Missing, unsafe or incomplete candidates, timeouts and continued incompatibility retain the fence and untouched saves, with connection/retry recovery. Activation alone is not compatibility proof.
 
