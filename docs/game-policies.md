@@ -196,7 +196,7 @@ Determine compatibility requirements from the current game/runtime release versi
 - Group Cheats actions logically and size the modal to fit the game's controls. Ada uses two logical columns and fits its controls without scrolling.
 - Cheats never touch the save. Using any cheat starts a cheat session: from that moment nothing is saved, earned or banked (progress, unlocks, currency, achievements, statistics), and returning to Start/title from play, reloading or closing the game ends the session; the session itself is never stored. Continue then loads the save as it was before the first cheat. Cheats work on Start/title too: they apply to the session that the next Play or Continue starts.
 - Grants that add an amount (currency, resources) are buttons that add a fixed amount on every press.
-- The Cheats modal also holds Show tips again in games with first-time tips or hints. Show tips again clears the seen record in the save without starting a cheat session.
+- Keep ordinary first-time tips and hints. Omit the **Show tips again** control from game menus.
 - Put **Reset save** in each game's normal menu or settings. Keep it visible and enable it only when a valid saved game exists. Disable it before first play and after a confirmed reset. Default data written at startup does not qualify as a saved game. Block activation by tap, hold, keyboard and programmatic means while disabled.
 - Require confirmation before Reset save clears all saved progress, including achievements. Cancel and X leave the save intact. Preserve device preferences stored separately from progress. Reset save starts no cheat session.
 - Each game lists its cheats in its own cheats spec.

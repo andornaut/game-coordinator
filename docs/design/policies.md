@@ -18,3 +18,4 @@ Shared product and development rules that apply to every game. The canonical tex
 | gc-0018 | Render standard game buttons through Game Kit                 | [gc-0018.md](../work/gc-0018.md) |
 | gc-0019 | Use a 4 GiB container memory ceiling across the workspace     | [gc-0019.md](../work/gc-0019.md) |
 | gc-0021 | Unify background updates and confirmation across games        | [gc-0021.md](../work/gc-0021.md) |
+| gc-0022 | Remove Show tips again from game menus                        | [gc-0022.md](../work/gc-0022.md) |
