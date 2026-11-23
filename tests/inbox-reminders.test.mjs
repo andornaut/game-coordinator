@@ -283,6 +283,19 @@ test("reports the observed paused-goal footer without claiming or typing", async
   assert.equal(writes().length, 0);
 });
 
+test("reports the stalled-goal footer without claiming or typing", async () => {
+  const { context, writes, claimCount } = fixture({
+    footer:
+      "  ← for agents · ? for shortcuts             Goal stalled (/goal resume) · \u26a0 1 warning · f2 to view",
+  });
+  const { outcomes } = await runInboxReminders(context);
+  assert.equal(outcomes[0].outcome, "refused");
+  assert.equal(outcomes[0].reason, "goal-stalled");
+  assert.equal(outcomes[0].settlement, "not-claimed");
+  assert.equal(claimCount(), 0);
+  assert.equal(writes().length, 0);
+});
+
 test("preserves unexpected draft text when the footer shows only warnings", async () => {
   const { context, writes } = fixture({
     warningOnlyAfterInsert: true,
