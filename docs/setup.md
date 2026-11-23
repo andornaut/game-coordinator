@@ -114,9 +114,10 @@ location, pins, roles and approvals.
 
 1. Create or prepare the game repository on `main`. Commit its source, checks and kit pins,
    a lockfile and schema-1 `delivery-kit.json`. See the
-   [Delivery Kit example](https://github.com/andornaut/delivery-kit/blob/v7.1.0/examples/delivery-kit.json)
-   for the shape. Match `reports.project` to the coordinator display name and name
-   `game-coordinator` in `reports.recipient` and `reports.workerParents`. Use existing shared
+   [Delivery Kit configuration reference](https://github.com/andornaut/delivery-kit/blob/v8.1.0/docs/configuration.md)
+   for the shape. With Delivery Kit 8.1 or later, use the display name from the coordinator's
+   game entry. Supply the matching legacy `reports.project` field only where a supported reader
+   requires it. Name `game-coordinator` in `reports.recipient` and `reports.workerParents`. Use existing shared
    checks and actual required CI names. Pick an approved unused departure minute, keep
    `deploy.mode: "none"` until separately approved and leave other schedules intact.
 2. Create distinct role branches and ignored `.worktrees/art`, `.worktrees/gameplay` and
