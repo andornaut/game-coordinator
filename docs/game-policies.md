@@ -160,7 +160,9 @@ Every game follows one install model through the shared game-kit loader:
 
 ### Download size
 
-Keep downloads small and the file count low; measure actual transferred (compressed) bytes and file count, not disk usage.
+Prefer fewer than 100 physical files per game in the complete emitted deployable output, including boot and update metadata. Report that count separately from first-install packs and the logical update inventory. For downloads, measure actual network requests and compressed bytes transferred.
+
+Use the smallest useful stable packs. Measure encoded and decoded bytes and the download cost of a representative small change. Preserve original URLs, access for retained builds, integrity checks and complete offline play after installation. Apply packing changes within existing approvals and delivery rules.
 
 - Consolidate frames into one sheet per asset set with frame data, instead of one file per frame. Keep each sheet within the texture limits verified on mid-range Android.
 - Store each shared asset once and reference it; ship no duplicate copies.
@@ -180,7 +182,7 @@ Retry is explicit, with at most one load attempt in flight. Use the single top l
 
 Request an update check when the app launches, when the player starts play or returns to Start/Home, and when the game regains foreground focus after switching away. Coalesce overlapping launch, focus and visibility signals for the same transition. Use the shared updater and preserve its offline and retry handling.
 
-Download updates silently in the background. Fetch only changed files and reuse unchanged cached files. Verify and stage the complete build separately from the active build before offering it. Switching to a staged build needs no further download.
+Download updates silently in the background. Use specific-file updates when the actual logical update inventory has at most 100 entries. Use update groups only where needed, with at most 100 groups. Reuse unchanged cached content and fetch only changed files or groups. Verify and stage the complete build separately from the active build before offering it. Switching to a staged build needs no further download.
 
 Activate a complete, verified update carried into the next cold launch automatically, before gameplay and save initialization. For an update that finishes staging during an open session, show the existing **Update now** modal wherever the player is. Pause gameplay for the modal and preserve any pause already in effect. **Update now** saves current progress as applicable, activates the staged build and reloads the game. **Cancel**, including equivalent dismissal controls, closes only the update modal and restores the preceding view, focus and pause state. The staged update remains available for the next cold launch. Returning to Start/Home or regaining foreground focus in the same session checks for updates and still requires confirmation to activate.
 
