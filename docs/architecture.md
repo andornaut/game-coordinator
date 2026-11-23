@@ -56,7 +56,7 @@ The [role catalog](roles.md), generated from `roles.json`, is the authoritative 
 
 ## delivery-kit: how games ship
 
-[delivery-kit](https://github.com/andornaut/delivery-kit) runs one resident runner per game, pinned in that game's `package.json`. It bundles coordination-kit, so games pin only delivery-kit.
+[delivery-kit](https://github.com/andornaut/delivery-kit) runs one resident runner per game, using the pin in that game's `package.json`. For scheduled reviews and event ingest, the runner calls the Coordination Kit CLI pinned in the coordinator checkout.
 
 Each game has a fixed hourly departure slot (Ada the Navigator :00, Archie :10, Chibi :20, America/Toronto). At its slot, when `main` has new commits, the runner:
 
@@ -97,8 +97,8 @@ At each :30 review, game-coordinator:
 
 ## Where state lives
 
-A workspace with Archie as an example. Game and kit paths come from the coordinator's
-`config.json`.
+This example shows the primary coordinator checkout alongside Archie and one kit.
+Game and kit paths are relative to the coordinator checkout in `config.json`.
 
 ```text
 workspace/
@@ -109,20 +109,21 @@ workspace/
     .worktrees/                      ignored task checkouts
     node_modules/                    local installation
     var/                             ignored runtime state
-      registry.json, route.json
-      coordination-authority.json
-      coordination/
-      games/archies-dog-walks/bus/
-      handoffs/games/archies-dog-walks/tech/current.md
-      session-frontends/
+      registry.json, route.json     native bindings and review route
+      coordination-authority.json   selects the active file authority
+      coordination/                authoritative journal and role records
+      work-protocol.json           optional pointer to external state
+      games/archies-dog-walks/bus/  runner state and delivery control
+      handoffs/games/archies-dog-walks/tech/current.md  Tech checkpoint
+      session-frontends/           generated Claude channel configuration
   archies-dog-walks/
     delivery-kit.json                tracked game delivery configuration
+    package.json, package-lock.json  tracked game dependencies and pins
     docs/design/, docs/work/         tracked design and work specifications
-    .worktrees/art/
-    .worktrees/gameplay/
-    .worktrees/tech/
+    .worktrees/                      ignored checkout paths for role branches
+      art/, gameplay/, tech/
   coordination-kit/
-    .worktrees/coordinator/
+    .worktrees/coordinator/          ignored checkout path for the kit role
 ```
 
 | Location                                                              | Contents                                                                                                         |
@@ -133,12 +134,16 @@ workspace/
 | Coordinator `var/coordination/` and `var/coordination-authority.json` | The canonical journal, committed role records and verified authority selection.                                  |
 | Coordinator `var/games/<game>/bus/`                                   | Delivery control, resident state, logs and ingest cursors.                                                       |
 | Coordinator `var/handoffs/` and `var/session-frontends/`              | Live checkpoints and evidence links, and generated per-conversation Claude channel configuration.                |
-| Configured external state root, or `var/` when unset                  | Wake and channel state, and the SQLite source retained after cutover.                                            |
+| Configured external state root, or `var/` when unset                  | Wake and channel state, artifacts and the SQLite source retained after cutover.                                  |
 | Coordinator `var/reviews/` and `var/scratch/`                         | Local review evidence and temporary output as needed.                                                            |
 | Outside the coordinator checkout                                      | Independent backups and restore evidence.                                                                        |
 | GitHub releases                                                       | Immutable kit archives pinned in consumer lockfiles.                                                             |
 
 Commit reviewable inputs. Keep live messages, questions, holds, private evidence, native IDs,
 locks, generated runtime files and secret values out of Git. Keep credential references in an
-approved configuration where required. See the [filesystem layout work](work/gc-0014.md) for
-verified migration evidence.
+approved configuration where required. A fresh coordinator starts with the SQLite source.
+Selecting file authority puts the journal in the primary checkout's `var/coordination/`.
+An optional `var/work-protocol.json` pointer keeps the SQLite source, transport state and
+artifacts at an external path. See [workspace setup](setup.md#select-the-store-authority)
+for the activation procedure and the [filesystem layout work](work/gc-0014.md) for verified
+migration evidence.

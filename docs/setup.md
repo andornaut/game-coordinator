@@ -6,33 +6,26 @@ registry, authority and backups when recovering an existing workspace. Use
 
 ## Initialize a new coordinator
 
-1. Use a primary Git checkout of game-coordinator and sibling checkouts for the repositories
-   selected in [config.json](../config.json). Check each relative path, game display name and
-   role list. The committed file describes the existing games workspace. An independent workspace
-   supplies its own config. Keep game defaults and conventions in the
-   [role catalog](roles.md) and [game policies](game-policies.md).
-2. Install the pinned packages from the coordinator checkout. Both kits require Node 24.21.0
-   or newer. Use the repository's pinned check image. Session operations need Git, `flock`,
-   tmux and the authorized native harness. Delivery also needs
-   the configured gate image and existing GitHub authentication. Keep credential values
-   in their designated stores.
-3. Through the approved harness's native interface, create or select the coordinator project
-   and the required root conversations for the selected roles. Record the exact returned project
-   and conversation IDs, verify
-   their project, working directory and parentage, and reconcile an ambiguous create before
-   retrying. The session helper plans and resumes existing IDs. Provision the managed Codex
-   control socket or verify effective Claude Remote Control separately.
-4. Prepare an initial registry draft using the installed
-   [registry schema](https://github.com/andornaut/coordination-kit/blob/v3.2.0/docs/registry.md).
-   It supplies `schema: 1`, the default `harness`, the native `host` with `root: "."`,
-   `roles`, `operations` and `transfers`. Use the verified native coordinator project ID for
-   `host.nativeProjectId`. Each role has its verified per-harness conversation binding,
-   relative worktree and scoped ownership. Use `held` ownership and phase for roles awaiting
-   activation. Give each game operation a registered bus owner. See the
-   [minimal registry seed](https://github.com/andornaut/coordination-kit/blob/main/docs/configuration.md#registry-seed-example).
-   For an empty history use
-   `transfers: []`. Keep the draft in private, ignored state. The SDK creates the registry at
-   revision 1 under its lock and refuses to replace an existing registry.
+Use the primary Git checkout of game-coordinator. Its committed [config.json](../config.json)
+describes the existing workspace. For an independent workspace, supply your own config with
+game and kit paths relative to the coordinator checkout. You can start with just the
+coordinator by using the following config, then register games and kits as they are added.
+
+```json
+{
+  "schema": 1,
+  "timezone": "America/Toronto",
+  "wakeMinutes": [],
+  "games": {},
+  "kits": {},
+  "sharedRoles": ["game-coordinator"]
+}
+```
+
+Install the pinned packages from the coordinator checkout. Both kits require Node 24.21.0 or
+newer. Use the repository's pinned check image for source checks. Session operations need
+Git, `flock`, tmux and the authorized native harness. Scheduled delivery also needs its
+configured gate image and existing GitHub authentication.
 
 ```bash
 COORDINATOR_ROOT="$(pwd -P)"
@@ -41,7 +34,27 @@ CK="$COORDINATOR_ROOT/node_modules/@andornaut/coordination-kit/dist/cli.js"
 DK="$COORDINATOR_ROOT/node_modules/@andornaut/delivery-kit/dist/cli.js"
 node "$CK" --version --json
 node "$DK" --version
+```
 
+Through the approved harness, create or select the coordinator project and required root
+conversations. Verify the returned project and conversation IDs, working directories and
+parentage. Reconcile ambiguous creation before retrying. The session helper resumes existing
+IDs. Verify the managed Codex control socket or effective Claude Remote Control separately.
+
+Use the Coordination Kit registry SDK with a draft following the installed
+[registry schema](https://github.com/andornaut/coordination-kit/blob/v4.0.4/docs/registry.md).
+See the [minimal registry seed](https://github.com/andornaut/coordination-kit/blob/v4.0.4/docs/configuration.md#registry-seed-example).
+Use the verified coordinator project ID for `host.nativeProjectId` and set `host.root` to
+`"."`. Give each role its verified native conversation binding and worktree path relative
+to game-coordinator. Use `held` ownership and phase for roles awaiting activation, a
+registered bus owner for each game operation, and `transfers: []` for an empty history.
+Keep the draft in ignored local state.
+
+The SDK creates `var/registry.json` at revision 1 under its lock and refuses an existing
+registry. The packaged CLI exposes store and session commands. The registry SDK is the
+bootstrap entry point.
+
+```bash
 # REGISTRY_DRAFT is the path to the reviewed JSON draft.
 node --input-type=module - "$REGISTRY_DRAFT" <<'JS'
 import { readFileSync } from "node:fs";
@@ -53,11 +66,23 @@ console.log(JSON.stringify({ revision: registry.revision }));
 JS
 ```
 
-Use the registry for role identity in both harnesses. To designate a game to dispatch scheduled reviews,
-write ignored `var/route.json` using the schema-2 [route contract](https://github.com/andornaut/coordination-kit/blob/v3.2.0/docs/review.md#review-route).
-Use `schema`, `state`, `host` and `targets`; the host game's committed `reports.recipient` is
-`game-coordinator`. Keep the route held until review startup is approved. Scheduled reviews
-require an active route and approved host runner. The host's delivery control can stay paused.
+Configure scheduled reviews once you have a registered host game and an approved review
+minute in `config.json`. Use ignored `var/route.json` and the
+[schema-2 route contract](https://github.com/andornaut/coordination-kit/blob/v4.0.4/docs/review.md#review-route).
+The host game's committed `reports.recipient` selects `game-coordinator`. This example
+uses the game added in the next section.
+
+```json
+{
+  "schema": 2,
+  "state": "held",
+  "host": "example-game",
+  "targets": ["example-game/art", "example-game/gameplay", "example-game/tech"]
+}
+```
+
+Keep the route held until review startup is approved. Scheduled reviews require an active
+route and approved host runner. The host's delivery control can stay paused.
 
 From the coordinator checkout, inspect the registered coordinator slot. If an authorized
 frontend needs resuming, use the scoped [session procedure](../README.md#inspect-and-resume).
@@ -73,7 +98,7 @@ node "$DK" --root "$COORDINATOR_ROOT" check-config
 
 ### Select the store authority
 
-Coordination Kit 3.2 starts an empty workspace on SQLite. `store migration-status` reports
+The pinned Coordination Kit starts an empty workspace on SQLite. `store migration-status` reports
 `sqlite` before the first write. After the coordinator's native binding and activation are
 verified, `session start` in that conversation makes the first durable record and creates
 `var/coordination.db` by default. An explicitly configured `var/work-protocol.json` can select
@@ -85,7 +110,7 @@ node "$CK" --root "$COORDINATOR_ROOT" session start
 ```
 
 To select the filesystem authority, follow the
-[Coordination Kit migration runbook](https://github.com/andornaut/coordination-kit/blob/v3.2.0/docs/upgrading.md#filesystem-authority-migration)
+[Coordination Kit migration runbook](https://github.com/andornaut/coordination-kit/blob/v4.0.4/docs/upgrading.md#filesystem-authority-migration)
 under the active coordinator binding. Prepare a snapshot using distinct, fresh backup and
 restore paths outside the primary checkout. Verify the prepared receipt and activate that
 exact ID under explicit authority.
@@ -101,9 +126,6 @@ node "$CK" --root "$COORDINATOR_ROOT" store migration-status
 Confirm the final status reports `files` and the exact active receipt. Retain the backup and
 restore evidence, frozen SQLite source, and state-root pointer if used. Keep the primary
 checkout and state root at their bound paths.
-
-Fresh setup uses the registry SDK, the store migration commands and separate operator
-steps for native identity, activation and delivery approval.
 
 ## Add a game
 
@@ -126,10 +148,12 @@ location, pins, roles and approvals.
    worktree.
 3. Add the game ID, display name, relative path and the three role types to the coordinator's
    tracked `config.json`. Art, Gameplay and Tech already have shared role contracts. Add
-   the exact IDs and role worktree paths to `var/registry.json` as held, and add the game
-   operation's initial Tech bus owner. Keep the route host, state and existing targets while
-   appending the three role keys, and reconcile compatibility mappings under their lock.
-   Use the existing registration transaction and the SDK's revision-checked registry writer.
+   the exact IDs and paths such as `../example-game/.worktrees/art` to `var/registry.json` as
+   held, and add the game's initial Tech bus owner. Append the new role keys to the existing
+   review route's targets while preserving its host, state and existing targets. If the
+   workspace has no route, follow [coordinator setup](#initialize-a-new-coordinator) once a
+   review host and minute are approved. Use the registration transaction and the SDK's
+   revision-checked registry writer.
    If the approved harness differs from the default, use `coordination-kit harness select`
    with the fresh `--expected-revision` and `--game` scope for the new game. The roles stay held.
 4. Validate the full layout from the coordinator checkout. Run the scoped role plan and
@@ -149,7 +173,7 @@ The sibling checkout uses the same game ID in registration and Delivery Kit comm
 ```
 
 ```bash
-# GAME_ID is the newly configured game slug.
+GAME_ID=example-game
 node "$DK" --root "$COORDINATOR_ROOT" check-config
 node scripts/sessions.mjs plan --role "$GAME_ID/art" \
   --role "$GAME_ID/gameplay" --role "$GAME_ID/tech"
