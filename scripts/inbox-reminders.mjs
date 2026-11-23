@@ -22,6 +22,8 @@ const PANE = /^%\d+$/;
 const EMPTY = "Ask Codex to do anything";
 const SHORTCUTS =
   /^ {2}← for agents · \? for shortcuts(?: +\u26a0 \d+ warnings? · f2 to view)?$/;
+const GOAL_PAUSED =
+  /^ {2}← for agents · \? for shortcuts +Goal paused \(\/goal resume\) · +\u26a0 \d+ warnings? · f2 to view$/;
 const WARNINGS_ONLY = /^ {2,}\u26a0 \d+ warnings? · f2 to view$/;
 const MODEL = /^ {2}\S.* · GPT-[\w.-]+(?: [\w-]+)? · /;
 const BLOCKER =
@@ -196,6 +198,7 @@ function capture(context, pane, info) {
 function composer(width, lines, expectedDraft) {
   const footer = lines.findLastIndex((line) => line !== "");
   if (footer < 0) return null;
+  requireState(!GOAL_PAUSED.test(lines[footer]), "goal-paused");
   const shortcuts = SHORTCUTS.test(lines[footer]);
   if (
     !shortcuts &&

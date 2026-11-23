@@ -203,7 +203,8 @@ function fixture(options = {}) {
                 ? "\u26a0 1 warning · f2 to view".padStart(
                     (options.width ?? 160) - 1 + (options.footerOffset ?? 0),
                   )
-                : "  ← for agents · ? for shortcuts             \u26a0 1 warning · f2 to view",
+                : (options.footer ??
+                  "  ← for agents · ? for shortcuts             \u26a0 1 warning · f2 to view"),
               ...(input === EMPTY ? [""] : []),
               "",
             ].join("\n") + "\n"
@@ -257,6 +258,27 @@ test("does not use a warning-only footer to claim an empty composer", async () =
   const { context, writes, claimCount } = fixture({ warningOnlyFooter: true });
   const { outcomes } = await runInboxReminders(context);
   assert.equal(outcomes[0].reason, "composer-layout-unverified");
+  assert.equal(claimCount(), 0);
+  assert.equal(writes().length, 0);
+});
+
+test("reports the observed paused-goal footer without claiming or typing", async () => {
+  const { context, writes, claimCount } = fixture({
+    footer:
+      "  ← for agents · ? for shortcuts             Goal paused (/goal resume) · \u26a0 2 warnings · f2 to view",
+  });
+  const { outcomes } = await runInboxReminders(context);
+  assert.deepEqual(outcomes, [
+    {
+      originals: [ORIGINAL, SECOND],
+      outcome: "refused",
+      pane: "%8",
+      reason: "goal-paused",
+      receipt: null,
+      role: ROLE,
+      settlement: "not-claimed",
+    },
+  ]);
   assert.equal(claimCount(), 0);
   assert.equal(writes().length, 0);
 });
