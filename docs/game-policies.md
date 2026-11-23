@@ -96,6 +96,8 @@ Prefer simple, explicit designs and consistent behavior across games. Treat like
 
 ### Controls and input
 
+Display the current state as **On** or **Off** directly below each toggle control. Keep the control label, accessible state and existing interaction behavior.
+
 Use Game Kit to render standard text and icon buttons in menus, modals, HUDs and standalone game controls. Game Kit owns rendering, control states and discrete input. Each game supplies its skin, labels, placement and callbacks. Use the shared loading-safe Retry presentation where applicable and size the button to its label plus the game's standard horizontal padding. Preserve its existing height and recovery behaviour. Preserve the existing semantics of continuous steering, dragging, sliders and native editing.
 
 Use smooth SVG for simple control glyphs and CSS or shared kit skins for simple surfaces. Reuse common controls through published kits. Keep characters, scenery, gear and badge illustrations, illustrated effects and pixel detail in raster at their authored resolution. Preserve each game's silhouettes, bevels and lips, persistent borders, state cues, hit targets and accessibility. When optimizing [download size](#download-size), compare transferred compressed bytes and requests in like-for-like builds and verify which dependencies are no longer downloaded.
@@ -139,7 +141,7 @@ Pause and Menu are one modal. On Start/title the entry control is Menu and the b
 
 ### Settings
 
-Use consistent settings structure, labels, state text and help across games. Labels name the setting; state text uses On/Off or Shown/Hidden as appropriate. Help is stable, declarative text describing the actual effect, rather than changing instructions for the next click. Include only settings the game supports; consistency does not authorize inventing toggles.
+Use consistent settings structure, labels, state text and help across games. Labels name the setting. Use Shown/Hidden for applicable non-toggle state text. Help is stable, declarative text describing the actual effect, rather than changing instructions for the next click. Include only settings the game supports; consistency does not authorize inventing toggles.
 
 Put the **FPS counter** toggle at the top of the right column in Settings, inline and aligned with the other settings. In a two-column layout, use the existing top-right position, swapping settings if needed. Keep it as a device preference that defaults to Off and operates independently of the save and cheat sessions. The FPS readout stays in its existing bottom-right position, with its existing parent, rotation, safe-area inset and layering over the game and letterbox bars.
 
