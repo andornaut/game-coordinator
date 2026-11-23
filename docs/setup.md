@@ -53,8 +53,7 @@ console.log(JSON.stringify({ revision: registry.revision }));
 JS
 ```
 
-Reconcile the compatibility entries in `~/.local/state/game-sessions/libraries.json` if the
-installed native session tooling uses them. To designate a game to dispatch scheduled reviews,
+Use the registry for role identity in both harnesses. To designate a game to dispatch scheduled reviews,
 write ignored `var/route.json` using the schema-2 [route contract](https://github.com/andornaut/coordination-kit/blob/v3.2.0/docs/review.md#review-route).
 Use `schema`, `state`, `host` and `targets`; the host game's committed `reports.recipient` is
 `game-coordinator`. Keep the route held until review startup is approved. Scheduled reviews
