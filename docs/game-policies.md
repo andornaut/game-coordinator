@@ -182,7 +182,9 @@ Before game version 1.0, host only the current build's required assets and bank,
 
 ### Loading failures
 
-Required assets must load before game entry. On failure, show **Loading failed**, the message **Some game files could not load. Try again.**, and **Retry**. Keep the error readable if the normal font fails. Present it through the published game-kit loading-failure presentation, with the Retry label in the same visible text colour as the game's primary Start button.
+Check for Service Worker and Cache Storage before starting the production installer or entering the game. If either is unavailable, stop loading progress and show one readable failure panel with no action. Adopt the shared startup path through published Game Kit support after per-game qualification. Preserve each game's loading layout, development launch, saves and update activation behavior.
+
+Required assets must load before game entry. For recoverable loading failures, show **Loading failed**, the message **Some game files could not load. Try again.**, and **Retry**. Keep the error readable if the normal font fails. Present it through the published game-kit loading-failure presentation, with the Retry label in the same visible text colour as the game's primary Start button.
 
 Retry is explicit, with at most one load attempt in flight. Use the single top loading bar for new loads and retries; success continues and another failure returns to the same error. Preserve saves and existing optional-asset placeholders.
 
