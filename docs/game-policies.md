@@ -67,13 +67,15 @@ Integrate approved, reviewed work into local main promptly after focused relevan
 
 Working games that pass mandatory gates ship on the normal cadence despite known visual or design regressions, unfinished approved refinements or missing final acceptance. Fix forward without rollback or polish-based delivery holds. Game-breaking failures, required red gates and explicit user delivery pauses remain blockers. Unknown feature authority limits that feature, not unrelated releases.
 
-Acceptance remains open until its clauses are proved, even after deployment. Worker READY, source presence and a successful deployment alone do not establish complete behavior. Use the existing delivery procedure; policy changes grant no manual departure authority.
+Both scheduled and user-authorized ad hoc releases use the existing Delivery Kit runner. The operational owner submits ad hoc releases through the runner's supported request command. Both use the same exact-commit gate, push, required CI and deployment flow.
+
+Acceptance remains open until its clauses are proved, even after deployment. Worker READY, source presence and a successful deployment alone do not establish complete behavior.
 
 Run tests and harnesses in isolated containers with only the project checkout and scratch writable. Fingerprint dirty paths and file contents before and after checks; discard changed-tree results. Run long checks in the background, preserve evidence and release completed owned resources.
 
 ### Resource admission
 
-Use only the one-minute load average for admission: ordinary containers start below 20; scheduled delivery starts below 30, rechecking every minute for up to 15 minutes after the slot before skipping it. Keep at most four CPUs and four test workers per container. Set the memory ceiling to 4 GiB for containers launched for the games workspace, including gates, checks, browser tools and previews. Apply the ceiling at the next clean launch, or at an idle, drained boundary for a resident that needs replacement. These execution caps add no admission conditions.
+Use only the one-minute load average for admission. Ordinary containers start below 20. Scheduled and ad hoc deliveries start below 30, rechecking every minute for up to 15 minutes before the runner skips the departure. Keep at most four CPUs and four test workers per container. Set the memory ceiling to 4 GiB for containers launched for the games workspace, including gates, checks, browser tools and previews. Apply the ceiling at the next clean launch, or at an idle, drained boundary for a resident that needs replacement. These execution caps add no admission conditions.
 
 ## Testing
 

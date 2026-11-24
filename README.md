@@ -13,7 +13,7 @@ Coordination home for three games and four shared kits. Each game and each kit i
 | Ada the Navigator | [ada-the-navigator](https://github.com/andornaut/ada-the-navigator) | Game                                                           |
 | art-kit           | [art-kit](https://github.com/andornaut/art-kit)                     | Raster, frame, font and Aseprite export primitives             |
 | game-kit          | [game-kit](https://github.com/andornaut/game-kit)                   | Shared TypeScript runtime, input, layout and Phaser adapters   |
-| delivery-kit      | [delivery-kit](https://github.com/andornaut/delivery-kit)           | Scheduled gate, push, CI watch, deploy and reviews             |
+| delivery-kit      | [delivery-kit](https://github.com/andornaut/delivery-kit)           | Scheduled and ad hoc delivery, plus scheduled reviews          |
 | coordination-kit  | [coordination-kit](https://github.com/andornaut/coordination-kit)   | Role registry, coordination store, messaging, harness adapters |
 
 Games consume kits as dev dependencies pinned to GitHub release tarballs.
@@ -29,8 +29,8 @@ The shared [communication contract](docs/game-policies.md#communication) defines
 The [development and delivery policy](docs/game-policies.md#development-and-delivery) defines integration and release eligibility; the [work lifecycle](docs/game-policies.md#work-lifecycle) records progress, evidence and acceptance.
 
 1. Art and Gameplay hand Tech an exact branch and commit. Tech reviews it and merges it into the game's local `main` once its tests pass. Kit owners integrate their approved work the same way. The integrating owner handles [task branch cleanup](#task-branch-cleanup) as part of landing.
-2. Each game uses at most one resident delivery-kit runner. Hourly departures are alphabetical in America/Toronto: Ada the Navigator at :00, Archie at :10 and Chibi at :20. Each game's delivery control enables or pauses its departures.
-3. A departure runs the full gate on local `main` HEAD in an isolated container, pushes that exact commit by fast-forward, watches CI for it, and deploys the gated build when CI passes. There is no queue: whatever is on `main` at departure time ships.
+2. Each game uses at most one resident delivery-kit runner. Hourly departures follow the America/Toronto schedule of Ada the Navigator at :00, Archie at :10 and Chibi at :20. The operational owner can submit a user-authorized ad hoc departure to the same runner. Each game's delivery control enables or pauses both kinds of departure.
+3. A departure runs the full gate on its captured local `main` commit in an isolated container, pushes that exact commit by fast-forward, watches CI for it, and deploys the gated build when CI passes.
 4. Failures are fixed forward with a new change on `main`. Failed trees are never retried unchanged, and nothing is reverted.
 
 ### Delivery control
@@ -45,11 +45,19 @@ node "$DK" --root "$COORDINATOR_ROOT" control --game ID --state STATE \
 node "$DK" --root "$COORDINATOR_ROOT" status --game ID
 ```
 
+For a user-authorized ad hoc release, the operational owner uses the existing runner request command:
+
+```bash
+node "$DK" --root "$COORDINATOR_ROOT" request --game ID --id REQUEST_ID
+```
+
+The request captures current `main`. The runner refuses it if `main` changes before departure.
+
 `var/games/<g>/bus/delivery-control.json` persists desired state separately from the runner's observed state. Tech readiness and blockers remain separate from desired control; enabling delivery does not establish readiness. Status reports desired and observed control, runner identity, drain state and blockers.
 
 Pausing blocks new scheduled and requested departures. Already admitted gates, CI watches and deployments finish, and scheduled reviews continue. Missing or invalid control fails closed until explicitly initialized or repaired.
 
-The current operational owner defined in the [role catalog](docs/roles.md) performs authorized runner adoption only while the affected residents and the shared route host are idle and drained. Validate the complete layout with `check-config` before startup, check status before and after replacement, preserve controls, routes, singleton ownership and schedules, and observe the next normal scheduled slot without a manual departure.
+The current operational owner defined in the [role catalog](docs/roles.md) performs authorized runner adoption only while the affected residents and the shared route host are idle and drained. Validate the complete layout with `check-config` before startup, check status before and after replacement, preserve controls, routes, singleton ownership and schedules, and observe the next normal scheduled slot.
 
 The games workspace sets `resources.memoryMiB` to `4096` in each game's `delivery-kit.json`. Local container launchers use the same 4 GiB ceiling. See [resource admission](docs/game-policies.md#resource-admission).
 

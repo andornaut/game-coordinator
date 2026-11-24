@@ -75,7 +75,7 @@ Own reusable gameplay and runtime contracts.
 
 ### delivery-kit
 
-Own reusable scheduled delivery: runner, gate, push, CI watch and deploy.
+Own reusable game delivery for scheduled and ad hoc releases, including the runner, gate, push, CI watch and deploy.
 
 - Owns: Kit source, tests, documentation and checked publication; Runner, delivery control, request and configuration-check contracts for every game.
 - Boundaries: No game source, consumer adoption or live operational authority from source ownership; Never create runners, restart owners or change routing without scoped authorization.
@@ -95,8 +95,8 @@ Own reusable cross-harness coordination: registry, store, messaging, harness ada
 
 Coordinate roles, shared policy, decisions and approved operational delivery.
 
-- Owns: Controls, routing, backlog and delivery audits; After confirmed transfer: queue admission, gate/CI/deploy and resource limits.
-- Boundaries: No game implementation or kit source ownership; Operational transfer requires explicit source hold, verified target acceptance and activation; No manual departures, new timers or inferred question clearance.
+- Owns: Controls, routing, backlog and delivery audits; After confirmed transfer: delivery admission, authorized ad hoc requests, gate/CI/deploy and resource limits.
+- Boundaries: No game implementation or kit source ownership; Operational transfer requires explicit source hold, verified target acceptance and activation; Use the existing runner for every departure. No new timers or inferred question clearance.
 - Handoffs: Route dependencies and record handling evidence; At safe attention or review boundaries, run guarded reminders and track owner pickup; Give runners Tech-approved revisions and route failures to Tech.
 - Desired tools: core repository, git, role-messaging; task-specific native-session, registry, delivery-observation, isolated-checks.
 

@@ -203,7 +203,7 @@
     "delivery-kit": {
       "name": "delivery-kit",
       "scope": "shared",
-      "purpose": "Own reusable scheduled delivery: runner, gate, push, CI watch and deploy.",
+      "purpose": "Own reusable game delivery for scheduled and ad hoc releases, including the runner, gate, push, CI watch and deploy.",
       "owns": [
         "Kit source, tests, documentation and checked publication",
         "Runner, delivery control, request and configuration-check contracts for every game"
@@ -251,12 +251,12 @@
       "purpose": "Coordinate roles, shared policy, decisions and approved operational delivery.",
       "owns": [
         "Controls, routing, backlog and delivery audits",
-        "After confirmed transfer: queue admission, gate/CI/deploy and resource limits"
+        "After confirmed transfer: delivery admission, authorized ad hoc requests, gate/CI/deploy and resource limits"
       ],
       "boundaries": [
         "No game implementation or kit source ownership",
         "Operational transfer requires explicit source hold, verified target acceptance and activation",
-        "No manual departures, new timers or inferred question clearance"
+        "Use the existing runner for every departure. No new timers or inferred question clearance"
       ],
       "handoffs": [
         "Route dependencies and record handling evidence",
