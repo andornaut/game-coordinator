@@ -164,6 +164,8 @@ Prefer fewer than 100 physical files per game in the complete emitted deployable
 
 The shared distribution target for all games is prebuilt static archives for first install and updates, with at most 100 archive groups per game. Serve only bootstrap, site assets and other assets intentionally needed at a direct URL as standalone files.
 
+Avoid hosting loose copies of archive members. Keep a small overlap only where needed for bootstrap or offline use. For each archive migration, report the exact hosted loose file list, count and total bytes, total archive bytes, bytes duplicated between loose files and archive members, and the reason for each intentionally served loose file.
+
 Keep each game's existing qualified distribution until Game Kit publishes the shared archive support and that game qualifies its migration. During the transition, Ada the Navigator keeps grouped updates with at most 100 groups. Archie and Chibi keep specific-file updates with at most 100 entries per logical update inventory.
 
 Use the smallest useful stable packs. Measure encoded and decoded bytes and the download cost of a representative small change. Preserve required stable URLs, integrity checks and complete offline play after installation. Apply packing changes within existing approvals and delivery rules.
@@ -171,7 +173,7 @@ Use the smallest useful stable packs. Measure encoded and decoded bytes and the 
 Before game version 1.0, host only the current build's required assets and bank, pack and index endpoints. Drop predecessor copies and aliases used solely by earlier clients. Keep save data and the normal checks for the current release. From version 1.0 onward, preserve original URLs and access for retained builds. Use sound banks in Archie and add art banks only when necessary.
 
 - Consolidate frames into one sheet per asset set with frame data, instead of one file per frame. Keep each sheet within the texture limits verified on mid-range Android.
-- Store each shared asset once and reference it; ship no duplicate copies.
+- Store each shared asset once and reference it, except for justified archive overlap.
 - Round vector coordinates to the precision the display needs (one decimal unless a set proves it needs more) and minify generated SVG.
 - Subset fonts to the glyphs the game's strings use, with a build check that every player-visible string is covered.
 - Ship no file the runtime does not reference, and keep non-player copies (such as art galleries) out of the deployed build.
