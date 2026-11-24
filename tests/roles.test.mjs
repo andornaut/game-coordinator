@@ -233,7 +233,10 @@ test("generated docs retain workflow boundaries, canonical references and actual
   assert.equal(readFileSync(join(root, "docs/roles.md"), "utf8"), docs);
   for (const reference of catalog.references)
     assert.ok(docs.includes(`](${reference.path.slice(5)})`));
-  assert.match(docs, /After confirmed transfer: queue admission/);
+  assert.match(
+    docs,
+    /After confirmed transfer: delivery admission, authorized ad hoc requests/,
+  );
   assert.match(
     docs,
     /Tech verifies interactions; item owner records evidence and finish/,
