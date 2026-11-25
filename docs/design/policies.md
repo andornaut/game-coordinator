@@ -23,3 +23,4 @@ Shared product and development rules that apply to every game. The canonical tex
 | gc-0024 | Show one Install button in Settings                           | [gc-0024.md](../work/gc-0024.md) |
 | gc-0025 | Cheats act on the real save in every game                     | [gc-0025.md](../work/gc-0025.md) |
 | gc-0027 | Archie offers Reset save only in Cheats                       | [gc-0027.md](../work/gc-0027.md) |
+| gc-0028 | Adopt the procedural systems and interface conventions        | [gc-0028.md](../work/gc-0028.md) |

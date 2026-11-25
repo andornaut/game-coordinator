@@ -73,6 +73,20 @@ Record baseline and after case counts and runtime separately, using comparable s
 
 Do not delete failing tests to get green, weaken timeouts, run mass mutation campaigns or add a new test matrix to reduce runtime. Test pruning does not authorize application changes or cross-game source imports. Use existing owners and assigned workers; focused worker checks and owner combined gates remain required. Preserve independent holds, publication controls and runtime state.
 
+## Procedural systems
+
+Applies to level generation, spawn planning, and encounter or enemy logic.
+
+- Each system is one pure function of explicit context, state and input, with context first and the subject last. It reads no `Math.random`, `Date`, `performance`, page address, engine object or module state it is not handed. Scenes build the request, call the system and apply the result; entropy and the page address enter at the scene or session boundary.
+- Draws come from Game Kit `randomStream(seed, name)`, named by zone, kind and purpose, so adding a draw never shifts another stream. Cosmetic draws come last or from their own stream. A resumable run saves its draw counts.
+- Results are explicit, with no silent fallback. A system that must deliver content returns a typed outcome with a reason and degrades only on a named "nothing fits" outcome. A density system reports requested, delivered and dropped counts by rule. Running out of search budget means unknown, not impossible.
+- Each admit or refuse decision is one predicate that returns the refusal reason.
+- Work is bounded by counters and try limits, never by time.
+- A planner that guarantees content is checked by an audit it does not run on itself. A density system keeps its spacing and overlap invariants in tests.
+- Build only the runtime path: no test-only modes, repair paths or proof scaffolding.
+- **Changing a system.** When behaviour must not change, refactor first with identical output, then change one rule at a time and measure each. When behaviour will change, build the approved replacement beside the old path, measure it, then switch.
+- **Pins.** Lasting pins are contract and property tests plus one fixed, bounded multi-seed acceptance batch with a delivery floor and budget headroom. Failing targets are listed in a greppable table and never weakened. A golden hash set is only a temporary scaffold for an identical-output refactor, marked `CLEANUP` with its removal condition. No routine simulations, seed sweeps or playthroughs.
+
 ## Product consistency
 
 Prefer simple, explicit designs and consistent behavior across games. Treat like cases alike; keep a difference only for a concrete current requirement. Review ergonomics against actual use, including controls, readability, layout and navigation. Preserve approved details and disclose unverified behavior rather than claiming completion.
@@ -85,6 +99,11 @@ Prefer simple, explicit designs and consistent behavior across games. Treat like
 - Place existing version/build metadata above the bottom Close or dismissal footer wherever both already appear. Keep that dismissal footer last, preserving existing typography, spacing, targets and centered sole-action rows. In rows-only scrolling layouts, keep metadata and dismissal fixed.
 
 ### Controls and input
+
+- Every card, header, close button, switch, form row, pager, action group and HUD disc comes from Game Kit; a game builds none of them locally, and a missing component is a kit request.
+- Spacing comes from Game Kit tokens applied by the containing group: 16 px between side-by-side buttons, 8 px between stacked standard buttons and 24 px between small buttons. No per-control padding cancelled by negative margins. Archie adopts the tokens with Art, because its geometry is Art-owned on a pixel grid.
+- Each pattern has one layout rule: one centring method, one title pattern, and one footer pattern with secondary left and primary right where edges are pinned. Colours and type come from tokens.
+- A change a player can see is approved from before and after captures; a restructuring is pixel-identical.
 
 Display the current state directly below each toggle control. Use **Shown** or **Hidden** for display visibility and **On** or **Off** where they describe the setting. Keep the control label, accessible state and existing interaction behavior.
 
