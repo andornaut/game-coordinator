@@ -256,6 +256,7 @@ Every game maps its source directories onto these bands, lowest first, and keeps
 - Support code never ships, and shipped code never imports it.
 - Engine imports (Phaser, DOM) appear only in Engine and views and the bands above it.
 - During the migration, one import check, as a script or test, places every module in a band and fails on a cycle, a wrong-direction import or an unplaced module not listed in its known-violations table, which only shrinks. Once the table is empty the check is removed, and ESLint guards the layers.
+- Shared kits end in the same state: ESLint guards their layers, and any import-check script or test is temporary in the same way.
 
 ## Design and work files
 
