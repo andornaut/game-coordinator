@@ -255,7 +255,7 @@ Every game maps its source directories onto these bands, lowest first, and keeps
 - Build-time code lives in one directory with one entry.
 - Support code never ships, and shipped code never imports it.
 - Engine imports (Phaser, DOM) appear only in Engine and views and the bands above it.
-- One import check, as a script or test, places every module in a band and fails on a cycle, a wrong-direction import or an unplaced module. It lands last, on a clean tree, with no exception list.
+- During the migration, one import check, as a script or test, places every module in a band and fails on a cycle, a wrong-direction import or an unplaced module. Once the tree is clean it is removed, and ESLint guards the layers.
 
 ## Design and work files
 
