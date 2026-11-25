@@ -250,7 +250,7 @@ Every game maps its source directories onto these bands, lowest first, and keeps
 | Support          | Simulator, test harness, tools and build; never shipped      |
 
 - Imports point down only. Areas in one band import each other only where the game's layer table orders them.
-- No import cycles, type-only imports included.
+- No runtime import cycles. Type-only imports still point down, but may form cycles within one band.
 - Each area is imported through one public entry; authored data files may be imported directly.
 - Build-time code lives in one directory with one entry.
 - Support code never ships, and shipped code never imports it.
