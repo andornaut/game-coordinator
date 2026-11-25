@@ -25,3 +25,4 @@ Shared product and development rules that apply to every game. The canonical tex
 | gc-0027 | Archie offers Reset save only in Cheats                       | [gc-0027.md](../work/gc-0027.md) |
 | gc-0028 | Adopt the procedural systems and interface conventions        | [gc-0028.md](../work/gc-0028.md) |
 | gc-0029 | Adopt the shared source structure in every game               | [gc-0029.md](../work/gc-0029.md) |
+| gc-0030 | Archie opens Cheats and Settings as full-screen pages         | [gc-0030.md](../work/gc-0030.md) |

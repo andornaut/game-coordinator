@@ -220,8 +220,9 @@ Determine compatibility requirements from the current game/runtime release versi
 - Before game version 1.0, backward compatibility and migrations are not required; incompatible saves may reset safely. This does not authorize deleting current progress or automatically resetting existing cloud saves.
 - From game version 1.0 onward, published save-schema changes require compatibility or a migration preserving player progress.
 - Offer Cheats in browser tabs and installed apps. Preserve each action's gameplay eligibility and guards across display modes.
-- Put one button labelled **Cheats** directly in the Menu or Pause modal, whichever applies in the current context. Use a shared modal structure with a title, a top-right X and a bottom primary Back button. Both dismissal controls return one layer to the invoking Menu or Pause and restore focus to the Cheats entry.
-- Group Cheats actions logically and size the modal to fit the game's controls. Ada uses two logical columns and fits its controls without scrolling.
+- Put one button labelled **Cheats** directly in the Menu or Pause modal, whichever applies in the current context. Ada and Chibi use a shared modal structure with a title, a top-right X and a bottom primary Back button. Both dismissal controls return one layer to the invoking Menu or Pause and restore focus to the Cheats entry.
+- Archie opens Cheats and Settings as full-screen pages, because its 328 px modal width cannot hold them. Page Back, Escape and system Back return one layer to the invoking Menu or Pause and restore focus to the entry.
+- Group Cheats actions logically and size the modal or page to fit the game's controls. Ada uses two logical columns and fits its controls without scrolling.
 - Cheats act on the real save like normal play. Progress, unlocks, currency, achievements and statistics from cheats, cheated runs and runs started from a run link are saved, banked and earned as usual; there is no cheat session. Cheats work on Start/title too and apply to the next Play or Continue. Reset save (Archie, in Cheats) clears saved progress; Restart (Ada and Chibi, on Start) keeps what that game's rules list.
 - Grants that add an amount (currency, resources) are buttons that add a fixed amount on every press.
 - Keep ordinary first-time tips and hints. Omit the **Show tips again** control from game menus.
