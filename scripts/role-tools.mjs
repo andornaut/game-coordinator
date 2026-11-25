@@ -48,7 +48,7 @@ export function installedMessaging(root) {
     if (
       pkg.name !== "@andornaut/coordination-kit" ||
       typeof pkg.version !== "string" ||
-      !/^[3-6]\.\d+\.\d+$/.test(pkg.version) ||
+      !/^[3-7]\.\d+\.\d+$/.test(pkg.version) ||
       !pkg.exports?.["./build/registry"] ||
       !statSync(cli).isFile()
     )

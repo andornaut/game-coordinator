@@ -268,9 +268,9 @@ test("socket override is explicit, absolute and fails closed when invalid", () =
     controlSocket({ CODEX_CONTROL_SOCKET: "/explicit/socket" }),
     "/explicit/socket",
   );
-  assert.match(
-    controlSocket({}),
-    /\.codex\/app-server-control\/app-server-control.sock$/,
+  assert.equal(
+    controlSocket({ HOME: "/home/user" }),
+    "/home/user/.codex/app-server-control/app-server-control.sock",
   );
   for (const value of ["", "relative/socket"])
     assert.throws(
@@ -1259,7 +1259,9 @@ test("messaging availability requires compatible public message CLI metadata", (
     ["6.0.0", "available"],
     ["6.2.1", "available"],
     ["6.0.0-rc.1", "missing"],
-    ["7.0.0", "missing"],
+    ["7.0.0", "available"],
+    ["7.0.0-rc.1", "missing"],
+    ["8.0.0", "missing"],
   ]) {
     writeFileSync(
       join(directory, "package.json"),
