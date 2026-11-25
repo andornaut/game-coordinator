@@ -13,7 +13,7 @@ setup.
 
 ## Native identity transaction
 
-Use game-sessions runtime/native preflight. The transaction below describes Codex; for Claude, first verify an equivalent supported creation adapter. Missing capability blocks creation rather than authorizing another daemon.
+Use game-sessions runtime/native preflight. The numbered transaction is the Codex app-server path; Claude follows [the Claude path](#claude-path). Missing capability blocks creation rather than authorizing another daemon.
 
 1. Persist a creation journal under ignored game-coordinator `var/` with slug, normalized game root, display name, authorization, a stable project idempotency key, role worktrees and per-step states. Write temp file, fsync, rename and fsync its directory for each transition.
 2. Reconcile journaled project IDs through `project/read` and paginated `project/list`. `project/create` accepts `idempotencyKey`, `name` and `roots: [{path: absoluteGameRoot}]`; reuse the same key after an ambiguous response. Persist `response.project.id` before the next mutation. Reject conflicting roots or multiple candidates.
@@ -21,12 +21,19 @@ Use game-sessions runtime/native preflight. The transaction below describes Code
 4. Thread creation has no assumed idempotency key. If its response is lost, mark it ambiguous; reconcile paginated `thread/list` (explicit project/cwd) and `thread/read` against the baseline and recorded intent. Verify visibility of empty persistent threads through supported metadata before treating a listing as complete. Adopt only an unambiguously identified root thread. Incomplete visibility or multiple candidates require parent/user reconciliation. Never blindly retry or silently archive a possible duplicate.
 5. Register returned IDs as held through the transaction below before using game-sessions frontend recovery. Keep native creation, held registration and infrastructure activation distinct.
 
+### Claude path
+
+1. Persist the creation journal as in step 1, with a fresh random UUID per role recorded before any launch.
+2. Register each UUID held under `conversations.claude` with the same locked registry update as the Codex path ([coordinated registration](#coordinated-registration)).
+3. For each role run `node scripts/sessions.mjs resume --role ROLE --held --new`. It launches `claude --session-id <uuid>` in the game root with the canonical session, window and pane markers. Verify the native session ID and cwd before recording the step done.
+4. After an ambiguous launch, never repeat `--new`: the ID may already exist. Reconcile it natively, then use plain `resume`.
+
 ## Coordinated registration
 
 Use installed validators and writers. Treat the registry as the role identity source, preserve unknown fields and keep the verified native project identity in the creation journal.
 
 - `config.json`: schema 1; append `games.<slug> = {name: displayName, path: relativeGameRoot, roles: ["art", "gameplay", "tech"]}`. Preserve `timezone`, `wakeMinutes`, `kits` and `sharedRoles`.
-- `var/registry.json`: schema 1; preserve `harness`, `host`, existing conversations, holds, transfers and delivery-owned `operations.*.lastAdoption`. Append `<slug>/<role>` records with `ownership: "held"`, `phase: "held"`, relative `.worktrees/<role>` paths and the actual returned ID under its supported `conversations.codex` or `conversations.claude` mapping; preserve an existing other-harness ID or use null when absent. This mapping does not select an active harness. Select the new held roles' authorized harness with scoped `harness select` before frontend planning; selection does not activate work or switch remaining owners. Append `operations.<slug>.busOwner = "<slug>/tech"`. Never fabricate transfer or activation evidence.
+- `var/registry.json`: schema 1; preserve `harness`, `host`, existing conversations, holds, transfers and delivery-owned `operations.*.lastAdoption`. Append `<slug>/<role>` records with `ownership: "held"`, `phase: "held"`, relative `.worktrees/<role>` paths and the actual returned (Codex) or journaled (Claude) ID under its supported `conversations.codex` or `conversations.claude` mapping; preserve an existing other-harness ID or use null when absent. This mapping does not select an active harness. Select the new held roles' authorized harness with scoped `harness select` before frontend planning; selection does not activate work or switch remaining owners. Append `operations.<slug>.busOwner = "<slug>/tech"`. Never fabricate transfer or activation evidence.
 - `var/route.json`: schema 2 with exactly `schema`, `state`, `host`, `targets`. The scheduled review goes to the host game's `reports.recipient` (`game-coordinator`). For an existing route, append the new role keys to its targets and preserve its host, state and existing targets. For the first route, use the [setup runbook](../../docs/setup.md#initialize-a-new-coordinator) after the host and review minute are approved.
 
 Hold `var/registry.lock` for registration. Re-read state after locking, reject changed registry revisions, validate the complete proposed configuration/registry/route set and increment registry `revision` with UTC `updatedAt`. Use durable writes and a journal identifying any partially completed multi-file transaction. Do not expose registration to launching consumers while incomplete. On interruption, reconcile exact recorded writes under lock before proceeding; never overwrite concurrent changes or roll back unrelated state.

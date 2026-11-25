@@ -28,6 +28,8 @@ export function quote(value) {
   return `'${String(value).replaceAll("'", "'\\''")}'`;
 }
 
+// Both harnesses start in the native root without --add-dir: a role worktree in another repository
+// raises a Claude directory-trust prompt, and Codex resume rejects the flag.
 export function launchArgs(slot, socket) {
   return slot.harness === "codex"
     ? [
@@ -42,15 +44,14 @@ export function launchArgs(slot, socket) {
       ]
     : [
         "claude",
-        "--resume",
+        // A new conversation takes its registered ID with --session-id; later launches resume it.
+        slot.create ? "--session-id" : "--resume",
         slot.id,
         "--name",
         slot.role,
         "--remote-control",
         slot.role,
         "--dangerously-skip-permissions",
-        "--add-dir",
-        slot.worktree,
         ...(slot.channelConfig
           ? [
               "--mcp-config",

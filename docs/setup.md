@@ -36,6 +36,15 @@ node "$CK" --version --json
 node "$DK" --version
 ```
 
+Link the project skills for both harnesses. Claude reads `.claude/skills` and Codex reads
+`.agents/skills`; each is an ignored symlink to the committed `skills/` directory.
+
+```bash
+mkdir -p .claude .agents
+ln -s ../skills .claude/skills
+ln -s ../skills .agents/skills
+```
+
 Through the approved harness, create or select the coordinator project and required root
 conversations. Verify the returned project and conversation IDs, working directories and
 parentage. Reconcile ambiguous creation before retrying. The session helper resumes existing

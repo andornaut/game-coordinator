@@ -15,3 +15,4 @@ The role catalog, startup orientation, shared tooling adoption and the work prot
 | gc-0014 | Store coordination in role-owned filesystem directories                | [gc-0014.md](../work/gc-0014.md) |
 | gc-0015 | Bound closed coordination message history by activity                  | [gc-0015.md](../work/gc-0015.md) |
 | gc-0020 | Act on blocked inbox delivery at safe boundaries                       | [gc-0020.md](../work/gc-0020.md) |
+| gc-0026 | Clean up Claude launch, creation and harness handoff                   | [gc-0026.md](../work/gc-0026.md) |

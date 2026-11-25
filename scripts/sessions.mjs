@@ -552,6 +552,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
       harness: { type: "string" },
       held: { type: "boolean", default: false },
       dispatch: { type: "boolean", default: false },
+      new: { type: "boolean", default: false },
       "runner-pid": { type: "string", multiple: true },
       "handoff-marker": { type: "string" },
     },
@@ -562,10 +563,12 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
     !["plan", "check", "brief", "resume"].includes(command)
   )
     throw new Error(
-      "Usage: sessions.mjs plan|check|brief|resume --role ROLE [--role ROLE] [--root PATH] [--harness codex|claude --held] [--runner-pid PID] [--handoff-marker TEXT] [brief --dispatch]",
+      "Usage: sessions.mjs plan|check|brief|resume --role ROLE [--role ROLE] [--root PATH] [--harness codex|claude --held] [--runner-pid PID] [--handoff-marker TEXT] [brief --dispatch] [resume --new]",
     );
   if (values.dispatch && command !== "brief")
     throw new Error("--dispatch is supported only with brief");
+  if (values.new && command !== "resume")
+    throw new Error("--new is supported only with resume");
   const root = realpathSync(values.root);
   const socketPath = controlSocket();
   const layout = loadLayout(root);
@@ -588,6 +591,8 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
     );
   };
   let slots = snapshot();
+  if (values.new && slots.some((slot) => slot.harness !== "claude"))
+    throw new Error("--new creates only Claude conversations");
   const probes = new Map();
   const probe = (binary, args) => {
     const key = JSON.stringify([binary, args]);
@@ -656,7 +661,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
       );
       const eligible =
         !values.held &&
-        available &&
+        (slot.harness !== "codex" || available) &&
         issues.length === 0 &&
         fresh.state === "live" &&
         fresh.remoteRequested &&
@@ -674,7 +679,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
               state: "not-sent",
               reason: values.held
                 ? "HOLD preparation is artifact-only"
-                : "Fresh exact live effective owner, matching remote configuration, socket and unchanged registry/catalog required",
+                : "Fresh exact live effective owner, matching remote configuration, Codex socket for Codex owners and unchanged registry/catalog required",
             },
       };
     });
@@ -703,7 +708,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
         );
         if (fresh.state !== "live") fresh = roleChannel(root, true, fresh);
         const result = resumeSlot(
-          fresh,
+          values.new ? { ...fresh, create: true } : fresh,
           socketPath,
           values["handoff-marker"],
           ports.tmux ?? run,

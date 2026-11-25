@@ -151,6 +151,7 @@ node scripts/sessions.mjs brief --role game-coordinator
 - By default, `brief` writes the generated orientation artifact without delivery. Include it once in a new role's initial HOLD request after its registry entry is verified, or in an existing handoff activation packet.
 - `brief --dispatch --role ROLE` completes previously unsent startup orientation after exact native identity verification for the live effective owner. It sends the brief with `msg send` under the caller's registry binding, which stores it and wakes the recipient; `--held` remains artifact-only. Do not use it for initial HOLD or handoff activation packets.
 - `resume` preserves live panes and resumes only eligible missing/dead slots. A fresh resume briefly waits for the exact launched identity and sends one orientation with `msg send`. On timeout it reports the guarded `brief --dispatch` follow-up. An ambiguous send reports the original ID to inspect before retrying. `--held` suppresses standalone orientation for held preparation, including newly registered roles; include the artifact once in the HOLD or activation packet. Another harness also needs `--harness TARGET`, asserting caller-verified source HOLD.
+- `resume --new` starts Claude slots with `claude --session-id ID`, creating the conversation for a newly registered ID; later launches resume it. It refuses Codex slots.
 - Repeat `--runner-pid PID` to inspect resident socket configuration. `--handoff-marker TEXT` preserves the original marker separately from the bounded role marker.
 
 Local inspection does not prove native project identity, pending-question state, quota or an effective Remote Control connection. The helper never selects ownership, activates work, stops frontends or changes a runner/daemon.
@@ -192,7 +193,8 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 | `node_modules/`                     | no        | The installed delivery-kit and coordination-kit                                                                                                  |
 | `.worktrees/`                       | no        | Worktrees for changes to this repository                                                                                                         |
 | `var/`                              | no        | Registry (`registry.json`), review route (`route.json`), channel config, per-role checkpoints and each game's runner state (`games/<game>/bus/`) |
-| `.claude/`                          | no        | Harness-local files                                                                                                                              |
+| `.claude/`                          | no        | Harness-local files and the `skills` link to `skills/`                                                                                           |
+| `.agents/`                          | no        | Harness-local files and the `skills` link to `skills/`                                                                                           |
 
 The live coordination store is ignored `var/coordination/` in the primary coordinator checkout. Keep backups outside the checkout. See [where state lives](docs/architecture.md#where-state-lives) for the full layout.
 

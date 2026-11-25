@@ -27,9 +27,9 @@ Status: `ck handoff show [--id ID]`, `dk G status --game G`.
 
 ## send (source to target)
 
-1. Check target quota. Codex: the TUI footer shows `weekly N% left`. At 0%, stay at `prepared`, report, and start nothing.
-2. Start each target role session by its registered ID in tmux, with the existing session and window conventions and the registry cwd and worktree: `node scripts/sessions.mjs resume --role ROLE --harness TARGET --held`. The Codex launch is `codex resume --remote unix://<socket> --dangerously-bypass-approvals-and-sandbox -C <cwd> <id>`; `--remote` rejects `--add-dir`.
-3. On a relaunched Claude session, confirm only the exact "Loading development channels" prompt: option 1 highlighted, the role channel listed, no draft text. Answer nothing else.
+1. Check quota on the source and the target. Claude shows a `7d:N%` footer in the status line; Codex shows `weekly N% left`. If the target has none left, or the source cannot finish `complete` and rollback, stay at `prepared`, report, and start nothing.
+2. Start each target role session by its registered ID: `node scripts/sessions.mjs resume --role ROLE --harness TARGET --held`. It owns the launch command, cwd, socket and window conventions. Send can be re-run: resume starts only `missing` and `dead` slots and preserves live ones.
+3. On a relaunched Claude session, confirm only the exact "Loading development channels" prompt: option 1 highlighted, the role channel listed, no draft text. A directory-trust prompt is the user's decision; report it and never answer it. Answer nothing else.
 4. Start the target game-coordinator last with "run `game-handoff complete` for the scope". `ck handoff state sent --id ID`.
 
 ## complete (target)
@@ -37,7 +37,7 @@ Status: `ck handoff show [--id ID]`, `dk G status --game G`.
 1. game-coordinator: read the revision, then `ck harness select --harness TARGET --expected-revision N --role R|--game G` for the scope. This comes first: it fences the source out and lets the wake guard skip the handoff hold for the bound target.
 2. `ck msg send` each target role its complete checklist, which also wakes it. The checklist: read `current.md`; `ck session start` (binding, checkpoint, questions, holds, inbox counts); verify `main` equals `origin/main` and kit tags and candidates against stored artifacts; reconcile pending questions as in [game-sessions](../game-sessions/SKILL.md#resume-existing-sessions); resume independent approved work; tell dependants who owns it now; `ck handoff active`, which releases its handoff hold. Other holds stay with their owners.
 3. `dk G runner start --game G` for each game; check `status` shows one lock holder and a supported coordinator CLI. The next :30 review confirms coverage.
-4. `ck msg send` COMPLETE to the source game-coordinator. Source sessions `/exit`; verify each frontend ended. `ck handoff state completed --id ID`.
+4. `ck msg send` COMPLETE to the source game-coordinator. Source sessions `/exit`. Verify each source frontend process ended: the pane is dead or its `#{pane_current_command}` is no longer the frontend, or the process list has no frontend with that ID. Typed input is not evidence. `ck handoff state completed --id ID`.
 
 ## Rollback (before completed)
 

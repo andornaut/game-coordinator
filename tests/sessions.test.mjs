@@ -146,10 +146,11 @@ test("canonical native roots differ from role worktrees for games and kits", () 
     )[0].state,
     "live",
   );
-  assert.deepEqual(launchArgs(game, "/socket").slice(-2), [
-    "--add-dir",
-    "/game/.worktrees/art",
-  ]);
+  // Claude launches in the game root; a worktree in another directory would raise a trust prompt.
+  const args = launchArgs(game, "/socket");
+  assert.equal(args.includes("--add-dir"), false);
+  assert.equal(args.includes(game.worktree), false);
+  assert.equal(args.includes("--dangerously-skip-permissions"), true);
 });
 
 test("coordinator windows omit harness prefixes while sessions retain them", () => {
@@ -655,14 +656,68 @@ test("resume argv contains exact ID and no new-session flag or appended prompt",
     "--remote-control",
     "game-coordinator",
     "--dangerously-skip-permissions",
-    "--add-dir",
-    "/repo",
   ]);
   assert.equal(identity("/managed/socket", codex).id, id);
   assert.equal(identity("/managed/socket", codex).remoteRequested, true);
   assert.equal(identity("/managed/socket", claude).id, id);
   assert.equal(identity("/socket", ["codex", "app-server"]), null);
   assert.equal(identity("/socket", ["bash", "-c", codex.join(" ")]), null);
+});
+
+test("a new Claude conversation launches with its registered ID as --session-id", () => {
+  const created = launchArgs(
+    { ...slot(), harness: "claude", create: true },
+    "/managed/socket",
+  );
+  assert.deepEqual(created.slice(0, 3), ["claude", "--session-id", id]);
+  assert.equal(created.includes("--resume"), false);
+  assert.equal(identity("/managed/socket", created).id, id);
+});
+
+test("--new is limited to resuming Claude slots", async (t) => {
+  await assert.rejects(main({}, ["plan", "--new"]), /only with resume/);
+  const { root } = startupFixture(t);
+  await assert.rejects(
+    main(
+      {
+        tools: availableTools,
+        processes: () => [],
+        panes: () => [],
+        tmux: () => assert.fail("rejected --new touched tmux"),
+      },
+      ["resume", "--new", "--root", root, "--role", "game-coordinator"],
+    ),
+    /only Claude/,
+  );
+  const path = join(root, "var/registry.json");
+  writeFileSync(
+    path,
+    JSON.stringify({
+      ...JSON.parse(readFileSync(path, "utf8")),
+      harness: "claude",
+    }),
+  );
+  const cli = join(root, "node_modules/@andornaut/coordination-kit/dist");
+  mkdirSync(cli, { recursive: true });
+  writeFileSync(join(cli, "cli.js"), "");
+  const launches = [];
+  await main(
+    {
+      tools: availableTools,
+      processes: () => [],
+      panes: () => [],
+      socketAvailable: async () => false,
+      tmux: (args) => {
+        if (args[0] === "new-session") launches.push(args.at(-1));
+        return args[0] === "new-session" ? "%1" : "";
+      },
+      output: () => {},
+    },
+    ["resume", "--new", "--held", "--root", root, "--role", "game-coordinator"],
+  );
+  assert.equal(launches.length, 1);
+  assert.match(launches[0], new RegExp(`'--session-id' '${target}'`));
+  assert.doesNotMatch(launches[0], /'--resume'/);
 });
 
 test("Bash wrapper descendants are inspected without pane_start_command or terminal contents", () => {
@@ -1369,6 +1424,53 @@ for (const mode of [
     ]);
   });
 }
+
+test("Claude brief dispatch does not require the Codex control socket", async (t) => {
+  const { root } = startupFixture(t);
+  const path = join(root, "var/registry.json");
+  writeFileSync(
+    path,
+    JSON.stringify({
+      ...JSON.parse(readFileSync(path, "utf8")),
+      harness: "claude",
+    }),
+  );
+  const claude = { ...frontend, harness: "claude", id: target, cwd: root };
+  const messages = [];
+  let output;
+  await main(
+    {
+      tools: availableTools,
+      processes: () => [claude],
+      panes: () => [
+        {
+          ...pane,
+          session: "claude-games",
+          harness: "claude",
+          id: target,
+          frontends: [claude],
+        },
+      ],
+      socketAvailable: async () => false,
+      tmux: () => assert.fail("brief dispatch touched tmux"),
+      message: (args) => {
+        messages.push(args);
+        return {
+          duplicate: false,
+          message: { id: args[args.indexOf("--id") + 1], state: "sent" },
+          wake: { status: "accepted" },
+        };
+      },
+      output: (text) => {
+        output = JSON.parse(text);
+      },
+    },
+    ["brief", "--dispatch", "--root", root, "--role", "game-coordinator"],
+  );
+  assert.equal(output.slots[0].harness, "claude");
+  assert.equal(output.slots[0].orientation.state, "sent");
+  assert.equal(messages.length, 1);
+});
 
 test("dispatch flag cannot add messaging to other session verbs", async () => {
   for (const command of ["plan", "check", "resume"])
