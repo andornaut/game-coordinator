@@ -51,6 +51,8 @@ export function launchArgs(slot, socket) {
         slot.role,
         "--remote-control",
         slot.role,
+        "--model",
+        "claude-opus-5-5",
         "--dangerously-skip-permissions",
         ...(slot.channelConfig
           ? [

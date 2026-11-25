@@ -655,6 +655,8 @@ test("resume argv contains exact ID and no new-session flag or appended prompt",
     "game-coordinator",
     "--remote-control",
     "game-coordinator",
+    "--model",
+    "claude-opus-5-5",
     "--dangerously-skip-permissions",
   ]);
   assert.equal(identity("/managed/socket", codex).id, id);
