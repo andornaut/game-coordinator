@@ -215,11 +215,11 @@ Determine compatibility requirements from the current game/runtime release versi
 - Offer Cheats in browser tabs and installed apps. Preserve each action's gameplay eligibility and guards across display modes.
 - Put one button labelled **Cheats** directly in the Menu or Pause modal, whichever applies in the current context. Use a shared modal structure with a title, a top-right X and a bottom primary Back button. Both dismissal controls return one layer to the invoking Menu or Pause and restore focus to the Cheats entry.
 - Group Cheats actions logically and size the modal to fit the game's controls. Ada uses two logical columns and fits its controls without scrolling.
-- Cheats act on the real save like normal play. Progress, unlocks, currency, achievements and statistics from cheats, cheated runs and runs started from a run link are saved, banked and earned as usual; there is no cheat session. Cheats work on Start/title too and apply to the next Play or Continue. Reset save (Archie) or Restart (Ada and Chibi) returns to a new save.
+- Cheats act on the real save like normal play. Progress, unlocks, currency, achievements and statistics from cheats, cheated runs and runs started from a run link are saved, banked and earned as usual; there is no cheat session. Cheats work on Start/title too and apply to the next Play or Continue. **Reset save** in Cheats returns to a new save.
 - Grants that add an amount (currency, resources) are buttons that add a fixed amount on every press.
 - Keep ordinary first-time tips and hints. Omit the **Show tips again** control from game menus.
-- Archie alone offers a standalone **Reset save** in its normal menu or settings. Ada and Chibi use **Restart** on their Start screens.
-- Keep Archie's **Reset save** visible and enable it only when a valid saved game exists. Disable it before first play and after a confirmed reset. Default data written at startup does not qualify as a saved game. Block activation by tap, hold, keyboard and programmatic means while disabled.
+- Every game offers **Reset save** only as the last action in Cheats. No normal menu, Settings or Start screen has a Reset save or Restart control.
+- Keep **Reset save** visible and enable it only when a valid saved game exists. Disable it before first play and after a confirmed reset. Default data written at startup does not qualify as a saved game. Block activation by tap, hold, keyboard and programmatic means while disabled.
 - Require confirmation before Reset save clears all saved progress, including achievements. Cancel and X leave the save intact. Preserve device preferences stored separately from progress.
 - Each game lists its cheats in its own cheats spec.
 
