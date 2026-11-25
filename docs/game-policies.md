@@ -234,6 +234,29 @@ Determine compatibility requirements from the current game/runtime release versi
 
 Games never import, link or depend on another game's source tree. Reuse code through published, pinned shared kit packages, or keep independent copies where appropriate. Kit owners retain reusable source; game Tech owners retain consumer adoption and integration. Kit publication and each consumer's adoption and deployment are separate outcomes.
 
+## Source structure
+
+Every game maps its source directories onto these bands, lowest first, and keeps any finer layers of its own inside them.
+
+| Band             | Holds                                                        |
+| ---------------- | ------------------------------------------------------------ |
+| Foundation       | Units, shared helpers, authored data and content             |
+| Model            | Pure state and rules, procedural systems                     |
+| Saving           | Progress and saves                                           |
+| Presentation     | Pure layout, view models, drawing maths that needs no engine |
+| Platform         | Loading, offline, crash reporting, developer tools           |
+| Engine and views | DOM views, Phaser scenes                                     |
+| Entries          | Page entries, bootstrap                                      |
+| Support          | Simulator, test harness, tools and build; never shipped      |
+
+- Imports point down only. Areas in one band import each other only where the game's layer table orders them.
+- No import cycles, type-only imports included.
+- Each area is imported through one public entry; authored data files may be imported directly.
+- Build-time code lives in one directory with one entry.
+- Support code never ships, and shipped code never imports it.
+- Engine imports (Phaser, DOM) appear only in Engine and views and the bands above it.
+- One import check, as a script or test, places every module in a band and fails on a cycle, a wrong-direction import or an unplaced module. It lands last, on a clean tree, with no exception list.
+
 ## Design and work files
 
 Every game and kit repository records design and approved work as committed files.
