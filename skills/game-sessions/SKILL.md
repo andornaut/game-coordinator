@@ -21,7 +21,7 @@ Same-harness recovery only. Recovery never changes ownership or harness; a harne
 2. Verify exact native IDs and cwd. Local process identity is not native proof. Use no picker, latest-session fallback or raw store.
 3. `node scripts/sessions.mjs resume --role ROLE` starts only `missing` and `dead` slots, without an appended prompt. It owns quoting, the control socket, pane markers and grouping; do not duplicate its launch logic.
 4. On a relaunched Claude session, confirm only the exact "Loading development channels" prompt: option 1 highlighted, the role channel listed, no draft text. A directory-trust prompt is the user's decision: leave it and report it; never press Enter blindly.
-5. The resumed role runs `ck session start` to read its binding, checkpoint, pending questions, holds and inbox counts. A held role is refused (`session-held`); leave the hold to its owner. Preserve an open native form. If its status is unknown, surface the recorded question and options with the owning session. Re-ask through a structured prompt only after verifying that the original closed without an answer, and link the new attempt to the same recorded question.
+5. The resumed role runs `ck session start` to read its binding, checkpoint, pending questions, holds and inbox counts. A held role is refused (`session-held`); leave the hold to its owner. Preserve an open native form. If it is no longer shown, the owning session asks the recorded question again as a structured prompt with the same options. The recorded question stays pending until the owner records the user's explicit answer with `question answer`.
 
 ## Replace a closed game-coordinator session
 
