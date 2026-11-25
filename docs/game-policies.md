@@ -28,6 +28,7 @@ Every game, coordinator and kit role, in Claude and Codex, uses one coordination
 - **Read and close.** Recipients run `coordination-kit inbox` (with `--include-body` for bodies) at startup, on every wake and at each safe boundary, then close each message with `msg done ID` (with `--superseded-by ID` for a superseded one) or `msg retain ID --reason TEXT --next-boundary TEXT`. Only the recipient closes its own messages, in one write.
 - **History.** `msg history` lists the store's append-only message events and is the durable record of what was sent, delivered and closed.
 - **Fence.** Each writing verb identifies its caller as the registry role whose effective harness binding equals the caller's native conversation ID. `harness select` rotates the binding. A worker writes under its parent's binding, with `--worker NAME` as an unverified label.
+- **After `/clear`.** A Claude role runs `session start` before any other store verb. From Coordination Kit 5.1.0 it rebinds the role when the transcript proves the rotation; otherwise game-coordinator rebinds it.
 
 Delivered means the recipient's own `inbox` read. Handled means its `msg done`. A wake, its acceptance or its failure is not delivery and never changes message state.
 
