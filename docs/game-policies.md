@@ -147,7 +147,7 @@ Pause and Menu are one modal. On Start/title the entry control is Menu and the b
 
 Use consistent settings structure, labels, state text and help across games. Labels name the setting. Use Shown/Hidden for applicable non-toggle state text. Help is stable, declarative text describing the actual effect, rather than changing instructions for the next click. Include only settings the game supports; consistency does not authorize inventing toggles.
 
-Put the **FPS counter** toggle at the top of the right column in Settings, inline and aligned with the other settings. In a two-column layout, use the existing top-right position, swapping settings if needed. Keep it as a device preference that defaults to Off and operates independently of the save and cheat sessions. The FPS readout stays in its existing bottom-right position, with its existing parent, rotation, safe-area inset and layering over the game and letterbox bars.
+Put the **FPS counter** toggle at the top of the right column in Settings, inline and aligned with the other settings. In a two-column layout, use the existing top-right position, swapping settings if needed. Keep it as a device preference that defaults to Off and operates independently of the save. The FPS readout stays in its existing bottom-right position, with its existing parent, rotation, safe-area inset and layering over the game and letterbox bars.
 
 In Archie, **FPS counter** is the last Settings option, below Install when offered. Align its label with the other labels on the left and keep its switch and state label on the right. The readout stays bottom-right.
 
@@ -216,7 +216,7 @@ Determine compatibility requirements from the current game/runtime release versi
 - Offer Cheats in browser tabs and installed apps. Preserve each action's gameplay eligibility and guards across display modes.
 - Put one button labelled **Cheats** directly in the Menu or Pause modal, whichever applies in the current context. Use a shared modal structure with a title, a top-right X and a bottom primary Back button. Both dismissal controls return one layer to the invoking Menu or Pause and restore focus to the Cheats entry.
 - Group Cheats actions logically and size the modal to fit the game's controls. Ada uses two logical columns and fits its controls without scrolling.
-- Cheats act on the real save like normal play. Progress, unlocks, currency, achievements and statistics from cheats, cheated runs and runs started from a run link are saved, banked and earned as usual; there is no cheat session. Cheats work on Start/title too and apply to the next Play or Continue. Reset save (Archie, in Cheats) or Restart (Ada and Chibi, on Start) returns to a new save.
+- Cheats act on the real save like normal play. Progress, unlocks, currency, achievements and statistics from cheats, cheated runs and runs started from a run link are saved, banked and earned as usual; there is no cheat session. Cheats work on Start/title too and apply to the next Play or Continue. Reset save (Archie, in Cheats) clears saved progress; Restart (Ada and Chibi, on Start) keeps what that game's rules list.
 - Grants that add an amount (currency, resources) are buttons that add a fixed amount on every press.
 - Keep ordinary first-time tips and hints. Omit the **Show tips again** control from game menus.
 - Archie offers **Reset save** only as the last action in Cheats, never in its normal menu or Settings. Ada and Chibi use **Restart** on their Start screens.
