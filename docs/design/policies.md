@@ -21,3 +21,4 @@ Shared product and development rules that apply to every game. The canonical tex
 | gc-0022 | Remove Show tips again from game menus                        | [gc-0022.md](../work/gc-0022.md) |
 | gc-0023 | Show the current state below each toggle                      | [gc-0023.md](../work/gc-0023.md) |
 | gc-0024 | Show one Install button in Settings                           | [gc-0024.md](../work/gc-0024.md) |
+| gc-0025 | Cheats act on the real save in every game                     | [gc-0025.md](../work/gc-0025.md) |
