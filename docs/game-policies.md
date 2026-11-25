@@ -24,7 +24,7 @@ Route dependencies to the role that can clear them. Never answer, cancel or clea
 Every game, coordinator and kit role, in Claude and Codex, uses one coordination-kit store and the same verbs, with identical output in both harnesses. All roles run the coordinator-installed CLI as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> ...`, never through `npx`; game-local delivery-runner package pins remain separate. The [role messaging](../README.md#role-messaging) table lists the verbs.
 
 - **Send.** `msg send --to ROLE --body-file FILE` is the only payload path for role-to-role coordination. It stores the message before anything native happens, then attempts at most one wake. Use `--intent unblock` for a confirmed unblocker, `--link work=ID` for related work, and a fixed `--id UUID` when a retry must not duplicate.
-- **Wake only.** Native session messages, channel notifications and tmux reminders only ask the recipient to run `inbox`. They may identify the count or exact original IDs. Keep message bodies in the store.
+- **Wake only.** Native session messages and channel notifications only ask the recipient to run `inbox`. They may identify the count or exact original IDs. Keep message bodies in the store.
 - **Read and close.** Recipients run `coordination-kit inbox` (with `--include-body` for bodies) at startup, on every wake and at each safe boundary, then close each message with `msg done ID` (with `--superseded-by ID` for a superseded one) or `msg retain ID --reason TEXT --next-boundary TEXT`. Only the recipient closes its own messages, in one write.
 - **History.** `msg history` lists the store's append-only message events and is the durable record of what was sent, delivered and closed.
 - **Fence.** Each writing verb identifies its caller as the registry role whose effective harness binding equals the caller's native conversation ID. `harness select` rotates the binding. A worker writes under its parent's binding, with `--worker NAME` as an unverified label.
@@ -38,23 +38,10 @@ The coordinator owns communication health and escalation; it is not a relay. Fro
 
 Use the existing hourly :30 America/Toronto reviews to drain the whole backlog and escalate messages open across two slots. Follow the [review procedure](../README.md#monitoring); add no daemon or timer.
 
-At the existing review or a safe boundary after a direct coordinator attention notice, the
-[guarded reminder executor](../README.md#guarded-inbox-reminder) may use tmux after a confirmed
-wake failure or refusal leaves an exact unblocker unread. The Coordination Kit ledger verifies
-the original, registered binding, question and hold clearance, and exact native idle state.
-The executor also verifies the matching Codex pane and its empty composer. It rechecks before
-inserting the wake and verifies the exact sole draft before submitting it. The coordinator may
-use the existing manual reminder path for another frontend when it can verify those same
-conditions directly. When verification is unavailable, the owner pulls at a safe boundary.
+The hourly review sends one wake per recipient with unread originals, through the Claude wake file or the Codex control socket; holds withhold it and pending questions do not.
 
-Use the Coordination Kit's planned batch for one inbox reminder per recipient. Record the
-exact originals, pane and outcome. Preserve ambiguous wakes and uncertain reminders for
-reconciliation. When a guard is unavailable or an original remains unread, record the owner,
-blocker and next boundary.
 Escalate an item still open after two scheduled reviews with its exact ID and the action its
 owner or the user can take to resolve it.
-A reminder leaves delivery and handling to the recipient's own inbox. Preserve questions, holds
-and drafts, and leave running turns uninterrupted.
 
 ## Session startup
 

@@ -106,31 +106,13 @@ delivery-kit delivers game-coordinator's review once per hour at :30 in America/
 
 1. Inventory the store's open messages for every registered role, including game Art, Gameplay and Tech, shared coordinators and kits, plus ready handoffs, from the brief, `review show` and `msg history`. Report unavailable question visibility; never infer an empty backlog from an idle session.
 2. Work from exact originals and owner dispositions. Prioritize user replies and dependency unblockers, then process independent work. Verify each retained item’s reason, owner and next boundary.
-3. Use the existing owner pull or handoff for unread, unconfirmed or ambiguous cases. Send new confirmed unblockers with `msg send --intent unblock`. Sweep for confirmed failed or refused wakes with unread unblockers using the [guarded inbox reminder](#guarded-inbox-reminder). Reconcile ambiguity before any retry and preserve guarded originals.
+3. Use the existing owner pull or handoff for unread, unconfirmed or ambiguous cases. Send new confirmed unblockers with `msg send --intent unblock`. The hourly review sends one wake per recipient with unread originals, through the Claude wake file or the Codex control socket; holds withhold it and pending questions do not. Reconcile ambiguity before any retry and preserve guarded originals.
 4. Surface pending user decisions through their owning session's structured prompt. Preserve unanswered questions, source holds and independent work. Never answer or cancel another owner's question, interrupt or restart its turn, or treat silence as a decision. Route release failures and cross-role dependencies to the role that can resolve them.
 5. Escalate any item unhandled or repeatedly deferred across two scheduled slots with its exact ID, owner, blocker and next action. Ask owners to close finished or stalled jobs after preserving diagnostics; retain protected live resources and unresolved ownership.
-6. Close processed review notices once their exact dispositions are stored. Close an unread attention alert only when the linked original has confirmed recipient collection or verified handling or supersession. Keep unresolved work on the underlying original and preserve ambiguous delivery, questions and holds.
+6. Close processed review notices once their exact dispositions are stored. Keep unresolved work on the underlying original and preserve ambiguous delivery, questions and holds.
 7. Finish each pass with exact counts of messages inspected, handled and superseded, plus unavailable scopes. Report unread messages, delivered messages awaiting disposition and retained messages separately. Identify each remaining item's owner, reason and next boundary. Record new arrivals at safe boundaries so they are included or explicitly retained for the next pass. Claim a fully drained backlog only when no open messages remain and visibility is complete.
 
 Use the existing hourly :30 reviews; add no timers or teams. Preserve handoff and activation guards when communicating with held owners.
-
-### Guarded inbox reminder
-
-Run this from the game-coordinator binding at the existing review, or after a direct coordinator
-attention notice at a safe event boundary. It uses the installed Coordination Kit's reminder
-ledger and sends only the wake to a verified idle Codex pane.
-
-```sh
-node "$COORDINATOR_ROOT/scripts/inbox-reminders.mjs" \
-  --root "$COORDINATOR_ROOT"
-```
-
-Coordination Kit plans the exact batch for each recipient. The executor claims that batch and
-types only the notice that matches the claim ID. It reports the pane, outcome, settlement and
-any deferred original IDs. A submitted reminder is evidence of input only. The recipient's own inbox records delivery. An uncertain
-submission or settlement stays reserved for reconciliation. Use `review show` and message status
-to record the owner, blocker and next boundary for ineligible or unread originals, including
-Claude and unavailable composer or question state.
 
 ## Sessions and handoffs
 

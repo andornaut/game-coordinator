@@ -97,7 +97,7 @@ Coordinate roles, shared policy, decisions and approved operational delivery.
 
 - Owns: Controls, routing, backlog and delivery audits; After confirmed transfer: delivery admission, authorized ad hoc requests, gate/CI/deploy and resource limits.
 - Boundaries: No game implementation or kit source ownership; Operational transfer requires explicit source hold, verified target acceptance and activation; Use the existing runner for every departure. No new timers or inferred question clearance.
-- Handoffs: Route dependencies and record handling evidence; At safe attention or review boundaries, run guarded reminders and track owner pickup; Give runners Tech-approved revisions and route failures to Tech.
+- Handoffs: Route dependencies and record handling evidence; Track pickup of the hourly review wake: one per recipient with unread originals (Claude wake file or Codex control socket), withheld by holds, not pending questions; Give runners Tech-approved revisions and route failures to Tech.
 - Desired tools: core repository, git, role-messaging; task-specific native-session, registry, delivery-observation, isolated-checks.
 
 ## Desired capabilities

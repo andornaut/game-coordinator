@@ -44,7 +44,7 @@ The [role catalog](roles.md), generated from `roles.json`, is the authoritative 
 - **Current coordination store.** The file journal and its committed records in `var/coordination/` are authoritative. Coordination Kit rebuilds the query index from the journal. The store contains messages, work, decisions, holds, sessions, handoffs, review briefs and ingested runner events. See the [Coordination Kit filesystem layout](https://github.com/andornaut/coordination-kit/blob/main/docs/store.md#filesystem-layout) for record examples.
 - **Messages.** Store first, wake second, pull third:
   1. `msg send` commits the message to the store. Nothing native happens before that commit.
-  2. The store attempts at most one outstanding wake per recipient, skipping unregistered, unbound and held recipients. A wake carries no content, only `N new messages for ROLE: run coordination-kit inbox`. Claude wakes through a per-conversation wake file that the channel server announces; Codex wakes through one guarded control-socket queue add. A wake outcome is logged apart from message state.
+  2. The store attempts at most one outstanding wake per recipient, skipping unregistered, unbound and held recipients. A wake carries no content, only `N new messages for ROLE: run coordination-kit inbox`. Claude wakes through a per-role wake file that the channel server announces; Codex wakes through one guarded control-socket queue add. A wake outcome is logged apart from message state.
   3. The recipient runs `inbox`, which records its messages `delivered`.
   4. The recipient closes each message in one write: `msg done` (handled or superseded) or `msg retain` with an owner, a reason and the next boundary.
 
@@ -52,7 +52,7 @@ The [role catalog](roles.md), generated from `roles.json`, is the authoritative 
 
 - **Work records.** The owner of a work file records its lifecycle with `work start`, `work evidence`, `work block`, `work ready` and `work finish`; only the owner writes. `question open|answer|cancel` and `hold set|release` record pending user prompts and holds, and a pending question or a role hold suppresses that role's wakes. `request close` closes an imported request the role owns.
 - **Sessions and handoffs.** Each role runs `session start` at startup, which refuses a held role. game-coordinator opens a harness handoff with `handoff open` and moves it with `handoff state`; each selected role reports `handoff ready` and `handoff active`.
-- **Channels.** Each Claude session runs a channel server that watches its conversation's wake file and emits one notification per new wake. Channels use the stable command `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> claude channel`, so a kit upgrade needs only `npm ci` and an `/mcp` reconnect; a changed command needs a relaunch.
+- **Channels.** Each Claude session runs a channel server that watches its role's wake file and emits one notification per new wake. Channels use the stable command `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> claude channel`, so a kit upgrade needs only `npm ci` and an `/mcp` reconnect; a changed command needs a relaunch.
 
 ## delivery-kit: how games ship
 

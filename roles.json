@@ -260,7 +260,7 @@
       ],
       "handoffs": [
         "Route dependencies and record handling evidence",
-        "At safe attention or review boundaries, run guarded reminders and track owner pickup",
+        "Track pickup of the hourly review wake: one per recipient with unread originals (Claude wake file or Codex control socket), withheld by holds, not pending questions",
         "Give runners Tech-approved revisions and route failures to Tech"
       ],
       "tools": {
