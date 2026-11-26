@@ -17,3 +17,4 @@ The role catalog, startup orientation, shared tooling adoption and the work prot
 | gc-0020 | Act on blocked inbox delivery at safe boundaries                       | [gc-0020.md](../work/gc-0020.md) |
 | gc-0026 | Clean up Claude launch, creation and harness handoff                   | [gc-0026.md](../work/gc-0026.md) |
 | gc-0032 | Restore native worker visibility in scheduled reviews                  | [gc-0032.md](../work/gc-0032.md) |
+| gc-0033 | Make Coordination Kit and Delivery Kit app neutral                     | [gc-0033.md](../work/gc-0033.md) |
