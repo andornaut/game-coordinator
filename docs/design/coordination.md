@@ -16,3 +16,4 @@ The role catalog, startup orientation, shared tooling adoption and the work prot
 | gc-0015 | Bound closed coordination message history by activity                  | [gc-0015.md](../work/gc-0015.md) |
 | gc-0020 | Act on blocked inbox delivery at safe boundaries                       | [gc-0020.md](../work/gc-0020.md) |
 | gc-0026 | Clean up Claude launch, creation and harness handoff                   | [gc-0026.md](../work/gc-0026.md) |
+| gc-0032 | Restore native worker visibility in scheduled reviews                  | [gc-0032.md](../work/gc-0032.md) |
