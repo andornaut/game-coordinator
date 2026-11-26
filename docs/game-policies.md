@@ -263,13 +263,15 @@ Every game maps its source directories onto these bands, lowest first, and keeps
 
 Every game and kit repository records design and approved work as committed files.
 
-- `docs/design/<area>.md` holds a short design summary and an index table of ID, title and link, with no status column.
+- Choose design topics that fit the repository. Link the repository README to a short `docs/README.md` that points to current requirements, technical design and work history. Put each current requirement and its rationale in one authoritative place under `docs/design/` or in a clearly linked guide.
+- Each work item appears once in its design area's `ID | Title | Link` table. Keep the table in `docs/design/<area>.md` or put it in `docs/work/index/<area>.md` and link it from the design area. Both layouts use the same work-file IDs and links.
 - Every user request is `docs/work/<id>.md`, approved or not. Its front matter holds `id`, `title`, `status` (milestone only: `proposed` until the user approves, `approved`, `done`, `declined` when the user declines, `cancelled` or `superseded`), the approval or request reference, the design area, related IDs and `supersedes`. Its sections are scope, criteria, decisions and outcome.
 - Live progress (started, blocked, ready, finished, evidence and retained items) is coordination-store records written through the [work lifecycle](#work-lifecycle) verbs, not work-file content.
 - Only `main` edits index tables and approved scope. Approval commits the work-file stub and its index row on `main`; that commit allocates the ID. Workers edit only their own work file and the design prose that ships with their feature. Integration sets `status: done` in the merge.
 - A changed or reverted decision is a new work item with `supersedes`; never rewrite a finished item's outcome.
 - Work files are public. Use short approval references such as "user, 2026-11-18, option b"; never record session IDs, hostnames or quoted conversation.
-- Condense old history only on request, and verify that no open item or live link is dropped.
+- Use stable `rule-` anchors for consequential requirements. `coordination-kit docs audit` checks committed links and lists marked rules for verification against implementation or observed behaviour.
+- `coordination-kit docs compact --plan` is read-only. Condense old history only on request. Preserve work paths, front matter, decision lines, referenced headings and a link to the original Git revision. Verify that open work, retained evidence and live links remain accessible.
 - Docs-only changes run only the attribution and lint checks. Split CI so a first job detects changed paths, lint always runs, and heavier jobs are skipped by condition; games never serve or package `docs/`.
 
 ## Work lifecycle
