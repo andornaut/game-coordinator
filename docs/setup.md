@@ -51,8 +51,8 @@ parentage. Reconcile ambiguous creation before retrying. The session helper resu
 IDs. Verify the managed Codex control socket or effective Claude Remote Control separately.
 
 Use the Coordination Kit registry SDK with a draft following the installed
-[registry schema](https://github.com/andornaut/coordination-kit/blob/v4.0.4/docs/registry.md).
-See the [minimal registry seed](https://github.com/andornaut/coordination-kit/blob/v4.0.4/docs/configuration.md#registry-seed-example).
+[registry schema](https://github.com/andornaut/coordination-kit/blob/v7.3.0/docs/registry.md).
+See the [minimal registry seed](https://github.com/andornaut/coordination-kit/blob/v7.3.0/docs/configuration.md#registry-seed-example).
 Use the verified coordinator project ID for `host.nativeProjectId` and set `host.root` to
 `"."`. Give each role its verified native conversation binding and worktree path relative
 to game-coordinator. Use `held` ownership and phase for roles awaiting activation, a
@@ -70,14 +70,14 @@ import { readFileSync } from "node:fs";
 import { createRegistry, loadLayout } from "@andornaut/coordination-kit/build/registry";
 
 const draft = JSON.parse(readFileSync(process.argv[2], "utf8"));
-const registry = createRegistry(loadLayout(process.cwd()), draft);
+const registry = createRegistry(() => new Date(), loadLayout(process.cwd()), draft);
 console.log(JSON.stringify({ revision: registry.revision }));
 JS
 ```
 
 Configure scheduled reviews once you have a registered host game and an approved review
 minute in `config.json`. Use ignored `var/route.json` and the
-[schema-2 route contract](https://github.com/andornaut/coordination-kit/blob/v4.0.4/docs/review.md#review-route).
+[schema-2 route contract](https://github.com/andornaut/coordination-kit/blob/v7.3.0/docs/review.md#review-route).
 The host game's committed `reports.recipient` selects `game-coordinator`. This example
 uses the game added in the next section.
 
@@ -119,7 +119,7 @@ node "$CK" --root "$COORDINATOR_ROOT" session start
 ```
 
 To select the filesystem authority, follow the
-[Coordination Kit migration runbook](https://github.com/andornaut/coordination-kit/blob/v4.0.4/docs/upgrading.md#filesystem-authority-migration)
+[Coordination Kit migration runbook](https://github.com/andornaut/coordination-kit/blob/v7.3.0/docs/upgrading.md#filesystem-authority-migration)
 under the active coordinator binding. Prepare a snapshot using distinct, fresh backup and
 restore paths outside the primary checkout. Verify the prepared receipt and activate that
 exact ID under explicit authority.
