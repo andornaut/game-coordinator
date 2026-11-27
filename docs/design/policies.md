@@ -28,3 +28,4 @@ Shared product and development rules that apply to every game. The canonical tex
 | gc-0030 | Archie opens Cheats and Settings as full-screen pages         | [gc-0030.md](../work/gc-0030.md) |
 | gc-0031 | Add Dependabot coverage for the games workspace               | [gc-0031.md](../work/gc-0031.md) |
 | gc-0035 | Keep routine game cleanup free of redundant archives          | [gc-0035.md](../work/gc-0035.md) |
+| gc-0036 | Show concise controls on every game website                   | [gc-0036.md](../work/gc-0036.md) |
