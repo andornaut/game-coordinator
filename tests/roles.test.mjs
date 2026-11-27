@@ -357,7 +357,10 @@ test("every role brief stays within 60 lines and 4 KB with long absolute paths",
 test("role briefs name only coordination-kit verbs the installed commands.md lists", () => {
   const known = commandVerbs(
     readFileSync(
-      join(root, "node_modules/@andornaut/coordination-kit/docs/commands.md"),
+      join(
+        root,
+        "node_modules/@andornaut/coordination-kit/docs/reference/commands.md",
+      ),
       "utf8",
     ),
   );

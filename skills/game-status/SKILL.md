@@ -17,7 +17,7 @@ When the installed Coordination Kit package bundles `coordination-status`, use t
 - For a delivery verification check, `--state unverified` selects done items without qualifying delivery evidence.
 - For a current status report, read `question list --state pending` and `hold list --state active`. Use registered roles, and the hold's scope where relevant, to match the requested game, kit or role.
 
-The installed [command reference](../../node_modules/@andornaut/coordination-kit/docs/commands.md#status) defines the status JSON fields and evidence rules.
+The installed [command reference](../../node_modules/@andornaut/coordination-kit/docs/reference/commands.md#status) defines the status JSON fields and evidence rules.
 
 ## Report
 
