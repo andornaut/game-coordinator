@@ -116,6 +116,8 @@ node scripts/sessions.mjs brief --role game-coordinator
 
 Local inspection does not prove native project identity, pending-question state, quota or an effective Remote Control connection. The helper never selects ownership, activates work, stops frontends or changes a runner/daemon.
 
+### Verify and complete a handoff
+
 1. Verify native identities, source HOLDs, checkpoints, owned jobs and pending questions. Commit unfinished work to named branches and preserve all independent holds. Keep current checkpoints concise. Archive superseded state unchanged in sibling history before removing obsolete receipts.
 2. Reuse matching live target panes. Resume missing or verified dead targets by exact ID, without an appended prompt. Verify effective Remote Control separately from launch flags and actual receipt. Leave directory-trust prompts to the user, including when No or exit is the default.
 3. Obtain each target's exact marker/role/ID acceptance before selecting its harness. Reconcile matching existing acceptance on retries instead of repeating activation. Delivery acceptance alone is not handling.

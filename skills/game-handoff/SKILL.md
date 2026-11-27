@@ -34,9 +34,9 @@ Status: `ck handoff show [--id ID]`, `dk G status --game G`.
 
 ## complete (target)
 
-Verify every target role’s exact identity and acceptance using the [handoff procedure](../../docs/guides/operations.md#sessions-and-handoffs). Obtain that acceptance before selecting the target harness.
+Verify every target role’s exact identity and acceptance using the [handoff procedure](../../docs/guides/operations.md#verify-and-complete-a-handoff). Obtain that acceptance before selecting the target harness.
 
-1. game-coordinator: read the revision, then `ck harness select --harness TARGET --expected-revision N --role R|--game G` for the scope. This comes first: it fences the source out and lets the wake guard skip the handoff hold for the bound target.
+1. game-coordinator: read the revision, then `ck harness select --harness TARGET --expected-revision N --role R|--app G` for the scope. Selection fences the source out and lets the wake guard skip the handoff hold for the bound target.
 2. `ck msg send` each target role its complete checklist, which also wakes it. The checklist: read `current.md`; `ck session start` (binding, checkpoint, questions, holds, inbox counts); verify `main` equals `origin/main` and kit tags and candidates against stored artifacts; reconcile pending questions as in [game-sessions](../game-sessions/SKILL.md#resume-existing-sessions); resume independent approved work; tell dependants who owns it now; `ck handoff active`, which releases its handoff hold. Other holds stay with their owners.
 3. `dk G runner start --game G` for each game; check `status` shows one lock holder and a supported coordinator CLI. The next :30 review confirms coverage.
 4. `ck msg send` COMPLETE to the source game-coordinator. Source sessions `/exit`. Verify each source frontend process ended: the pane is dead or its `#{pane_current_command}` is no longer the frontend, or the process list has no frontend with that ID. Typed input is not evidence. `ck handoff state completed --id ID`.
