@@ -174,7 +174,7 @@ Use consistent settings structure, labels, state text and help across games. Lab
 
 Put the **FPS counter** toggle at the top of the right column in Settings, inline and aligned with the other settings. In a two-column layout, use the existing top-right position, swapping settings if needed. Keep it as a device preference that defaults to Off and operates independently of the save. The FPS readout stays in its existing bottom-right position, with its existing parent, rotation, safe-area inset and layering over the game and letterbox bars.
 
-In Archie, **FPS counter** is the last Settings option, below Install when offered. Align its label with the other labels on the left and keep its switch and state label on the right. The readout stays bottom-right.
+In Archie, **FPS counter** sits immediately above **Install** when offered and is the last Settings option when Install is unavailable. Align its label with the other labels on the left and keep its switch and state label on the right. The readout stays bottom-right.
 
 ### Installs
 
