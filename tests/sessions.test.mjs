@@ -1336,7 +1336,9 @@ test("messaging availability requires compatible public message CLI metadata", (
     ["7.0.0-rc.1", "missing"],
     ["8.0.0", "available"],
     ["8.0.0-rc.1", "missing"],
-    ["9.0.0", "missing"],
+    ["9.0.0", "available"],
+    ["9.0.0-rc.1", "missing"],
+    ["10.0.0", "missing"],
   ]) {
     writeFileSync(
       join(directory, "package.json"),

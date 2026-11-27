@@ -48,7 +48,7 @@ export function installedMessaging(root) {
     if (
       pkg.name !== "@andornaut/coordination-kit" ||
       typeof pkg.version !== "string" ||
-      !/^[3-8]\.\d+\.\d+$/.test(pkg.version) ||
+      !/^[3-9]\.\d+\.\d+$/.test(pkg.version) ||
       !pkg.exports?.["./build/registry"] ||
       !statSync(cli).isFile()
     )
@@ -59,7 +59,7 @@ export function installedMessaging(root) {
       status: "missing",
       cli,
       reason:
-        "Coordinator coordination-kit CLI or registry build export missing or incompatible (supported stable majors 3 through 8)",
+        "Coordinator coordination-kit CLI or registry build export missing or incompatible (supported stable majors 3 through 9)",
     };
   }
 }
