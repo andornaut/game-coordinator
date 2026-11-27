@@ -124,6 +124,12 @@ A hold on a discrete control fires after 500 ms in every game. Archie keeps its 
 
 Each game audits all current control bindings and migrates bypasses to that shared binding, with a meaningful construction or architecture guard against future bypasses. Before changing a kit, distinguish an existing published hold fallback from a caller that bypasses it.
 
+### Game website controls
+
+Every game website has a short, visible **Controls** section. Use concise semantic tables with action and input headers for character or gameplay controls and menu controls. List the game's actual keyboard bindings and relevant pointer or touch controls where supported. Keep the tables readable at narrow viewport widths.
+
+Arrow glyphs such as ← ↑ ↓ → are optional. Pair them with readable key names or a short legend, and expose the key names to assistive technology.
+
 ### Modal background isolation
 
 Keep all game content outside the top modal window painted and laid out, visibly dimmed and inactive, including top controls, HUD and lower cards. Only the top modal is interactive; do not exempt a live topbar or substitute hiding, removing or reparenting background content.
