@@ -150,6 +150,15 @@ Pause and Menu are one modal. On Start/title the entry control is Menu and the b
 - A click or tap in any letterbox region outside the rendered game viewport invokes the existing **Back**, **Close** or **X** action of the topmost active page or modal that offers one, exactly once. **Previous** is ineligible. A blocking surface without an available dismissal prevents the input from reaching a lower surface. Consume the dismissal input and preserve existing inside-viewport input, gestures, guards and focus restoration.
 - Review modals without a valid cancellation action case by case. Preserve each modal's existing blocking behaviour until the user approves a specific safe cancellation path for it. The X must never accept a decision or advance a story choice.
 
+### Dialogue navigation
+
+Apply these rules to existing dialogue surfaces where the relevant controls and choices occur.
+
+- Use **Next** to advance linear dialogue. Show **Previous** when a preceding page exists, including at topic lists and internal forks. Previous follows the actual path and leaves committed outcomes intact.
+- At a fork, show the authored questions, responses or actions and omit **Next**. Remove the generic **Ask more** gateway. When topics are optional, include a named action that resumes the main conversation.
+- When an optional thread ends, return to its original topic list. Keep every thread selectable. Internal forks are reached by following their thread. **Skip** can pass optional dialogue and leaves material choices for the player.
+- Put the game's quest icon on choices that advance a quest. A separate checkmark marks a thread fully read during the current interaction. Preserve both meanings for assistive technology. Backing out halfway leaves the thread unchecked. Keep checkmarks across page turns and tabs within the interaction. Reset them when the player leaves the interaction, such as undocking or closing a standalone conversation.
+
 ### Settings
 
 Use consistent settings structure, labels, state text and help across games. Labels name the setting. Use Shown/Hidden for applicable non-toggle state text. Help is stable, declarative text describing the actual effect, rather than changing instructions for the next click. Include only settings the game supports; consistency does not authorize inventing toggles.
