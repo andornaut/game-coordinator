@@ -30,3 +30,4 @@ Shared product and development rules that apply to every game. The canonical tex
 | gc-0035 | Keep routine game cleanup free of redundant archives          | [gc-0035.md](../work/gc-0035.md) |
 | gc-0036 | Show concise controls on every game website                   | [gc-0036.md](../work/gc-0036.md) |
 | gc-0037 | Use a common structure for game homepages                     | [gc-0037.md](../work/gc-0037.md) |
+| gc-0038 | Simplify homepage navigation and order play actions           | [gc-0038.md](../work/gc-0038.md) |

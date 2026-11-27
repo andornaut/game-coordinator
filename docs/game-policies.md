@@ -131,7 +131,10 @@ Use this section order on every game homepage.
 1. A themed hero with the game title, a concise premise, a primary Play action and the existing Install action where available.
 2. One compact **About** or **Highlights** section with a short gameplay summary or up to three brief highlights.
 3. The [Controls section](#game-website-controls).
-4. A compact footer for existing necessary links.
+
+When both actions appear, place Play before Install in the DOM and visual order. Verify the rendered order at desktop and narrow widths.
+
+End the homepage with Controls and omit the footer, including footer navigation. Chibi and Archie also omit the homepage navigation bar. Archie omits all public Tuning and Gallery pages while preserving the asset paths the game uses.
 
 Keep the same reading order and align sections to one content column as the viewport changes. The hero can pair art and copy at wide widths and stack them at narrow widths. Use comparable visual hierarchy and content density across homepages. Reuse each game's assets and visual identity in its existing site build. Preserve functionality and page metadata.
 
