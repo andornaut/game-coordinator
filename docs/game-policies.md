@@ -316,5 +316,5 @@ Art review adds no delivery hold; the fix-forward policy remains in force.
 ## Resource cleanup
 
 - Use published Git for landed source and scheduled filesystem backups for recovery. Skip routine agent-created recovery archives, including Git bundles, tarballs, checkout snapshots, and copies of build outputs or dependencies. Game distribution artifacts, release packages, scheduled backups and evidence protected by existing decisions are outside its scope.
-- Preserve active work. Before removing an abandoned worktree or branch without a merge path, verify the owner released the exact worktree or branch, no live consumers remain, and all required evidence is preserved. Record each item of evidence once at a durable reference. Use commit references and concise receipts or check results, with media only where essential.
+- Preserve active work. Remove an abandoned worktree or branch without a merge path after verifying release by its owner, no live consumers and preservation of required evidence. Record each item of evidence once at a durable reference. Use commit references and concise receipts or check results, with media only where essential.
 - Create an exception archive only for a concrete recovery need. Name its owner, record an expiry or removal condition and retain the smallest payload that meets that need.

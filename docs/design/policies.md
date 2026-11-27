@@ -27,3 +27,4 @@ Shared product and development rules that apply to every game. The canonical tex
 | gc-0029 | Adopt the shared source structure in every game               | [gc-0029.md](../work/gc-0029.md) |
 | gc-0030 | Archie opens Cheats and Settings as full-screen pages         | [gc-0030.md](../work/gc-0030.md) |
 | gc-0031 | Add Dependabot coverage for the games workspace               | [gc-0031.md](../work/gc-0031.md) |
+| gc-0035 | Keep routine game cleanup free of redundant archives          | [gc-0035.md](../work/gc-0035.md) |
