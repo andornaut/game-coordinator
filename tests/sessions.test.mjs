@@ -540,6 +540,7 @@ test("conflicts, duplicate owners and foreign live slots are never resumed", () 
     [[{ ...pane, id: target }], [frontend]],
     [[{ ...pane, frontends: [{ ...frontend, cwd: "/wrong" }] }], []],
     [[], [frontend]],
+    [[{ ...pane, shell: true, frontends: [] }], [frontend]],
     [[{ ...pane, frontends: [{ ...frontend, id: target }] }], []],
   ])
     assert.equal(
@@ -1236,6 +1237,11 @@ test("unavailable unrelated registry contact is explicit without blocking a sele
   );
 });
 
+test("messaging preflight accepts the installed pinned Coordination Kit", () => {
+  const messaging = installedMessaging(join(import.meta.dirname, ".."));
+  assert.equal(messaging.status, "available", messaging.reason);
+});
+
 test("messaging availability requires compatible public message CLI metadata", (t) => {
   const { root } = startupFixture(t);
   const directory = join(root, "node_modules/@andornaut/coordination-kit");
@@ -1261,7 +1267,9 @@ test("messaging availability requires compatible public message CLI metadata", (
     ["6.0.0-rc.1", "missing"],
     ["7.0.0", "available"],
     ["7.0.0-rc.1", "missing"],
-    ["8.0.0", "missing"],
+    ["8.0.0", "available"],
+    ["8.0.0-rc.1", "missing"],
+    ["9.0.0", "missing"],
   ]) {
     writeFileSync(
       join(directory, "package.json"),
@@ -1482,4 +1490,30 @@ test("Claude brief dispatch does not require the Codex control socket", async (t
 test("dispatch flag cannot add messaging to other session verbs", async () => {
   for (const command of ["plan", "check", "resume"])
     await assert.rejects(main({}, [command, "--dispatch"]), /only with brief/);
+});
+
+test("a handoff marker is accepted only for resume", async () => {
+  for (const command of ["plan", "check", "brief"])
+    await assert.rejects(
+      main({}, [command, "--handoff-marker", "fixture"]),
+      /--handoff-marker is supported only with resume/,
+    );
+});
+
+test("session help lists only applicable options without inspecting the workspace", async () => {
+  let output;
+  const ports = { output: (value) => (output = value) };
+  await main(ports, ["--help", "--root", "/nonexistent-coordinator"]);
+  assert.match(output, /Commands:\n  plan\b/);
+  assert.match(output, /--role ROLE/);
+  assert.doesNotMatch(output, /--dispatch|--new|--handoff-marker/);
+  await main(ports, ["brief", "-h", "--root", "/nonexistent-coordinator"]);
+  assert.match(output, /Usage: sessions\.mjs brief/);
+  assert.match(output, /--dispatch/);
+  assert.doesNotMatch(output, /--new|--handoff-marker/);
+  await main(ports, ["resume", "--help", "--root", "/nonexistent-coordinator"]);
+  assert.match(output, /Usage: sessions\.mjs resume/);
+  assert.match(output, /--new/);
+  assert.match(output, /--handoff-marker TEXT/);
+  assert.doesNotMatch(output, /--dispatch/);
 });

@@ -144,6 +144,7 @@ export function plan(root, registry, options, panes, processes) {
       live.length &&
       live[0].shell &&
       !live[0].frontends.length &&
+      owners.length === 0 &&
       live[0].role === role &&
       live[0].harness === harness &&
       live[0].id === id

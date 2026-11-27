@@ -542,34 +542,120 @@ export function resumeSlot(slot, socket, handoffMarker, tmux = run) {
   return { ...slot, pane, action: "resume-requested" };
 }
 
+const sessionCommands = {
+  plan: "Inspect selected session slots and report blockers.",
+  check: "Inspect selected session slots and exit 1 if there are blockers.",
+  brief: "Write the selected roles' startup briefs.",
+  resume: "Preserve live slots and start eligible missing or dead slots.",
+};
+
+const sessionOptions = {
+  role: {
+    parser: { type: "string", multiple: true },
+    value: "ROLE",
+    description: "Select a registered role. Repeat to select multiple roles.",
+  },
+  root: {
+    parser: { type: "string" },
+    value: "PATH",
+    description:
+      "Select the coordinator checkout. Defaults to the current directory.",
+  },
+  harness: {
+    parser: { type: "string" },
+    value: "codex|claude",
+    description: "Select a harness. A different target requires --held.",
+  },
+  held: {
+    parser: { type: "boolean" },
+    description: "Prepare a held slot without sending a startup brief.",
+  },
+  "runner-pid": {
+    parser: { type: "string", multiple: true },
+    value: "PID",
+    description:
+      "Inspect a resident's socket configuration. Repeat for multiple residents.",
+  },
+  dispatch: {
+    parser: { type: "boolean" },
+    command: "brief",
+    description: "Send the brief after verifying the exact live owner.",
+  },
+  new: {
+    parser: { type: "boolean" },
+    command: "resume",
+    description: "Create the registered Claude conversation by its exact ID.",
+  },
+  "handoff-marker": {
+    parser: { type: "string" },
+    command: "resume",
+    value: "TEXT",
+    description: "Record the original handoff marker on the pane.",
+  },
+  help: {
+    parser: { type: "boolean", short: "h" },
+    description: "Show general or command-specific help.",
+  },
+};
+
+function sessionHelp(command) {
+  const usage = command
+    ? `Usage: sessions.mjs ${command} --role ROLE [options]`
+    : "Usage: sessions.mjs COMMAND --role ROLE [options]";
+  const summary = command
+    ? [sessionCommands[command]]
+    : [
+        "Commands:",
+        ...Object.entries(sessionCommands).map(
+          ([name, description]) => `  ${name.padEnd(8)} ${description}`,
+        ),
+        "",
+        "Run sessions.mjs COMMAND --help for command-specific options.",
+      ];
+  const options = Object.entries(sessionOptions)
+    .filter(([, option]) => !option.command || option.command === command)
+    .map(([name, { parser, value, description }]) => {
+      const flag = parser.short ? `-${parser.short}, --${name}` : `--${name}`;
+      const label = value ? `${flag} ${value}` : flag;
+      return `  ${label.padEnd(24)} ${description}`;
+    });
+  return [usage, "", ...summary, "", "Options:", ...options].join("\n");
+}
+
 export async function main(ports = {}, argv = process.argv.slice(2)) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: {
-      role: { type: "string", multiple: true },
-      root: { type: "string", default: process.cwd() },
-      harness: { type: "string" },
-      held: { type: "boolean", default: false },
-      dispatch: { type: "boolean", default: false },
-      new: { type: "boolean", default: false },
-      "runner-pid": { type: "string", multiple: true },
-      "handoff-marker": { type: "string" },
-    },
+    options: Object.fromEntries(
+      Object.entries(sessionOptions).map(([name, { parser }]) => [
+        name,
+        parser,
+      ]),
+    ),
   });
   const [command] = positionals;
-  if (
-    positionals.length !== 1 ||
-    !["plan", "check", "brief", "resume"].includes(command)
-  )
+  if (values.help && positionals.length === 0) {
+    (ports.output ?? console.log)(sessionHelp());
+    return;
+  }
+  if (positionals.length !== 1 || !Object.hasOwn(sessionCommands, command))
     throw new Error(
-      "Usage: sessions.mjs plan|check|brief|resume --role ROLE [--role ROLE] [--root PATH] [--harness codex|claude --held] [--runner-pid PID] [--handoff-marker TEXT] [brief --dispatch] [resume --new]",
+      "Usage: sessions.mjs plan|check|brief|resume --role ROLE [options]. Run sessions.mjs --help for options.",
     );
-  if (values.dispatch && command !== "brief")
-    throw new Error("--dispatch is supported only with brief");
-  if (values.new && command !== "resume")
-    throw new Error("--new is supported only with resume");
-  const root = realpathSync(values.root);
+  for (const [name, option] of Object.entries(sessionOptions)) {
+    if (
+      values[name] !== undefined &&
+      option.command &&
+      command !== option.command
+    )
+      throw new Error(`--${name} is supported only with ${option.command}`);
+  }
+  if (values.help) {
+    (ports.output ?? console.log)(sessionHelp(command));
+    return;
+  }
+  if (!values.role?.length) throw new Error("Select at least one --role");
+  const root = realpathSync(values.root ?? process.cwd());
   const socketPath = controlSocket();
   const layout = loadLayout(root);
   const registry = readRegistry(layout);
@@ -577,7 +663,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
   const options = {
     roles: values.role,
     harness: values.harness,
-    held: values.held,
+    held: values.held ?? false,
     config: layout.config,
   };
   const snapshot = () => {
@@ -617,7 +703,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
       catalog,
       slot,
       toolReports.get(slot.role),
-      values.held,
+      options.held,
       command === "brief",
     ),
   }));
@@ -660,7 +746,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
         (candidate) => candidate.role === slot.role,
       );
       const eligible =
-        !values.held &&
+        !options.held &&
         (slot.harness !== "codex" || available) &&
         issues.length === 0 &&
         fresh.state === "live" &&
@@ -677,7 +763,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
           : {
               id: orientationId(slot, slot.brief),
               state: "not-sent",
-              reason: values.held
+              reason: options.held
                 ? "HOLD preparation is artifact-only"
                 : "Fresh exact live effective owner, matching remote configuration, Codex socket for Codex owners and unchanged registry/catalog required",
             },
@@ -703,7 +789,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
           catalog,
           fresh,
           toolReports.get(slot.role),
-          values.held,
+          options.held,
           true,
         );
         if (fresh.state !== "live") fresh = roleChannel(root, true, fresh);
@@ -719,7 +805,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
           currentBindings()
             ? snapshot().find((s) => s.role === slot.role)
             : undefined;
-        const started = result.action === "resume-requested" && !values.held;
+        const started = result.action === "resume-requested" && !options.held;
         const observed = started
           ? await observeStartup(result, observe, ports.startupWait)
           : observe();
@@ -736,7 +822,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
             : {
                 id: orientationId(fresh, brief),
                 state: "not-sent",
-                reason: values.held
+                reason: options.held
                   ? "HOLD preparation is artifact-only"
                   : started
                     ? "Fresh frontend or unchanged binding could not be verified"
