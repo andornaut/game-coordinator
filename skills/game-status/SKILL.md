@@ -7,6 +7,8 @@ description: Report every outstanding and in-progress item across the games, kit
 
 Use the coordinator-installed Coordination Kit CLI. Resolve the coordinator checkout from the registry. Run `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root>` followed by the commands below.
 
+When the installed Coordination Kit package bundles `coordination-status`, use that skill for shared inventory and reporting, then apply the game-specific scope, delivery and prompt-visibility rules below. The commands and reporting rules here also work with earlier pins.
+
 ## Read
 
 - For general status, run `status --format json` without a date filter. Include all open work regardless of age. Use `latestEvidenceAt` for recent activity and `recentCompletions[].at` for completions, defaulting to the last 24 hours for those summaries. Join completion references to `items` by repository and ID for titles and evidence.
