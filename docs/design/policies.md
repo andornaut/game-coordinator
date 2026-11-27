@@ -34,4 +34,4 @@ Shared product and development rules that apply to every game. The canonical tex
 | gc-0039 | Organize coordinator documentation and navigation             | [gc-0039.md](../work/gc-0039.md) |
 | gc-0040 | Keep rectangular button lips full-width and square            | [gc-0040.md](../work/gc-0040.md) |
 | gc-0041 | Group coordinator guides, design and reference docs           | [gc-0041.md](../work/gc-0041.md) |
-| gc-0042 | Let mobile platform Back leave from game home                 | [gc-0042.md](../work/gc-0042.md) |
+| gc-0042 | Confirm mobile platform Back from Start                       | [gc-0042.md](../work/gc-0042.md) |
