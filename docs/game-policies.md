@@ -124,6 +124,17 @@ A hold on a discrete control fires after 500 ms in every game. Archie keeps its 
 
 Each game audits all current control bindings and migrates bypasses to that shared binding, with a meaningful construction or architecture guard against future bypasses. Before changing a kit, distinguish an existing published hold fallback from a caller that bypasses it.
 
+### Game homepage structure
+
+Use this section order on every game homepage.
+
+1. A themed hero with the game title, a concise premise, a primary Play action and the existing Install action where available.
+2. One compact **About** or **Highlights** section with a short gameplay summary or up to three brief highlights.
+3. The [Controls section](#game-website-controls).
+4. A compact footer for existing necessary links.
+
+Keep the same reading order and align sections to one content column as the viewport changes. The hero can pair art and copy at wide widths and stack them at narrow widths. Use comparable visual hierarchy and content density across homepages. Reuse each game's assets and visual identity in its existing site build. Preserve functionality and page metadata.
+
 ### Game website controls
 
 Every game website has a short, visible **Controls** section. Use concise semantic tables with action and input headers for character or gameplay controls and menu controls. List the game's actual keyboard bindings and relevant pointer or touch controls where supported. Keep the tables readable at narrow viewport widths.
