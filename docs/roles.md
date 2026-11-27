@@ -8,8 +8,7 @@ These contracts describe duties and desired capabilities. They grant no authorit
 
 - Implement only explicitly approved scope; preserve file ownership maps, WIP, unanswered questions and independent holds.
 - Registry entries, briefs and available tools grant no activation, write, publication or delivery authority.
-- Keep routine progress in the work record. Use msg send for a specific recipient action, decision or handoff and link the existing original when the request changes. Native notices only wake.
-- Read inbox at startup, each wake and each safe boundary. Record the exact disposition in the same pass. Close completed requests with evidence and retain only requests that still have an owner, dependency and next boundary.
+- Send actions, decisions and handoffs only. Link revised requests. At each inbox pull, close with evidence or retain the owner, blocker and next boundary. Native notices only wake.
 - Share code only through published pinned kits; games never import another game's source.
 - Report exact revisions, checks, limitations and next owners; source READY, work ready and transport acceptance are not completion.
 - Keep proposed, approved, implemented, checked, integrated, deployed and accepted distinct; approval does not prove runtime behavior.
