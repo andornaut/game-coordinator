@@ -124,6 +124,12 @@ A hold on a discrete control fires after 500 ms in every game. Archie keeps its 
 
 Each game audits all current control bindings and migrates bypasses to that shared binding, with a meaningful construction or architecture guard against future bypasses. Before changing a kit, distinguish an existing published hold fallback from a caller that bypasses it.
 
+#### Rectangular button lips
+
+On a rectangular button, render any dark bottom lip as one solid, full-width rectangle with hard square corners flush to both sides. Keep the lower silhouette straight and square in normal, pressed and disabled states, without rounding, pinholes or background show-through. An intentional press may hide the lip. The remaining face keeps a straight lower edge and square lower corners.
+
+Apply this rule to designs, mockups, HTML/CSS, canvas and skins. Verify the actual raster output at normal and enlarged scales.
+
 ### Game homepage structure
 
 Use this section order on every game homepage.

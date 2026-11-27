@@ -32,3 +32,4 @@ Shared product and development rules that apply to every game. The canonical tex
 | gc-0037 | Use a common structure for game homepages                     | [gc-0037.md](../work/gc-0037.md) |
 | gc-0038 | Simplify homepage navigation and order play actions           | [gc-0038.md](../work/gc-0038.md) |
 | gc-0039 | Organize coordinator documentation and navigation             | [gc-0039.md](../work/gc-0039.md) |
+| gc-0040 | Keep rectangular button lips full-width and square            | [gc-0040.md](../work/gc-0040.md) |
