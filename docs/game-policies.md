@@ -161,9 +161,11 @@ Pause and Menu are one modal. On Start/title the entry control is Menu and the b
 
 Apply these rules to existing dialogue surfaces where the relevant controls and choices occur.
 
-- Use **Next** to advance linear dialogue. Show **Previous** when a preceding page exists, including at topic lists and internal forks. Previous follows the actual path and leaves committed outcomes intact.
-- At a fork, show the authored questions, responses or actions and omit **Next**. Remove the generic **Ask more** gateway. When topics are optional, include a named action that resumes the main conversation.
-- When an optional thread ends, return to its original topic list. Keep every thread selectable. Internal forks are reached by following their thread. **Skip** can pass optional dialogue and leaves material choices for the player.
+- Place **Previous** and **Next** in one centered bottom row, with Previous on the left and the shared 16 px horizontal gap when both appear. Center a lone button in the same row. Next is primary whenever shown. Previous uses the secondary style.
+- Show **Next** on a linear page with a single forward choice. Show **Previous** only after the first page, including at topic lists and internal forks when reached from a preceding page. Previous follows the actual path and leaves committed outcomes intact.
+- Show **Skip** separately at the top right only when both the current page and its immediate next page show **Next**. Skip can pass optional dialogue and leaves material choices for the player.
+- On pages with multiple options, show the authored questions, responses or actions and omit **Next**. Use a descriptive label for each option and avoid **Next**, **Continue**, **Skip** and **Previous** as option labels. Remove the generic **Ask more** gateway. When topics are optional, include a named action that resumes the main conversation.
+- When an optional thread ends, return to its original topic list. Keep every thread selectable. Players reach internal forks by following their thread.
 - Put the game's quest icon on choices that advance a quest. A separate checkmark marks a thread fully read during the current interaction. Preserve both meanings for assistive technology. Backing out halfway leaves the thread unchecked. Keep checkmarks across page turns and tabs within the interaction. Reset them when the player leaves the interaction, such as undocking or closing a standalone conversation.
 
 ### Settings
