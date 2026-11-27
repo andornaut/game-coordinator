@@ -1,6 +1,6 @@
 # Architecture
 
-How the games, shared kits and agent sessions fit together. For checkout and registration steps, see [Workspace setup](setup.md).
+How the games, shared kits and agent sessions fit together. For checkout and registration steps, see [Workspace setup](../guides/setup.md).
 
 ```text
                           game-coordinator role
@@ -48,7 +48,7 @@ Every game has three permanent roles, Art, Gameplay and Tech. Each kit has one r
 
 Substantive work goes to short-lived workers, each in its own worktree and branch. The parent role reviews and integrates their results.
 
-The [role catalog](roles.md), generated from `roles.json`, is the authoritative list of roles, scopes and boundaries.
+The [role catalog](../reference/roles.md), generated from `roles.json`, is the authoritative list of roles, scopes and boundaries.
 
 ## coordination-kit: how roles talk and keep records
 
@@ -100,7 +100,7 @@ At each :30 review, game-coordinator:
 - escalates anything stuck for two scheduled slots with its owner, blocker and next action;
 - closes stalled or ownerless containers, worktrees and scratch after preserving their diagnostics.
 
-[Monitoring](operations.md#monitoring) lists the exact steps.
+[Monitoring](../guides/operations.md#monitoring) lists the exact steps.
 
 ## Ownership and authority
 
@@ -158,6 +158,6 @@ locks, generated runtime files and secret values out of Git. Keep credential ref
 approved configuration where required. A fresh coordinator starts with the SQLite source.
 Selecting file authority puts the journal in the primary checkout's `var/coordination/`.
 An optional `var/work-protocol.json` pointer keeps the SQLite source, transport state and
-artifacts at an external path. See [workspace setup](setup.md#select-the-store-authority)
-for the activation procedure and the [filesystem layout work](work/gc-0014.md) for verified
+artifacts at an external path. See [workspace setup](../guides/setup.md#select-the-store-authority)
+for the activation procedure and the [filesystem layout work](../work/gc-0014.md) for verified
 migration evidence.

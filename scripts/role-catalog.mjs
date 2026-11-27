@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, posix, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const types = [
@@ -13,6 +13,7 @@ const types = [
   "coordination-kit",
   "game-coordinator",
 ];
+const roleDocsPath = "docs/reference/roles.md";
 const text = (value) =>
   typeof value === "string" && value.trim().length > 0 && !/[\r\n]/.test(value);
 const record = (value) =>
@@ -86,7 +87,7 @@ function validate(catalog) {
       (reference) =>
         record(reference) &&
         text(reference.label) &&
-        /^docs\/[a-z-]+\.md(?:#[a-z-]+)?$/.test(reference.path),
+        /^docs\/(?:[a-z-]+\/)*[a-z-]+\.md(?:#[a-z-]+)?$/.test(reference.path),
     )
   )
     throw new Error("Invalid references");
@@ -234,7 +235,7 @@ export function renderBrief(catalog, context) {
     `Own: ${contract.owns.join("; ")}.`,
     `Boundaries: ${contract.boundaries.join("; ")}.`,
     `Handoffs: ${contract.handoffs.join("; ")}.`,
-    `Shared kit owners (purposes in docs/roles.md): ${peers.join(", ")}.`,
+    `Shared kit owners (purposes in ${roleDocsPath}): ${peers.join(", ")}.`,
     `Protocol: ${catalog.protocol.join(" ")}`,
     `Workflow: ${catalog.workflow.map((step) => `${step.stage} (${step.owner})`).join(" -> ")}.`,
     `Desired tools, not installed proof; verify: core ${contract.tools.required.join(", ")}; task-specific ${contract.tools.whenNeeded.join(", ") || "none"}.`,
@@ -302,10 +303,11 @@ export function briefVerbs(brief) {
 const cell = (value) => value.replaceAll("|", "\\|");
 export function renderRoleDocs(catalog) {
   validate(catalog);
+  const docsDirectory = posix.dirname(roleDocsPath);
   return [
     "# Role contracts",
     "",
-    "Generated from [roles.json](../roles.json). Run `node scripts/role-catalog.mjs` to regenerate or add `--check` to detect drift.",
+    `Generated from [roles.json](${posix.relative(docsDirectory, "roles.json")}). Run \`node scripts/role-catalog.mjs\` to regenerate or add \`--check\` to detect drift.`,
     "",
     "These contracts describe duties and desired capabilities. They grant no authority and do not prove installed tools, native identity or activation.",
     "",
@@ -353,7 +355,8 @@ export function renderRoleDocs(catalog) {
     "## References",
     "",
     ...catalog.references.map(
-      (reference) => `- [${reference.label}](${reference.path.slice(5)})`,
+      (reference) =>
+        `- [${reference.label}](${posix.relative(docsDirectory, reference.path)})`,
     ),
     "",
   ].join("\n");
@@ -375,10 +378,12 @@ export function main(args = process.argv.slice(2)) {
         "Usage: node scripts/role-catalog.mjs [--root PATH] [--check]",
       );
   }
-  const path = resolve(root, "docs/roles.md");
+  const path = resolve(root, roleDocsPath);
   const expected = renderRoleDocs(loadCatalog(root));
-  if (!check) writeFileSync(path, expected);
-  else {
+  if (!check) {
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, expected);
+  } else {
     let actual;
     try {
       actual = readFileSync(path, "utf8");
@@ -387,7 +392,7 @@ export function main(args = process.argv.slice(2)) {
     }
     if (actual !== expected)
       throw new Error(
-        "docs/roles.md is stale; run node scripts/role-catalog.mjs",
+        `${roleDocsPath} is stale; run node scripts/role-catalog.mjs`,
       );
   }
 }

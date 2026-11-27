@@ -1,6 +1,6 @@
 # Role contracts
 
-Generated from [roles.json](../roles.json). Run `node scripts/role-catalog.mjs` to regenerate or add `--check` to detect drift.
+Generated from [roles.json](../../roles.json). Run `node scripts/role-catalog.mjs` to regenerate or add `--check` to detect drift.
 
 These contracts describe duties and desired capabilities. They grant no authority and do not prove installed tools, native identity or activation.
 
@@ -119,6 +119,6 @@ Capability IDs are shared by Claude and Codex. Startup checks must report actual
 
 ## References
 
-- [Shared policies](game-policies.md)
-- [Art review](game-policies.md#art-review)
-- [Work lifecycle](game-policies.md#work-lifecycle)
+- [Shared policies](../design/game-policies.md)
+- [Art review](../design/game-policies.md#art-review)
+- [Work lifecycle](../design/game-policies.md#work-lifecycle)

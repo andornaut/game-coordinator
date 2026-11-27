@@ -1,10 +1,10 @@
 # Operating the workspace
 
-Use [Workspace setup](setup.md) to initialize the coordinator and register games. See [Architecture](architecture.md) for ownership and state.
+Use [Workspace setup](setup.md) to initialize the coordinator and register games. See [Architecture](../design/architecture.md) for ownership and state.
 
 ## Delivery
 
-The [development and delivery policy](game-policies.md#development-and-delivery) defines integration and release eligibility. The [work lifecycle](game-policies.md#work-lifecycle) records progress, evidence and acceptance.
+The [development and delivery policy](../design/game-policies.md#development-and-delivery) defines integration and release eligibility. The [work lifecycle](../design/game-policies.md#work-lifecycle) records progress, evidence and acceptance.
 
 1. Art and Gameplay hand Tech an exact branch and commit. Tech reviews it and merges it into the game's local `main` once its tests pass. Kit owners integrate their approved work the same way. The integrating owner handles [task branch cleanup](#task-branch-cleanup) as part of landing.
 2. Each game uses at most one resident delivery-kit runner. Hourly departures follow the America/Toronto schedule of Ada the Navigator at :00, Archie at :10 and Chibi at :20. The operational owner can submit a user-authorized ad hoc departure to the same runner. Each game's delivery control enables or pauses both kinds of departure.
@@ -35,13 +35,13 @@ The request captures current `main`. The runner refuses it if `main` changes bef
 
 Pausing blocks new scheduled and requested departures. Already admitted gates, CI watches and deployments finish, and scheduled reviews continue. Missing or invalid control fails closed until explicitly initialized or repaired.
 
-The current operational owner defined in the [role catalog](roles.md) performs authorized runner adoption only while the affected residents and the shared route host are idle and drained. Validate the complete layout with `check-config` before startup, check status before and after replacement, preserve controls, routes, singleton ownership and schedules, and observe the next normal scheduled slot.
+The current operational owner defined in the [role catalog](../reference/roles.md) performs authorized runner adoption only while the affected residents and the shared route host are idle and drained. Validate the complete layout with `check-config` before startup, check status before and after replacement, preserve controls, routes, singleton ownership and schedules, and observe the next normal scheduled slot.
 
-The games workspace sets `resources.memoryMiB` to `4096` in each game's `delivery-kit.json`. Local container launchers use the same 4 GiB ceiling. See [resource admission](game-policies.md#resource-admission).
+The games workspace sets `resources.memoryMiB` to `4096` in each game's `delivery-kit.json`. Local container launchers use the same 4 GiB ceiling. See [resource admission](../design/game-policies.md#resource-admission).
 
 ## Role messaging
 
-All roles, in Claude and Codex, use the coordination-kit CLI installed in the primary game-coordinator checkout and pass that checkout's absolute root, including from a game or kit worktree. Invoke it as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> ...`, never through `npx`. Follow the [communication and recipient guards](game-policies.md#communication).
+All roles, in Claude and Codex, use the coordination-kit CLI installed in the primary game-coordinator checkout and pass that checkout's absolute root, including from a game or kit worktree. Invoke it as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> ...`, never through `npx`. Follow the [communication and recipient guards](../design/game-policies.md#communication).
 
 Use `@andornaut/coordination-kit/build/registry` for registry SDK imports. The `@andornaut/delivery-kit/build/source-identity` import stays in delivery-kit. Each kit's CLI is its `dist/cli.js`.
 
@@ -87,7 +87,7 @@ delivery-kit delivers game-coordinator's review once per hour at :30 in America/
 3. Use the existing owner pull or handoff for unread, unconfirmed or ambiguous cases. Send new confirmed unblockers with `msg send --intent unblock`. Existing wake deduplication and recipient guards apply. Reconcile ambiguity before any retry and preserve guarded originals.
 4. Surface pending user decisions through their owning session's structured prompt. Preserve unanswered questions, source holds and independent work. Never answer or cancel another owner's question, interrupt or restart its turn, or treat silence as a decision. Route release failures and cross-role dependencies to the role that can resolve them.
 5. Escalate items unhandled or repeatedly deferred across two scheduled slots in one packet per owner. Include each exact ID, blocker and next action. Reuse an existing escalation while those facts are unchanged. Ask owners to close finished or stalled jobs after preserving diagnostics. Retain protected live resources and unresolved ownership.
-6. Close the review notice in the same pass once its exact dispositions are stored. Carry unresolved work on the underlying original or its verified successor. Use the existing [communication rules](game-policies.md#communication) to close completed handoffs without waiting for their downstream work.
+6. Close the review notice in the same pass once its exact dispositions are stored. Carry unresolved work on the underlying original or its verified successor. Use the existing [communication rules](../design/game-policies.md#communication) to close completed handoffs without waiting for their downstream work.
 7. Finish each pass with exact counts of messages inspected, handled and superseded, plus unavailable scopes. Report unread messages, delivered messages awaiting disposition and retained messages separately. Identify each remaining item's owner, reason and next boundary. Record new arrivals at safe boundaries so they are included or explicitly retained for the next pass. Claim a fully drained backlog only when no open messages remain and visibility is complete.
 
 Use the existing hourly :30 reviews without adding timers or teams. Preserve handoff and activation guards when communicating with held owners.
@@ -136,7 +136,7 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 - For rebased or squashed work, use the recorded integration and verify that no unique changes would be lost before deleting the task branch.
 - Before removing an attached task worktree, verify that it is clean, its essential evidence has a durable reference, its owner has released it, and no consumer still uses it. Record an owner and reason for any deferred cleanup.
 - Check integration against published `main` before deleting a merged GitHub task branch. Preserve protected branches and any branch used by an open pull request.
-- Follow the [resource cleanup policy](game-policies.md#resource-cleanup) for abandoned worktrees and branches, evidence retention and recovery archives.
+- Follow the [resource cleanup policy](../design/game-policies.md#resource-cleanup) for abandoned worktrees and branches, evidence retention and recovery archives.
 
 ## This repository
 
@@ -144,7 +144,7 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 | ----------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `README.md`                         | yes       | Project overview and documentation links                                                                                                         |
 | `config.json`                       | yes       | Workspace configuration for games, kits, shared role names and the review schedule                                                               |
-| `roles.json`                        | yes       | Role catalog source for the generated `docs/roles.md`                                                                                            |
+| `roles.json`                        | yes       | Role catalog source for the generated `docs/reference/roles.md`                                                                                  |
 | `docs/`                             | yes       | Workspace guides, shared policy, role catalog, design and work history                                                                           |
 | `scripts/`                          | yes       | The role catalog generator (`role-catalog.mjs`) and the session helper (`sessions.mjs` and its modules)                                          |
 | `skills/`                           | yes       | Coordinator-local skills for game creation, handoff, session recovery and status                                                                 |
@@ -157,7 +157,7 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 | `.claude/`                          | no        | Harness-local files and the `skills` link to `skills/`                                                                                           |
 | `.agents/`                          | no        | Harness-local files and the `skills` link to `skills/`                                                                                           |
 
-See [where state lives](architecture.md#where-state-lives) for runtime state and backup locations.
+See [where state lives](../design/architecture.md#where-state-lives) for runtime state and backup locations.
 
 ### Source checks
 

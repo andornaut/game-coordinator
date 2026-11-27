@@ -2,11 +2,11 @@
 
 Use this runbook for a new coordinator checkout or an approved game addition. Restore the
 registry, authority and backups when recovering an existing workspace. Use
-[game-sessions](../skills/game-sessions/SKILL.md) for existing native identities.
+[game-sessions](../../skills/game-sessions/SKILL.md) for existing native identities.
 
 ## Initialize a new coordinator
 
-Use the primary Git checkout of game-coordinator. Its committed [config.json](../config.json)
+Use the primary Git checkout of game-coordinator. Its committed [config.json](../../config.json)
 describes the existing workspace. For an independent workspace, supply your own config with
 game and kit paths relative to the coordinator checkout. You can start with just the
 coordinator by using the following config, then register games and kits as they are added.
@@ -138,8 +138,8 @@ checkout and state root at their bound paths.
 
 ## Add a game
 
-Use [game-create](../skills/game-create/SKILL.md) for authorized creation and its
-[registration contract](../skills/game-create/contracts.md#coordinated-registration) for the
+Use [game-create](../../skills/game-create/SKILL.md) for authorized creation and its
+[registration contract](../../skills/game-create/contracts.md#coordinated-registration) for the
 coordinated writes. If a checked repository already exists, start with its verified
 location, pins, roles and approvals.
 

@@ -277,15 +277,15 @@
   "references": [
     {
       "label": "Shared policies",
-      "path": "docs/game-policies.md"
+      "path": "docs/design/game-policies.md"
     },
     {
       "label": "Art review",
-      "path": "docs/game-policies.md#art-review"
+      "path": "docs/design/game-policies.md#art-review"
     },
     {
       "label": "Work lifecycle",
-      "path": "docs/game-policies.md#work-lifecycle"
+      "path": "docs/design/game-policies.md#work-lifecycle"
     }
   ]
 }

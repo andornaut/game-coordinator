@@ -1,6 +1,6 @@
 # Coordination
 
-The role catalog, startup orientation, shared tooling adoption and the work protocol. The roles are described in [docs/roles.md](../roles.md) and the components in [docs/architecture.md](../architecture.md).
+The role catalog, startup orientation, shared tooling adoption and the work protocol. The roles are described in [docs/reference/roles.md](../reference/roles.md) and the components in [docs/design/architecture.md](architecture.md).
 
 ## Work items
 

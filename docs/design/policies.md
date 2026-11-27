@@ -1,6 +1,6 @@
 # Policies
 
-Shared product and development rules that apply to every game. The canonical text is [docs/game-policies.md](../game-policies.md); per-game adoption is tracked by each owning game.
+Shared product and development rules that apply to every game. The canonical text is [docs/design/game-policies.md](game-policies.md); per-game adoption is tracked by each owning game.
 
 ## Work items
 
@@ -33,3 +33,4 @@ Shared product and development rules that apply to every game. The canonical tex
 | gc-0038 | Simplify homepage navigation and order play actions           | [gc-0038.md](../work/gc-0038.md) |
 | gc-0039 | Organize coordinator documentation and navigation             | [gc-0039.md](../work/gc-0039.md) |
 | gc-0040 | Keep rectangular button lips full-width and square            | [gc-0040.md](../work/gc-0040.md) |
+| gc-0041 | Group coordinator guides, design and reference docs           | [gc-0041.md](../work/gc-0041.md) |

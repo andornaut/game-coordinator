@@ -94,6 +94,9 @@ test("catalog validation rejects missing ownership, unknown capabilities and uns
       (value) => {
         value.roles.extra = value.roles.tech;
       },
+      (value) => {
+        value.references[0].path = "docs/design/../../roles.md";
+      },
     ]) {
       const value = structuredClone(catalog);
       mutate(value);
@@ -132,7 +135,7 @@ test("both harness briefs retain exact caller identity and holds without grantin
       /source READY, work ready and transport acceptance are not completion/,
     );
     const owners = brief.match(
-      /^Shared kit owners \(purposes in docs\/roles\.md\): (.*)\.$/m,
+      /^Shared kit owners \(purposes in docs\/reference\/roles\.md\): (.*)\.$/m,
     );
     assert.ok(owners, "shared kit owner line");
     for (const role of [
@@ -230,9 +233,12 @@ test("catalog hash is semantic and changes with an ownership contract", () => {
 
 test("generated docs retain workflow boundaries, canonical references and actual checked output", () => {
   const docs = renderRoleDocs(catalog);
-  assert.equal(readFileSync(join(root, "docs/roles.md"), "utf8"), docs);
+  assert.equal(
+    readFileSync(join(root, "docs/reference/roles.md"), "utf8"),
+    docs,
+  );
   for (const reference of catalog.references)
-    assert.ok(docs.includes(`](${reference.path.slice(5)})`));
+    assert.ok(docs.includes(`](../${reference.path.slice(5)})`));
   assert.match(
     docs,
     /After confirmed transfer: delivery admission, authorized ad hoc requests/,
@@ -262,12 +268,12 @@ const roles = [
 const retired =
   /\bepochs?\b|enrol|receipt|\bledger\b|accounting|\bmessage (?:send|dispatch|status|reconcile|retire-spool)\b|\binbox (?:snapshot|ack)\b|\bprotocol (?:boundary|claim|work)|\bnpx\b/i;
 
-test("docs/roles.md and every role brief match what roles.json produces", () => {
+test("docs/reference/roles.md and every role brief match what roles.json produces", () => {
   const onDisk = loadCatalog(root);
   assert.equal(
-    readFileSync(join(root, "docs/roles.md"), "utf8"),
+    readFileSync(join(root, "docs/reference/roles.md"), "utf8"),
     renderRoleDocs(onDisk),
-    "docs/roles.md is stale; run node scripts/role-catalog.mjs",
+    "docs/reference/roles.md is stale; run node scripts/role-catalog.mjs",
   );
   assert.doesNotMatch(renderRoleDocs(onDisk), retired);
   for (const role of roles) {
@@ -406,7 +412,7 @@ test("generation and check distinguish missing or stale output without changing 
     const args = ["--root", directory];
     assert.throws(() => main([...args, "--check"]), /stale/);
     main(args);
-    const output = join(directory, "docs/roles.md");
+    const output = join(directory, "docs/reference/roles.md");
     const expected = readFileSync(output, "utf8");
     main([...args, "--check"]);
     writeFileSync(output, expected + "changed\n");
