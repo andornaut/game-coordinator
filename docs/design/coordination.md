@@ -19,3 +19,4 @@ The role catalog, startup orientation, shared tooling adoption and the work prot
 | gc-0032 | Restore native worker visibility in scheduled reviews                  | [gc-0032.md](../work/gc-0032.md) |
 | gc-0033 | Make Coordination Kit and Delivery Kit app neutral                     | [gc-0033.md](../work/gc-0033.md) |
 | gc-0034 | Require user decisions for messages from unverified senders            | [gc-0034.md](../work/gc-0034.md) |
+| gc-0043 | Fix coordinator recovery and operator guidance                         | [gc-0043.md](../work/gc-0043.md) |
