@@ -21,7 +21,7 @@ Route dependencies to the role that can clear them. Never answer, cancel or clea
 
 ## Communication
 
-Every game, coordinator and kit role, in Claude and Codex, uses one coordination-kit store and the same verbs, with identical output in both harnesses. All roles run the coordinator-installed CLI as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> ...`, never through `npx`; game-local delivery-runner package pins remain separate. The [role messaging](../README.md#role-messaging) table lists the verbs.
+Every game, coordinator and kit role, in Claude and Codex, uses one coordination-kit store and the same verbs, with identical output in both harnesses. All roles run the coordinator-installed CLI as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root> ...`, never through `npx`; game-local delivery-runner package pins remain separate. The [role messaging](operations.md#role-messaging) table lists the verbs.
 
 - **Send.** Keep routine progress and proof in the work record or handoff. Send when a specific recipient needs to act, decide, or collect a required handoff. Check for an existing open request for the same recipient and action. If the required action or evidence changes, link the unchanged original in one follow-up and state what changed. `msg send --to ROLE --body-file FILE` stores the payload and attempts at most one wake. Use `--intent unblock` for a confirmed unblocker, `--link work=ID` for related work, and a fixed `--id UUID` on retries.
 - **Wake only.** Native session messages and channel notifications only ask the recipient to run `inbox`. They may identify the count or exact original IDs. Keep message bodies in the store.
@@ -38,13 +38,13 @@ The store sends no wake to an unregistered, unbound or held recipient, and a Cod
 
 The coordinator owns communication health and escalation; it is not a relay. Frontend bridge and authentication repair remain separate integration-owner responsibilities.
 
-Use the existing hourly :30 America/Toronto reviews to drain the whole backlog and escalate messages open across two slots. Follow the [review procedure](../README.md#monitoring); add no daemon or timer.
+Use the existing hourly :30 America/Toronto reviews to drain the whole backlog and escalate messages open across two slots. Follow the [review procedure](operations.md#monitoring); add no daemon or timer.
 
 At the hourly review, existing wake deduplication and recipient guards apply. Escalate originals still open after two scheduled reviews in one packet per owner with exact IDs and required actions. Carry forward the existing escalation until its blocker, owner or required action changes. Close the review notice once its dispositions are recorded, and track unresolved work on the original or its verified successor.
 
 ## Session startup
 
-Start every interactive game-development owner inside its appropriate managed tmux session and window on both Claude and Codex: game Art, Gameplay and Tech, shared kits and the coordinator. Follow the [session layout](../README.md#sessions-and-handoffs).
+Start every interactive game-development owner inside its appropriate managed tmux session and window on both Claude and Codex: game Art, Gameplay and Tech, shared kits and the coordinator. Follow the [session layout](operations.md#sessions-and-handoffs).
 
 Preserve existing owners' identities, processes, working directories, worktrees, WIP, providers, questions and independent HOLDs. This rule does not authorize restarting or duplicating owners, changing ownership or treating regrouping as activation. Backend workers remain parent-managed; do not create interactive frontends solely for this policy.
 
@@ -300,7 +300,9 @@ Every game maps its source directories onto these bands, lowest first, and keeps
 
 Every game and kit repository records design and approved work as committed files.
 
-- Choose design topics that fit the repository. Link the repository README to a short `docs/README.md` that points to current requirements, technical design and work history. Put each current requirement and its rationale in one authoritative place under `docs/design/` or in a clearly linked guide.
+- Keep the root README to a short project summary and documentation links. Use `docs/README.md` to explain and link the documentation and the subfolders the repository uses. Give each documentation subfolder a README that describes its contents and how to find them.
+
+- Choose design topics that fit the repository. Put each current requirement and its rationale in one authoritative place under `docs/design/` or in a clearly linked guide.
 - Each work item appears once in its design area's `ID | Title | Link` table. Keep the table in `docs/design/<area>.md` or put it in `docs/work/index/<area>.md` and link it from the design area. Both layouts use the same work-file IDs and links.
 - Every user request is `docs/work/<id>.md`, approved or not. Its front matter holds `id`, `title`, `status` (milestone only: `proposed` until the user approves, `approved`, `done`, `declined` when the user declines, `cancelled` or `superseded`), the approval or request reference, the design area, related IDs and `supersedes`. Its sections are scope, criteria, decisions and outcome.
 - Live progress (started, blocked, ready, finished, evidence and retained items) is coordination-store records written through the [work lifecycle](#work-lifecycle) verbs, not work-file content.

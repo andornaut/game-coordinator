@@ -94,7 +94,7 @@ Keep the route held until review startup is approved. Scheduled reviews require 
 route and approved host runner. The host's delivery control can stay paused.
 
 From the coordinator checkout, inspect the registered coordinator slot. If an authorized
-frontend needs resuming, use the scoped [session procedure](../README.md#inspect-and-resume).
+frontend needs resuming, use the scoped [session procedure](operations.md#inspect-and-resume).
 For Claude, that helper writes the per-conversation MCP configuration to ignored
 `var/session-frontends/`. Current bindings, creation records and channel configuration are
 local runtime state.

@@ -23,6 +23,20 @@ How the games, shared kits and agent sessions fit together. For checkout and reg
          +-------------------------------------+
 ```
 
+## Projects
+
+| Project           | Repository                                                          | Purpose                                                        |
+| ----------------- | ------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Archie            | [archies-dog-walks](https://github.com/andornaut/archies-dog-walks) | Game                                                           |
+| Chibi             | [chibis-way-home](https://github.com/andornaut/chibis-way-home)     | Game                                                           |
+| Ada the Navigator | [ada-the-navigator](https://github.com/andornaut/ada-the-navigator) | Game                                                           |
+| art-kit           | [art-kit](https://github.com/andornaut/art-kit)                     | Raster, frame, font and Aseprite export primitives             |
+| game-kit          | [game-kit](https://github.com/andornaut/game-kit)                   | Shared TypeScript runtime, input, layout and Phaser adapters   |
+| delivery-kit      | [delivery-kit](https://github.com/andornaut/delivery-kit)           | Scheduled and ad hoc delivery, plus scheduled reviews          |
+| coordination-kit  | [coordination-kit](https://github.com/andornaut/coordination-kit)   | Role registry, coordination store, messaging, harness adapters |
+
+Games consume kits as dev dependencies pinned to GitHub release tarballs.
+
 ## Roles and sessions
 
 Every game has three permanent roles, Art, Gameplay and Tech. Each kit has one role, and game-coordinator is one more. Each role is a long-running agent session (Claude or Codex) with its own Git worktree in the owning repository's ignored `.worktrees/` directory.
@@ -86,7 +100,7 @@ At each :30 review, game-coordinator:
 - escalates anything stuck for two scheduled slots with its owner, blocker and next action;
 - closes stalled or ownerless containers, worktrees and scratch after preserving their diagnostics.
 
-[Monitoring](../README.md#monitoring) lists the exact steps.
+[Monitoring](operations.md#monitoring) lists the exact steps.
 
 ## Ownership and authority
 
