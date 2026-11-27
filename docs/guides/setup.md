@@ -51,8 +51,8 @@ parentage. Reconcile ambiguous creation before retrying. The session helper resu
 IDs. Verify the managed Codex control socket or effective Claude Remote Control separately.
 
 Use the Coordination Kit registry SDK with a draft following the installed
-[registry schema](https://github.com/andornaut/coordination-kit/blob/v7.3.0/docs/registry.md).
-See the [minimal registry seed](https://github.com/andornaut/coordination-kit/blob/v7.3.0/docs/configuration.md#registry-seed-example).
+[registry schema](https://github.com/andornaut/coordination-kit/blob/v8.0.0/docs/reference/registry.md).
+See the [minimal registry seed](https://github.com/andornaut/coordination-kit/blob/v8.0.0/docs/reference/configuration.md#registry-seed-example).
 Use the verified coordinator project ID for `host.nativeProjectId` and set `host.root` to
 `"."`. Give each role its verified native conversation binding and worktree path relative
 to game-coordinator. Use `held` ownership and phase for roles awaiting activation, a
@@ -77,7 +77,7 @@ JS
 
 Configure scheduled reviews once you have a registered host game and an approved review
 minute in `config.json`. Use ignored `var/route.json` and the
-[schema-2 route contract](https://github.com/andornaut/coordination-kit/blob/v7.3.0/docs/review.md#review-route).
+[schema-2 route contract](https://github.com/andornaut/coordination-kit/blob/v8.0.0/docs/reference/review.md#review-route).
 The host game's committed `reports.recipient` selects `game-coordinator`. This example
 uses the game added in the next section.
 
@@ -105,36 +105,23 @@ node "$CK" --root "$COORDINATOR_ROOT" harness ready --role game-coordinator
 node "$DK" --root "$COORDINATOR_ROOT" check-config
 ```
 
-### Select the store authority
+### Initialize the coordination store
 
-The pinned Coordination Kit starts an empty workspace on SQLite. `store migration-status` reports
-`sqlite` before the first write. After the coordinator's native binding and activation are
-verified, `session start` in that conversation makes the first durable record and creates
-`var/coordination.db` by default. An explicitly configured `var/work-protocol.json` can select
-an external state root for the SQLite source and wake state.
+Coordination Kit initializes the file journal on the first successful write. After verifying
+the coordinator's native binding and activation, run this from the coordinator conversation.
 
 ```bash
-node "$CK" --root "$COORDINATOR_ROOT" store migration-status
 node "$CK" --root "$COORDINATOR_ROOT" session start
 ```
 
-To select the filesystem authority, follow the
-[Coordination Kit migration runbook](https://github.com/andornaut/coordination-kit/blob/v7.3.0/docs/upgrading.md#filesystem-authority-migration)
-under the active coordinator binding. Prepare a snapshot using distinct, fresh backup and
-restore paths outside the primary checkout. Verify the prepared receipt and activate that
-exact ID under explicit authority.
+Verify the returned binding and startup record. Keep `var/coordination/` and its authority
+receipt in the primary checkout. An optional `var/work-protocol.json` selects an external
+location for wake and channel files and artifacts. Preserve the existing journal, receipt,
+state-root pointer, and independent backups when recovering a workspace.
 
-```bash
-node "$CK" --root "$COORDINATOR_ROOT" store migration-prepare \
-  --backup "$BACKUP_FILE" --restore "$RESTORE_FILE"
-node "$CK" --root "$COORDINATOR_ROOT" store migration-status
-node "$CK" --root "$COORDINATOR_ROOT" store migration-activate --id "$RECEIPT_ID"
-node "$CK" --root "$COORDINATOR_ROOT" store migration-status
-```
-
-Confirm the final status reports `files` and the exact active receipt. Retain the backup and
-restore evidence, frozen SQLite source, and state-root pointer if used. Keep the primary
-checkout and state root at their bound paths.
+See the [store layout](https://github.com/andornaut/coordination-kit/blob/v8.0.0/docs/reference/store.md#location-and-settings)
+and the [upgrade guide](https://github.com/andornaut/coordination-kit/blob/v8.0.0/docs/guides/upgrading.md#coordination-kit-80)
+for a workspace that reports `file-authority-legacy-state`.
 
 ## Add a game
 
@@ -164,7 +151,7 @@ location, pins, roles and approvals.
    review host and minute are approved. Use the registration transaction and the SDK's
    revision-checked registry writer.
    If the approved harness differs from the default, use `coordination-kit harness select`
-   with the fresh `--expected-revision` and `--game` scope for the new game. The roles stay held.
+   with the fresh `--expected-revision` and `--app` scope for the new game. The roles stay held.
 4. Validate the full layout from the coordinator checkout. Run the scoped role plan and
    generate each role's held brief. Its reported artifact belongs in the corresponding initial
    HOLD request. Verify actual replies and effective harness capability. Initialize desired

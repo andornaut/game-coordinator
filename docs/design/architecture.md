@@ -55,7 +55,7 @@ The [role catalog](../reference/roles.md), generated from `roles.json`, is the a
 [coordination-kit](https://github.com/andornaut/coordination-kit) is the common contract every role uses through one CLI installed in the primary game-coordinator checkout, invoked as `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root>`. Every caller passes that checkout as the explicit root from any working directory.
 
 - **Registry.** `var/registry.json` maps each role name to its current conversation per harness and its worktree. Senders always address roles by name. Every send resolves the recipient's current conversation, so a relaunched or transferred session keeps receiving messages without changes elsewhere. The registry binding is also the writer fence: a writing command is accepted only from the role whose effective binding equals the caller's native conversation ID.
-- **Current coordination store.** The file journal and its committed records in `var/coordination/` are authoritative. Coordination Kit rebuilds the query index from the journal. The store contains messages, work, decisions, holds, sessions, handoffs, review briefs and ingested runner events. See the [Coordination Kit filesystem layout](https://github.com/andornaut/coordination-kit/blob/main/docs/store.md#filesystem-layout) for record examples.
+- **Current coordination store.** The file journal and its committed records in `var/coordination/` are authoritative. Coordination Kit rebuilds the query index from the journal. The store contains messages, work, decisions, holds, sessions, handoffs, review briefs and ingested runner events. See the [Coordination Kit filesystem layout](https://github.com/andornaut/coordination-kit/blob/v8.0.0/docs/reference/store.md#filesystem-layout) for record examples.
 - **Messages.** Store first, wake second, pull third:
   1. `msg send` commits the message to the store. Nothing native happens before that commit.
   2. The store attempts at most one outstanding wake per recipient, skipping unregistered, unbound and held recipients. A wake carries no content, only `N new messages for ROLE: run coordination-kit inbox`. Claude wakes through a per-role wake file that the channel server announces; Codex wakes through one guarded control-socket queue add. A wake outcome is logged apart from message state.
@@ -148,16 +148,12 @@ workspace/
 | Coordinator `var/coordination/` and `var/coordination-authority.json` | The canonical journal, committed role records and verified authority selection.                                  |
 | Coordinator `var/games/<game>/bus/`                                   | Delivery control, resident state, logs and ingest cursors.                                                       |
 | Coordinator `var/handoffs/` and `var/session-frontends/`              | Live checkpoints and evidence links, and generated per-conversation Claude channel configuration.                |
-| Configured external state root, or `var/` when unset                  | Wake and channel state, artifacts and the SQLite source retained after cutover.                                  |
+| Configured external state root, or `var/` when unset                  | Wake and channel state and artifacts.                                                                             |
 | Coordinator `var/reviews/` and `var/scratch/`                         | Local review evidence and temporary output as needed.                                                            |
 | Outside the coordinator checkout                                      | Independent backups and restore evidence.                                                                        |
 | GitHub releases                                                       | Immutable kit archives pinned in consumer lockfiles.                                                             |
 
 Commit reviewable inputs. Keep live messages, questions, holds, private evidence, native IDs,
 locks, generated runtime files and secret values out of Git. Keep credential references in an
-approved configuration where required. A fresh coordinator starts with the SQLite source.
-Selecting file authority puts the journal in the primary checkout's `var/coordination/`.
-An optional `var/work-protocol.json` pointer keeps the SQLite source, transport state and
-artifacts at an external path. See [workspace setup](../guides/setup.md#select-the-store-authority)
-for the activation procedure and the [filesystem layout work](../work/gc-0014.md) for verified
-migration evidence.
+approved configuration where required. See [workspace setup](../guides/setup.md#initialize-the-coordination-store)
+for journal initialization and recovery.

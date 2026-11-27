@@ -4,12 +4,12 @@ Read the installed Coordination Kit registry and Delivery Kit configuration defi
 
 ## Coordination store
 
-Check the selected authority with the installed `coordination-kit store migration-status`. Game
-registration uses the existing authority. After scope and activation are verified, each owner runs
-`session start` in its bound conversation and records approved work using the installed store
-commands. Preserve questions, holds and unresolved worker lineage under their owning role. Use
-the [workspace setup runbook](../../docs/guides/setup.md#select-the-store-authority) for fresh authority
-setup.
+Game registration uses the coordinator's shared file journal. Use the
+[workspace setup runbook](../../docs/guides/setup.md#initialize-the-coordination-store) for a
+fresh coordinator or to recover an existing store. After verifying scope and activation, each
+owner runs `session start` in its bound conversation and records approved work using the
+installed store commands. Preserve questions, holds and unresolved worker lineage under their
+owning role.
 
 ## Native identity transaction
 
