@@ -312,3 +312,9 @@ All Art owners and workers inspect each actual mockup and production artifact be
 Check affected states, views and sizes, including visible pixel geometry and occlusion; DOM bounds alone are insufficient. Record the artifact or source pin and disclose deviations and unverified limits. Present incomplete or nonconforming work as WIP with its differences stated.
 
 Art review adds no delivery hold; the fix-forward policy remains in force.
+
+## Resource cleanup
+
+- Use published Git for landed source and scheduled filesystem backups for recovery. Skip routine agent-created recovery archives, including Git bundles, tarballs, checkout snapshots, and copies of build outputs or dependencies. Game distribution artifacts, release packages, scheduled backups and evidence protected by existing decisions are outside its scope.
+- Preserve active work. Before removing an abandoned worktree or branch without a merge path, verify the owner released the exact worktree or branch, no live consumers remain, and all required evidence is preserved. Record each item of evidence once at a durable reference. Use commit references and concise receipts or check results, with media only where essential.
+- Create an exception archive only for a concrete recovery need. Name its owner, record an expiry or removal condition and retain the smallest payload that meets that need.

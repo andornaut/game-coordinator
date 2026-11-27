@@ -154,10 +154,11 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 
 ### Task branch cleanup
 
-- Delete a local task branch after verifying its current tip is an ancestor of local `main`. Preserve `main` and permanent role branches.
+- Delete a merged local task branch after verifying its current tip is an ancestor of local `main`. Preserve `main` and permanent role branches.
 - For rebased or squashed work, use the recorded integration and verify that no unique changes would be lost before deleting the task branch.
 - Before removing an attached task worktree, verify that it is clean, its essential evidence has a durable reference, its owner has released it, and no consumer still uses it. Record an owner and reason for any deferred cleanup.
-- Apply the same integration check against published `main` before deleting a GitHub task branch. Preserve protected branches and any branch used by an open pull request.
+- Check integration against published `main` before deleting a merged GitHub task branch. Preserve protected branches and any branch used by an open pull request.
+- Follow the [resource cleanup policy](docs/game-policies.md#resource-cleanup) for abandoned worktrees and branches, evidence retention and recovery archives.
 
 ## This repository
 
