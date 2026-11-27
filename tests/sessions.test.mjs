@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import {
+  existsSync,
   mkdtempSync,
   mkdirSync,
   writeFileSync,
@@ -12,6 +13,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+import { loadLayout } from "@andornaut/coordination-kit/build/registry";
 import {
   identity,
   launchArgs,
@@ -282,9 +284,10 @@ test("socket override is explicit, absolute and fails closed when invalid", () =
 test("Claude role channel requires installed CLI and preserves immutable owned config", (t) => {
   const root = mkdtempSync(join(tmpdir(), "sessions-channel-"));
   t.after(() => rmSync(root, { recursive: true }));
+  const layout = { root, varDir: join(root, "var") };
   const current = { ...slot(), harness: "claude", id: target };
   assert.throws(
-    () => roleChannel(root, false, current),
+    () => roleChannel(layout, false, current),
     /installed coordination-kit/,
   );
   mkdirSync(join(root, "node_modules/@andornaut/coordination-kit/dist"), {
@@ -294,17 +297,17 @@ test("Claude role channel requires installed CLI and preserves immutable owned c
     join(root, "node_modules/@andornaut/coordination-kit/dist/cli.js"),
     "",
   );
-  const configured = roleChannel(root, true, current);
+  const configured = roleChannel(layout, true, current);
   const args = launchArgs(configured, "/socket");
   assert.equal(args.includes("--mcp-config"), true);
   assert.equal(args.includes("--strict-mcp-config"), false);
   assert.equal(args.includes("--dangerously-load-development-channels"), true);
   assert.equal(
-    roleChannel(root, false, current).channelConfig,
+    roleChannel(layout, false, current).channelConfig,
     configured.channelConfig,
   );
   writeFileSync(configured.channelConfig, "{}");
-  assert.throws(() => roleChannel(root, true, current), /exact owned match/);
+  assert.throws(() => roleChannel(layout, true, current), /exact owned match/);
 });
 
 for (const [role, conversation] of [
@@ -315,6 +318,7 @@ for (const [role, conversation] of [
   test(`Claude channel binds exact identity for ${role} without changing startup authority`, (t) => {
     const root = mkdtempSync(join(tmpdir(), "sessions-role-channel-"));
     t.after(() => rmSync(root, { recursive: true }));
+    const layout = { root, varDir: join(root, "var") };
     const cli = join(
       root,
       "node_modules/@andornaut/coordination-kit/dist/cli.js",
@@ -324,7 +328,7 @@ for (const [role, conversation] of [
     });
     writeFileSync(cli, "");
     const current = { ...slot(), role, harness: "claude", id: conversation };
-    const configured = roleChannel(root, true, current);
+    const configured = roleChannel(layout, true, current);
     assert.deepEqual(configured, {
       ...current,
       channelConfig: join(
@@ -354,7 +358,7 @@ for (const [role, conversation] of [
     );
     assert.equal(statSync(configured.channelConfig).mode & 0o777, 0o600);
     assert.equal(
-      roleChannel(root, false, current).channelConfig,
+      roleChannel(layout, false, current).channelConfig,
       configured.channelConfig,
     );
     const args = launchArgs(configured, "/socket");
@@ -379,9 +383,10 @@ for (const [role, conversation] of [
 test("Codex roles do not require or create Claude channel configuration", (t) => {
   const root = mkdtempSync(join(tmpdir(), "sessions-codex-channel-"));
   t.after(() => rmSync(root, { recursive: true }));
+  const layout = { root, varDir: join(root, "var") };
   for (const role of ["game-coordinator", "art-kit", "game/art"]) {
     const current = { ...slot(), role };
-    assert.equal(roleChannel(root, true, current), current);
+    assert.equal(roleChannel(layout, true, current), current);
   }
 });
 
@@ -401,7 +406,7 @@ test("Claude channel refuses a symlink config without changing its target", (t) 
   symlinkSync(original, join(root, `var/session-frontends/${target}.mcp.json`));
   assert.throws(
     () =>
-      roleChannel(root, true, {
+      roleChannel({ root, varDir: join(root, "var") }, true, {
         ...slot(),
         role: "game/art",
         harness: "claude",
@@ -723,6 +728,79 @@ test("--new is limited to resuming Claude slots", async (t) => {
   assert.doesNotMatch(launches[0], /'--resume'/);
 });
 
+test("session commands use resolved runtime paths and leave the legacy workspace usable", async (t) => {
+  const { root, registry: value } = startupFixture(t);
+  const legacy = loadLayout(root);
+  let output;
+  const ports = {
+    tools: availableTools,
+    processes: () => [],
+    panes: () => [],
+    socketAvailable: async () => true,
+    tmux: (args) => (args[0] === "new-session" ? "%1" : ""),
+    output: (text) => {
+      output = JSON.parse(text);
+    },
+  };
+  const selection = ["--root", root, "--role", "game-coordinator"];
+  await main(ports, ["plan", ...selection]);
+  assert.equal(output.slots[0].harness, "codex");
+  assert.ok(
+    output.slots[0].brief.path.startsWith(
+      join(root, "var/session-briefs") + "/",
+    ),
+  );
+  assert.equal(existsSync(output.slots[0].brief.path), false);
+
+  const varDir = join(root, ".coordination-kit");
+  const layout = {
+    ...legacy,
+    varDir,
+    registryFile: join(varDir, "role-registry.json"),
+    handoffsDir: join(varDir, "checkpoints"),
+  };
+  mkdirSync(varDir);
+  writeFileSync(
+    layout.registryFile,
+    JSON.stringify({ ...value, harness: "claude" }),
+  );
+  const cliDir = join(root, "node_modules/@andornaut/coordination-kit/dist");
+  mkdirSync(cliDir, { recursive: true });
+  writeFileSync(join(cliDir, "cli.js"), "");
+
+  await main({ ...ports, loadLayout: () => layout }, [
+    "resume",
+    "--held",
+    ...selection,
+  ]);
+  const [resumed] = output.slots;
+  assert.equal(resumed.harness, "claude");
+  assert.equal(resumed.action, "resume-requested");
+  assert.ok(
+    resumed.brief.path.startsWith(join(varDir, "session-briefs") + "/"),
+  );
+  const brief = readFileSync(resumed.brief.path, "utf8");
+  assert.match(brief, /\.coordination-kit\/role-registry\.json/);
+  assert.match(
+    brief,
+    /Checkpoint: \.coordination-kit\/checkpoints\/game-coordinator\/current\.md/,
+  );
+  assert.equal(
+    resumed.channelConfig,
+    join(varDir, `session-frontends/${target}.mcp.json`),
+  );
+  const channel = JSON.parse(readFileSync(resumed.channelConfig, "utf8"));
+  const args = channel.mcpServers["delivery-kit-monitor"].args;
+  assert.equal(args[args.indexOf("--root") + 1], root);
+  assert.equal(existsSync(join(varDir, "session-resume.lock")), true);
+  for (const path of [
+    "session-briefs",
+    "session-frontends",
+    "session-resume.lock",
+  ])
+    assert.equal(existsSync(join(legacy.varDir, path)), false, path);
+});
+
 test("Bash wrapper descendants are inspected without pane_start_command or terminal contents", () => {
   const all = [
     { pid: 40, ppid: 1 },
@@ -984,11 +1062,11 @@ test("bounded probes report only executable metadata and sanitized version", (t)
 
 test("brief artifacts bind exact identity, contacts and catalog without granting native clearance", (t) => {
   const { root, registry: value, catalog } = startupFixture(t);
+  const layout = loadLayout(root);
   const current = plan(root, value, options, [], [])[0];
   const brief = startupBrief(
-    root,
+    layout,
     value,
-    config,
     catalog,
     current,
     availableTools(),
@@ -1007,16 +1085,7 @@ test("brief artifacts bind exact identity, contacts and catalog without granting
     assert.ok(text.toLowerCase().includes(expected.toLowerCase()), expected);
   assert.equal(statSync(brief.path).mode & 0o777, 0o600);
   assert.deepEqual(
-    startupBrief(
-      root,
-      value,
-      config,
-      catalog,
-      current,
-      availableTools(),
-      true,
-      true,
-    ),
+    startupBrief(layout, value, catalog, current, availableTools(), true, true),
     brief,
   );
   assert.match(
@@ -1031,9 +1100,8 @@ test("brief artifacts bind exact identity, contacts and catalog without granting
   assert.throws(
     () =>
       startupBrief(
-        root,
+        layout,
         value,
-        config,
         catalog,
         current,
         availableTools(),
@@ -1222,9 +1290,8 @@ test("unavailable unrelated registry contact is explicit without blocking a sele
   };
   const current = plan(root, value, options, [], [])[0];
   const brief = startupBrief(
-    root,
+    loadLayout(root),
     value,
-    config,
     catalog,
     current,
     availableTools(),

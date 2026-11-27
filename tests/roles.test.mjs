@@ -30,6 +30,7 @@ const context = {
   id: "existing-conversation",
   cwd: "/game",
   worktree: "/game/.worktrees/tech",
+  registryFile: "/coordinator/var/registry.json",
   registryRevision: 42,
   checkpoint: "/coordinator/var/handoffs/games/example-game/tech/current.md",
   held: true,
@@ -305,6 +306,7 @@ test("every role brief stays within 60 lines and 4 KB with long absolute paths",
     worktree:
       "/home/example-operator/src/github.com/example-organization/example-game-worktrees",
     checkpoint: `${coordinator}/var/handoffs/games/example-game/gameplay/current.md`,
+    registryFile: `${coordinator}/var/registry.json`,
     registryRevision: 1234,
     held: true,
   };

@@ -43,25 +43,25 @@ export function controlSocket(env = process.env) {
   return resolveCodexControlSocket({ env }).path;
 }
 
-export function checkpointFor(root, role) {
+export function checkpointFor({ handoffsDir }, role) {
   const scope = role.includes("/")
     ? `games/${role}`
     : role === "game-coordinator"
       ? role
       : `kits/${role}`;
-  return resolve(root, `var/handoffs/${scope}/current.md`);
+  return resolve(handoffsDir, scope, "current.md");
 }
 
 export function startupBrief(
-  root,
+  layout,
   registry,
-  config,
   catalog,
   slot,
   tools,
   held,
   write = false,
 ) {
+  const { root, config, registryFile, varDir } = layout;
   const contacts = [];
   const unavailableContacts = [];
   for (const role of Object.keys(registry.roles)
@@ -87,7 +87,7 @@ export function startupBrief(
         id,
         cwd,
         worktree,
-        checkpoint: checkpointFor(root, role),
+        checkpoint: checkpointFor(layout, role),
       });
     } catch {
       unavailableContacts.push(role);
@@ -102,8 +102,9 @@ export function startupBrief(
       id: slot.id,
       cwd: slot.cwd,
       worktree: slot.worktree,
+      registryFile,
       registryRevision: registry.revision,
-      checkpoint: checkpointFor(root, slot.role),
+      checkpoint: checkpointFor(layout, slot.role),
       held,
       contacts,
       tools: tools.capabilities,
@@ -112,12 +113,10 @@ export function startupBrief(
       ? `Unavailable registry contacts: ${unavailableContacts.join(", ")}. Use supported owner reconciliation.\n`
       : "");
   const hash = createHash("sha256").update(text).digest("hex");
-  const path = resolve(root, `var/session-briefs/${slot.id}-${hash}.md`);
+  const briefsDir = resolve(varDir, "session-briefs");
+  const path = resolve(briefsDir, `${slot.id}-${hash}.md`);
   if (write) {
-    for (const directory of [
-      resolve(root, "var"),
-      resolve(root, "var/session-briefs"),
-    ]) {
+    for (const directory of [varDir, briefsDir]) {
       if (existsSync(directory)) {
         const stat = lstatSync(directory);
         if (!stat.isDirectory() || stat.uid !== process.getuid())
@@ -254,7 +253,7 @@ async function observeStartup(launched, observe, wait = delay) {
   return observed;
 }
 
-export function roleChannel(root, write, slot) {
+export function roleChannel({ root, varDir }, write, slot) {
   if (slot.harness !== "claude") return slot;
   const cli = resolve(
     root,
@@ -264,7 +263,8 @@ export function roleChannel(root, write, slot) {
     throw new Error(
       "Claude role requires the installed coordination-kit channel CLI",
     );
-  const path = resolve(root, `var/session-frontends/${slot.id}.mcp.json`);
+  const frontendsDir = resolve(varDir, "session-frontends");
+  const path = resolve(frontendsDir, `${slot.id}.mcp.json`);
   const content = `${JSON.stringify(
     {
       mcpServers: {
@@ -297,7 +297,7 @@ export function roleChannel(root, write, slot) {
       );
     }
   } else if (write) {
-    mkdirSync(resolve(root, "var/session-frontends"), { recursive: true });
+    mkdirSync(frontendsDir, { recursive: true });
     writeFileSync(path, content, { flag: "wx", mode: 0o600 });
   }
   return { ...slot, channelConfig: path };
@@ -657,7 +657,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
   if (!values.role?.length) throw new Error("Select at least one --role");
   const root = realpathSync(values.root ?? process.cwd());
   const socketPath = controlSocket();
-  const layout = loadLayout(root);
+  const layout = (ports.loadLayout ?? loadLayout)(root);
   const registry = readRegistry(layout);
   const catalog = loadCatalog(root);
   const options = {
@@ -697,9 +697,8 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
     ...slot,
     tools: toolReports.get(slot.role),
     brief: startupBrief(
-      root,
+      layout,
       registry,
-      layout.config,
       catalog,
       slot,
       toolReports.get(slot.role),
@@ -726,7 +725,7 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
       issues.push(`${slot.role}: registered root or worktree missing`);
   for (const slot of slots.filter((s) => s.state !== "live")) {
     try {
-      roleChannel(root, false, slot);
+      roleChannel(layout, false, slot);
     } catch (error) {
       issues.push(error.message);
     }
@@ -775,7 +774,8 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
     const currentBindings = () =>
       readRegistry(layout).revision === registry.revision &&
       catalogHash(loadCatalog(root)) === catalogHash(catalog);
-    await resumeLock(resolve(root, "var/session-resume.lock"), async () => {
+    const lockPath = resolve(layout.varDir, "session-resume.lock");
+    await resumeLock(lockPath, async () => {
       for (const slot of slots) {
         if (readRegistry(layout).revision !== registry.revision)
           throw new Error("Registry changed; re-plan");
@@ -783,16 +783,15 @@ export async function main(ports = {}, argv = process.argv.slice(2)) {
           throw new Error("Role catalog changed; re-plan");
         let fresh = snapshot().find((s) => s.role === slot.role);
         const brief = startupBrief(
-          root,
+          layout,
           registry,
-          layout.config,
           catalog,
           fresh,
           toolReports.get(slot.role),
           options.held,
           true,
         );
-        if (fresh.state !== "live") fresh = roleChannel(root, true, fresh);
+        if (fresh.state !== "live") fresh = roleChannel(layout, true, fresh);
         const result = resumeSlot(
           values.new ? { ...fresh, create: true } : fresh,
           socketPath,

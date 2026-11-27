@@ -160,9 +160,16 @@ function roleNames(names) {
 export function renderBrief(catalog, context) {
   if (
     !record(context) ||
-    !["root", "role", "harness", "id", "cwd", "worktree", "checkpoint"].every(
-      (key) => text(context[key]),
-    ) ||
+    ![
+      "root",
+      "role",
+      "harness",
+      "id",
+      "cwd",
+      "worktree",
+      "checkpoint",
+      "registryFile",
+    ].every((key) => text(context[key])) ||
     !["claude", "codex"].includes(context.harness) ||
     !Number.isSafeInteger(context.registryRevision) ||
     context.registryRevision < 0 ||
@@ -208,10 +215,11 @@ export function renderBrief(catalog, context) {
         "node_modules/@andornaut/coordination-kit/dist/cli.js",
       ),
     );
-  const under = (base, path, name) =>
-    path.startsWith(base.replace(/\/$/, "") + "/") && path !== base
-      ? `${path.slice(base.replace(/\/$/, "").length + 1)} under ${name}`
-      : path;
+  const under = (base, path, name) => {
+    const prefix = base.replace(/\/$/, "") + "/";
+    if (!path.startsWith(prefix) || path === base) return path;
+    return `${path.slice(prefix.length)}${name ? ` under ${name}` : ""}`;
+  };
   const handoff =
     contract.type === "game-coordinator"
       ? "`CK handoff open|state|ready|active|show`"
@@ -241,7 +249,7 @@ export function renderBrief(catalog, context) {
     `Desired tools, not installed proof; verify: core ${contract.tools.required.join(", ")}; task-specific ${contract.tools.whenNeeded.join(", ") || "none"}.`,
     ...(contacts.length
       ? [
-          `Roles (\`CK msg send --to NAME\`; harness, cwd and checkpoint in var/registry.json): ${roleNames(contacts.map((contact) => contact.role))}.`,
+          `Roles (\`CK msg send --to NAME\`; harness, cwd and checkpoint in ${under(context.root, context.registryFile)}): ${roleNames(contacts.map((contact) => contact.role))}.`,
         ]
       : []),
     ...tools.map(
