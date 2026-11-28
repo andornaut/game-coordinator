@@ -8,8 +8,8 @@
     "lint": "shellcheck -x -P SCRIPTDIR tests/container/stock tests/container/check-stock tests/container/markdown && markdownlint-cli2"
   },
   "devDependencies": {
-    "@andornaut/coordination-kit": "https://github.com/andornaut/coordination-kit/releases/download/v8.0.0/coordination-kit-8.0.0.tgz",
-    "@andornaut/delivery-kit": "https://github.com/andornaut/delivery-kit/releases/download/v8.7.0/delivery-kit-8.7.0.tgz",
+    "@andornaut/coordination-kit": "https://github.com/andornaut/coordination-kit/releases/download/v9.0.0/coordination-kit-9.0.0.tgz",
+    "@andornaut/delivery-kit": "https://github.com/andornaut/delivery-kit/releases/download/v8.8.0/delivery-kit-8.8.0.tgz",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
     "markdownlint-cli2": "0.24.0",
