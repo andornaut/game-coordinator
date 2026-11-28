@@ -39,5 +39,6 @@
     "delivery-kit",
     "game-kit",
     "coordination-kit"
-  ]
+  ],
+  "appStateRoot": "var"
 }

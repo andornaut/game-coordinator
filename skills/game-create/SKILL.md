@@ -9,7 +9,7 @@ Create only the requested infrastructure under the supplied display name. Do not
 
 ## Scope
 
-- Read `config.json`, `var/registry.json`, any existing `var/route.json`, the pinned kit docs and [contracts.md](contracts.md) before creating or registering identities. Use schemas and commands from the coordinator-installed releases.
+- Read `coordination-kit.json`, `.coordination-kit/registry.json`, any existing `.coordination-kit/route.json`, the pinned kit docs and [contracts.md](contracts.md) before creating or registering identities. Use schemas and commands from the coordinator-installed releases.
 - Create the three roles on the explicitly authorized harness, or the verified current one. Existing games, kits, game-coordinator, holds, questions and cadences stay unchanged. Preserve the existing harness bindings and reuse shared roles. For a different authorized harness, use the installed `coordination-kit harness select` scoped to the new roles.
 
 ## Repository

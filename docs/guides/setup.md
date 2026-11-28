@@ -6,7 +6,7 @@ registry, authority and backups when recovering an existing workspace. Use
 
 ## Initialize a new coordinator
 
-Use the primary Git checkout of game-coordinator. Its committed [config.json](../../config.json)
+Use the primary Git checkout of game-coordinator. Its committed [coordination-kit.json](../../coordination-kit.json)
 describes the existing workspace. For an independent workspace, supply your own config with
 game and kit paths relative to the coordinator checkout. You can start with just the
 coordinator by using the following config, then register games and kits as they are added.
@@ -16,6 +16,7 @@ coordinator by using the following config, then register games and kits as they 
   "schema": 1,
   "timezone": "America/Toronto",
   "wakeMinutes": [],
+  "appStateRoot": "var",
   "games": {},
   "kits": {},
   "sharedRoles": ["game-coordinator"]
@@ -59,7 +60,7 @@ to game-coordinator. Use `held` ownership and phase for roles awaiting activatio
 registered bus owner for each game operation, and `transfers: []` for an empty history.
 Keep the draft in ignored local state.
 
-The SDK creates `var/registry.json` at revision 1 under its lock and refuses an existing
+The SDK creates `.coordination-kit/registry.json` at revision 1 under its lock and refuses an existing
 registry. The packaged CLI exposes store and session commands. The registry SDK is the
 bootstrap entry point.
 
@@ -76,7 +77,7 @@ JS
 ```
 
 Configure scheduled reviews once you have a registered host game and an approved review
-minute in `config.json`. Use ignored `var/route.json` and the
+minute in `coordination-kit.json`. Use ignored `.coordination-kit/route.json` and the
 [schema-2 route contract](https://github.com/andornaut/coordination-kit/blob/v8.0.0/docs/reference/review.md#review-route).
 The host game's committed `reports.recipient` selects `game-coordinator`. This example
 uses the game added in the next section.
@@ -114,8 +115,8 @@ the coordinator's native binding and activation, run this from the coordinator c
 node "$CK" --root "$COORDINATOR_ROOT" session start
 ```
 
-Verify the returned binding and startup record. Keep `var/coordination/` and its authority
-receipt in the primary checkout. An optional `var/work-protocol.json` selects an external
+Verify the returned binding and startup record. Keep `.coordination-kit/coordination/` and its authority
+receipt in the primary checkout. An optional `.coordination-kit/work-protocol.json` selects an external
 location for wake and channel files and artifacts. Preserve the existing journal, receipt,
 state-root pointer, and independent backups when recovering a workspace.
 
@@ -143,8 +144,8 @@ location, pins, roles and approvals.
    registering. The native conversations use the game root. Work happens in each role's
    worktree.
 3. Add the game ID, display name, relative path and the three role types to the coordinator's
-   tracked `config.json`. Art, Gameplay and Tech already have shared role contracts. Add
-   the exact IDs and paths such as `../example-game/.worktrees/art` to `var/registry.json` as
+   tracked `coordination-kit.json`. Art, Gameplay and Tech already have shared role contracts. Add
+   the exact IDs and paths such as `../example-game/.worktrees/art` to `.coordination-kit/registry.json` as
    held, and add the game's initial Tech bus owner. Append the new role keys to the existing
    review route's targets while preserving its host, state and existing targets. If the
    workspace has no route, follow [coordinator setup](#initialize-a-new-coordinator) once a
@@ -157,7 +158,7 @@ location, pins, roles and approvals.
    HOLD request. Verify actual replies and effective harness capability. Initialize desired
    delivery control as paused and inspect status before requesting runner startup.
 
-For example, add this object as `games.example-game` in the coordinator's `config.json`.
+For example, add this object as `games.example-game` in the coordinator's `coordination-kit.json`.
 The sibling checkout uses the same game ID in registration and Delivery Kit commands.
 
 ```json

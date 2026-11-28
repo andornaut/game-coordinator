@@ -45,7 +45,7 @@ All roles, in Claude and Codex, use the coordination-kit CLI installed in the pr
 
 Use `@andornaut/coordination-kit/build/registry` for registry SDK imports. The `@andornaut/delivery-kit/build/source-identity` import stays in delivery-kit. Each kit's CLI is its `dist/cli.js`.
 
-Every message is committed to the selected coordination store before any native wake. This workspace uses the file authority under `var/coordination/`. `msg send` is the only payload path for role-to-role coordination. Native session messages and channel notifications carry only the wake `N new messages for ROLE: run coordination-kit inbox`.
+Every message is committed to the selected coordination store before any native wake. This workspace uses the file authority under `.coordination-kit/coordination/`. `msg send` is the only payload path for role-to-role coordination. Native session messages and channel notifications carry only the wake `N new messages for ROLE: run coordination-kit inbox`.
 
 The writing verbs (`msg send`, `inbox`, `msg done`, `msg retain`) identify the caller by the registry fence: the role whose effective harness binding equals the caller's native conversation ID (`CLAUDE_CODE_SESSION_ID` or `CODEX_THREAD_ID`, or `--native-id ID`). `harness select` rotates the binding. Parents record messages and decisions in their own session. A verified child can use its own binding for the documented linked work verbs. `--worker NAME` is an unverified label.
 
@@ -94,7 +94,7 @@ Use the existing hourly :30 reviews without adding timers or teams. Preserve han
 
 ## Sessions and handoffs
 
-Each role keeps its exact conversation IDs and one shared edit worktree. Native cwd stays at the game root, or game-coordinator for kits and game-coordinator. Every role's window belongs in `codex-games` or `claude-games`. A game role's window is the first word of the game's `config.json` name plus the role (`ada-tech`, `archie-art`, `chibi-gameplay`). Other windows use the role (`art-kit`, `game-coordinator`). Windows are alphabetical. Moving windows preserves processes and does not activate a role.
+Each role keeps its exact conversation IDs and one shared edit worktree. Native cwd stays at the game root, or game-coordinator for kits and game-coordinator. Every role's window belongs in `codex-games` or `claude-games`. A game role's window is the first word of the game's `coordination-kit.json` name plus the role (`ada-tech`, `archie-art`, `chibi-gameplay`). Other windows use the role (`art-kit`, `game-coordinator`). Windows are alphabetical. Moving windows preserves processes and does not activate a role.
 
 The coordination-kit registry resolves each role through its optional harness override, otherwise the registry default. Handoffs select explicit games and any included kit or game-coordinator roles. Unselected roles retain their existing owners.
 
@@ -142,22 +142,23 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 
 ## This repository
 
-| Path                                | Committed | Contents                                                                                                                                         |
-| ----------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `README.md`                         | yes       | Project overview and documentation links                                                                                                         |
-| `config.json`                       | yes       | Workspace configuration for games, kits, shared role names and the review schedule                                                               |
-| `roles.json`                        | yes       | Role catalog source for the generated `docs/reference/roles.md`                                                                                  |
-| `docs/`                             | yes       | Workspace guides, shared policy, role catalog, design and work history                                                                           |
-| `scripts/`                          | yes       | The role catalog generator (`role-catalog.mjs`) and the session helper (`sessions.mjs` and its modules)                                          |
-| `skills/`                           | yes       | Coordinator-local skills for game creation, handoff, session recovery and status                                                                 |
-| `tests/`                            | yes       | Role catalog and session tests. `container/` holds the isolated check wrappers                                                                   |
-| `Makefile`                          | yes       | `make check` and `make lint` entry points                                                                                                        |
-| `package.json`, `package-lock.json` | yes       | The pinned delivery-kit and coordination-kit releases                                                                                            |
-| `node_modules/`                     | no        | The installed delivery-kit and coordination-kit                                                                                                  |
-| `.worktrees/`                       | no        | Worktrees for changes to this repository                                                                                                         |
-| `var/`                              | no        | Registry (`registry.json`), review route (`route.json`), channel config, per-role checkpoints and each game's runner state (`games/<game>/bus/`) |
-| `.claude/`                          | no        | Harness-local files and the `skills` link to `skills/`                                                                                           |
-| `.agents/`                          | no        | Harness-local files and the `skills` link to `skills/`                                                                                           |
+| Path                                | Committed | Contents                                                                                                |
+| ----------------------------------- | --------- | ------------------------------------------------------------------------------------------------------- |
+| `README.md`                         | yes       | Project overview and documentation links                                                                |
+| `coordination-kit.json`             | yes       | Workspace configuration for games, kits, shared role names and the review schedule                      |
+| `roles.json`                        | yes       | Role catalog source for the generated `docs/reference/roles.md`                                         |
+| `docs/`                             | yes       | Workspace guides, shared policy, role catalog, design and work history                                  |
+| `scripts/`                          | yes       | The role catalog generator (`role-catalog.mjs`) and the session helper (`sessions.mjs` and its modules) |
+| `skills/`                           | yes       | Coordinator-local skills for game creation, handoff, session recovery and status                        |
+| `tests/`                            | yes       | Role catalog and session tests. `container/` holds the isolated check wrappers                          |
+| `Makefile`                          | yes       | `make check` and `make lint` entry points                                                               |
+| `package.json`, `package-lock.json` | yes       | The pinned delivery-kit and coordination-kit releases                                                   |
+| `node_modules/`                     | no        | The installed delivery-kit and coordination-kit                                                         |
+| `.worktrees/`                       | no        | Worktrees for changes to this repository                                                                |
+| `.coordination-kit/`                | no        | Native bindings, review route, live checkpoints and coordination journal.                               |
+| `var/`                              | no        | Channel config, historical evidence and each game's runner state (`games/<game>/bus/`).                 |
+| `.claude/`                          | no        | Harness-local files and the `skills` link to `skills/`                                                  |
+| `.agents/`                          | no        | Harness-local files and the `skills` link to `skills/`                                                  |
 
 See [where state lives](../design/architecture.md#where-state-lives) for runtime state and backup locations.
 

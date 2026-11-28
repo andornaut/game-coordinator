@@ -11,7 +11,7 @@ Same-harness recovery only. Recovery never changes ownership or harness; a harne
 
 ## Identity and scope
 
-- For exact-ID resume, use `var/registry.json` as the sole source of role IDs, worktrees and effective harnesses. Ask only about unresolved identity or scope.
+- For exact-ID resume, use `.coordination-kit/registry.json` as the sole source of role IDs, worktrees and effective harnesses. Ask only about unresolved identity or scope.
 - Recover only the selected roles; preserve every other owner. Every role's window lives in `claude-games` or `codex-games`: a game role is the first word of the game's name plus the role (`ada-tech`, `archie-art`), any other role is its name (`art-kit`, `game-coordinator`).
 - Native cwd is the game root (game roles) or the game-coordinator root (kits, game-coordinator). Edit scope is `.worktrees/art|gameplay|tech` (games) or `.worktrees/coordinator` (kits). Keep their branches and WIP.
 

@@ -7,7 +7,7 @@ description: Move named games and kits, or all of them, between Claude and Codex
 
 `game-handoff prepare|send|complete` for `--scope ROLE|all...`. A game moves with its Art, Gameplay and Tech. game-coordinator runs every step. Other roles never invoke this skill: each gets its part as a stored message (`ck msg send`) and runs the verbs already in its brief.
 
-`ck` is `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root>` and `dk G` is `DELIVERY_KIT_ROOT=<root> node <game>/node_modules/@andornaut/delivery-kit/dist/cli.js`, where `<root>` is the game-coordinator checkout. Never use npx. Read `var/registry.json` for IDs, worktrees and cwd; never create a duplicate owner.
+`ck` is `node <root>/node_modules/@andornaut/coordination-kit/dist/cli.js --root <root>` and `dk G` is `DELIVERY_KIT_ROOT=<root> node <game>/node_modules/@andornaut/delivery-kit/dist/cli.js`, where `<root>` is the game-coordinator checkout. Never use npx. Read `.coordination-kit/registry.json` for IDs, worktrees and cwd; never create a duplicate owner.
 
 Status: `ck handoff show [--id ID]`, `dk G status --game G`.
 
