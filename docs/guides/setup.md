@@ -97,8 +97,8 @@ route and approved host runner. The host's delivery control can stay paused.
 From the coordinator checkout, inspect the registered coordinator slot. If an authorized
 frontend needs resuming, use the scoped [session procedure](operations.md#inspect-and-resume).
 For Claude, that helper writes the per-conversation MCP configuration to ignored
-`var/session-frontends/`. Current bindings, creation records and channel configuration are
-local runtime state.
+`.coordination-kit/session-frontends/`. Current bindings, creation records and channel
+configuration are local runtime state.
 
 ```bash
 node scripts/sessions.mjs plan --role game-coordinator

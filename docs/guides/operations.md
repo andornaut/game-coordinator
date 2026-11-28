@@ -155,8 +155,8 @@ If quota prevents activation, leave explicitly prepared targets idle and keep ro
 | `package.json`, `package-lock.json` | yes       | The pinned delivery-kit and coordination-kit releases                                                   |
 | `node_modules/`                     | no        | The installed delivery-kit and coordination-kit                                                         |
 | `.worktrees/`                       | no        | Worktrees for changes to this repository                                                                |
-| `.coordination-kit/`                | no        | Native bindings, review route, live checkpoints and coordination journal.                               |
-| `var/`                              | no        | Channel config, historical evidence and each game's runner state (`games/<game>/bus/`).                 |
+| `.coordination-kit/`                | no        | Native bindings, review route, live checkpoints, channel config and coordination journal.                |
+| `var/`                              | no        | Historical evidence and each game's runner state (`games/<game>/bus/`).                                 |
 | `.claude/`                          | no        | Harness-local files and the `skills` link to `skills/`                                                  |
 | `.agents/`                          | no        | Harness-local files and the `skills` link to `skills/`                                                  |
 

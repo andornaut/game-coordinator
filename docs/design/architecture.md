@@ -128,10 +128,10 @@ workspace/
       coordination/                authoritative journal and role records
       work-protocol.json           optional pointer to external state
       handoffs/games/archies-dog-walks/tech/current.md  Tech checkpoint
+      session-frontends/           generated Claude channel configuration
     var/                             ignored delivery and historical evidence
       games/archies-dog-walks/bus/  runner state and delivery control
       handoffs/                    retained evidence and checkpoint history
-      session-frontends/           generated Claude channel configuration
   archies-dog-walks/
     delivery-kit.json                tracked game delivery configuration
     package.json, package-lock.json  tracked game dependencies and pins
@@ -149,9 +149,10 @@ workspace/
 | Coordinator `.coordination-kit/registry.json` and `.coordination-kit/route.json`                  | Native role bindings, ownership and scheduled review routing.                                                    |
 | Coordinator `.coordination-kit/coordination/` and `.coordination-kit/coordination-authority.json` | The canonical journal, committed role records and verified authority selection.                                  |
 | Coordinator `var/games/<game>/bus/`                                                               | Delivery control, resident state, logs and ingest cursors.                                                       |
-| Coordinator `.coordination-kit/handoffs/`, `var/handoffs/` and `var/session-frontends/`           | Live checkpoints and evidence links, and generated per-conversation Claude channel configuration.                |
+| Coordinator `.coordination-kit/handoffs/` and `.coordination-kit/session-frontends/`               | Live checkpoints and generated per-conversation Claude channel configuration.                                  |
+| Coordinator `var/handoffs/`                                                                      | Retained evidence and checkpoint history.                                                                      |
 | Configured external state root, or `.coordination-kit/` when unset                                | Wake and channel state and artifacts.                                                                            |
-| Coordinator `var/reviews/` and `var/scratch/`                                                     | Local review evidence and temporary output as needed.                                                            |
+| Coordinator `var/reviews/` and `var/scratch/`                                                     | Retained review evidence and temporary output as needed.                                                       |
 | Outside the coordinator checkout                                                                  | Independent backups and restore evidence.                                                                        |
 | GitHub releases                                                                                   | Immutable kit archives pinned in consumer lockfiles.                                                             |
 
