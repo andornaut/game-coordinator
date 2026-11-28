@@ -11,7 +11,7 @@
     "@andornaut/coordination-kit": "https://github.com/andornaut/coordination-kit/releases/download/v9.0.0/coordination-kit-9.0.0.tgz",
     "@andornaut/delivery-kit": "https://github.com/andornaut/delivery-kit/releases/download/v8.8.0/delivery-kit-8.8.0.tgz",
     "husky": "^9.1.7",
-    "lint-staged": "^17.6.0",
+    "lint-staged": "^17.6.1",
     "markdownlint-cli2": "0.24.0",
     "prettier": "^3.9.10"
   },
