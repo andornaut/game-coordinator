@@ -110,6 +110,8 @@ Use Game Kit to render standard text and icon buttons in menus, modals, HUDs and
 
 Every game is playable with a keyboard alone. Arrow keys, WASD and HJKL navigate all foreground game menus, overlays, pages and gameplay options. Map W/K/Up to up, A/H/Left to left, S/J/Down to down, and D/L/Right to right. Enter or Space activates the selected action when it is available. Keep navigation and activation within the active surface. Preserve native Tab order and focus restoration, text editing and IME composition, keys owned by controls such as sliders, mouse and touch input, and existing safe actions and guards. Gameplay movement and aim keep their game-specific bindings.
 
+From active gameplay, Escape opens Pause where available. Within Pause and its nested surfaces, arrow keys move selection and Space or Enter activates the selected action when available.
+
 During gameplay, E, F, Enter and right click invoke Use in games that already offer that action. Gameplay Space and left mouse keep their game-specific bindings. In foreground UI, E, F, Enter and Space activate the focused action when available. Right click activates an available action at the pointer target, and left click behaves normally. Consume foreground UI activations within that surface. Suppress the context menu only when the game consumes the right click. Preserve native editing and selection, focus behavior, existing action guards and control-state styling.
 
 Each game's Tech owns the game bindings and uses published Game Kit APIs for shared keyboard behavior. Report missing shared capabilities to Game Kit. Verify a complete keyboard-only route through gameplay, nested UI and recovery.
